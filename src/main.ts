@@ -8,6 +8,7 @@ import CreepSpawner from "./creep_spawner";
 import ResourceAssigner from "./resource_assigner";
 import RepairerRole from "./role.repairer";
 import CreepRenewer from "./creep_renewer";
+import PermanentSafeModeActivator from "./permanent_safe_mode_activator";
 
 const _ = require('lodash');
 
@@ -28,6 +29,7 @@ module.exports.loop = function () {
     runnables.push(new CreepSpawner(roles, spawn));
     runnables.push(new CreepRunner(roles));
     runnables.push(new CreepRenewer(spawn));
+    runnables.push(new PermanentSafeModeActivator(spawn));
 
     for (let runnable of runnables) {
         runnable.run(Game, Memory);

@@ -14,3 +14,4 @@ export const REPAIRERS_ENERGY_LIMIT = 50;
 export const REPAIRER_BODY = [WORK, CARRY, MOVE];
 
 export const TTL_UNTIL_RENEW = 400;
+export const USE_PERMANENT_SAFE_MODE = true;
