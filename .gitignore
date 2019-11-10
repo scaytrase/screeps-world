@@ -1,0 +1,5 @@
+.tscache/
+dist/
+node_modules/
+env.json
+tscommand-*
