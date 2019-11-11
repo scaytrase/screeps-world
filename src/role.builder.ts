@@ -9,7 +9,6 @@ const ROLE_BUILDER = 'builder';
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
-    STRUCTURE_SPAWN
 ];
 
 export default class BuilderRole implements Role {
@@ -17,7 +16,7 @@ export default class BuilderRole implements Role {
         let sources = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) > BUILDERS_ENERGY_LIMIT;
+                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= BUILDERS_ENERGY_LIMIT;
             }
         });
 

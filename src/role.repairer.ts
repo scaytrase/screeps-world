@@ -9,7 +9,6 @@ const ROLE_REPAIRER = 'repairer';
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
-    STRUCTURE_SPAWN
 ];
 
 export default class RepairerRole implements Role {
@@ -31,7 +30,7 @@ export default class RepairerRole implements Role {
         let sources = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) > REPAIRERS_ENERGY_LIMIT;
+                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= REPAIRERS_ENERGY_LIMIT;
             }
         });
 
