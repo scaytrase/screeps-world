@@ -14,7 +14,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 export default class RepairerRole implements Role {
     private static getTarget(creep: Creep): AnyStructure | null {
         const targets = creep.room.find(FIND_STRUCTURES, {
-            filter: object => object.hits < object.hitsMax
+            filter: object => object.structureType !== STRUCTURE_WALL && object.hits < object.hitsMax
         });
 
         targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);

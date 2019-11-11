@@ -11,6 +11,11 @@ export default class CreepRunner implements Runnable {
     run(game: Game, memory: Memory): void {
         for (let name in game.creeps) {
             let creep = game.creeps[name];
+
+            if (creep.spawning) {
+                continue;
+            }
+
             for (let role of this.roles) {
                 if (role.match(creep)) {
                     role.run(creep);

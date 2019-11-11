@@ -14,7 +14,7 @@ export default class PermanentSafeModeActivator implements Runnable {
         }
 
         const controller = this.spawn.room.controller;
-        if (controller.safeModeAvailable) {
+        if (controller.safeMode === undefined && controller.safeModeAvailable) {
             controller.activateSafeMode();
         }
     }

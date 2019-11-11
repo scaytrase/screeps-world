@@ -1,8 +1,9 @@
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import {HARVESTER_ADVANCED_BODY, HARVESTER_BODY, HARVESTERS_COUNT} from "./config";
+import {HARVESTER_ADVANCED_BODY, HARVESTER_BODY, HARVESTER_SUPER_ADVANCED_BODY, HARVESTERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
+import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
 
 const _ = require('lodash');
 
@@ -15,12 +16,10 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 ];
 
 export default class HarvesterRole implements Role {
-    private static getSource(creep: Creep): Source {
-        let sources = creep.room.find(FIND_SOURCES);
-
-        return creep.memory['assigned_to_resource_id'] === undefined
-            ? sources[0] :
-            Game.getObjectById(creep.memory['assigned_to_resource_id']);
+    private static getSource(creep: Creep): Source | null {
+        return creep.memory[RESOURCE_ASSIGNMENT] === undefined
+            ? null
+            : Game.getObjectById(creep.memory[RESOURCE_ASSIGNMENT]);
     }
 
     private static getTarget(creep: Creep): AnyStructure | null {
@@ -54,10 +53,23 @@ export default class HarvesterRole implements Role {
 
     spawn(spawn: StructureSpawn, game: Game) {
         spawn.spawnCreep(
-            this.getCurrentCreepCount(game) > 4 ? HARVESTER_ADVANCED_BODY : HARVESTER_BODY,
+            this.getBody(game),
             'Harvester' + game.time,
             {memory: {role: ROLE_HARVESTER}}
         )
+    }
+
+    private getBody(game: Game) {
+        const currentCreepCount = this.getCurrentCreepCount(game);
+        if (currentCreepCount < 5) {
+            return HARVESTER_BODY;
+        }
+
+        if (currentCreepCount < 10) {
+            return HARVESTER_ADVANCED_BODY;
+        }
+
+        return HARVESTER_SUPER_ADVANCED_BODY;
     }
 
     getCurrentCreepCount(game: Game): Number {
