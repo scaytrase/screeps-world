@@ -38,16 +38,9 @@ export default class UpgraderRole implements Role {
         }
 
         if (creep.memory['upgrading']) {
-            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
-            }
+            CreepTrait.upgradeController(creep);
         } else {
-            const source = UpgraderRole.getSource(creep);
-            if (source) {
-                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source, {visualizePathStyle: {stroke: '#ffffff'}});
-                }
-            }
+            CreepTrait.withdraw(creep, UpgraderRole.getSource(creep));
         }
 
         CreepTrait.renewIfNeeded(creep);

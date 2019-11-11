@@ -39,17 +39,9 @@ export default class HarvesterRole implements Role {
 
     run(creep: Creep) {
         if (creep['store'].getFreeCapacity() > 0) {
-            const source = HarvesterRole.getSource(creep);
-            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
-            }
+            CreepTrait.harvest(creep, HarvesterRole.getSource(creep));
         } else {
-            const target = HarvesterRole.getTarget(creep);
-            if (target !== null) {
-                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
-                }
-            }
+            CreepTrait.transferAllEnergy(creep, HarvesterRole.getTarget(creep));
         }
 
         CreepTrait.renewIfNeeded(creep);

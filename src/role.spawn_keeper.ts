@@ -56,19 +56,9 @@ export default class SpawnKeeperRole implements Role {
 
     run(creep: Creep): void {
         if (creep['store'].getFreeCapacity() > 0) {
-            const source = SpawnKeeperRole.getSource(creep);
-            if (source !== null) {
-                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
-                }
-            }
+            CreepTrait.withdraw(creep, SpawnKeeperRole.getSource(creep));
         } else {
-            const target = SpawnKeeperRole.getTarget(creep);
-            if (target !== null) {
-                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
-                }
-            }
+            CreepTrait.transferAllEnergy(creep, SpawnKeeperRole.getTarget(creep))
         }
 
         CreepTrait.renewIfNeeded(creep);

@@ -49,19 +49,9 @@ export default class BuilderRole implements Role {
         }
 
         if (creep.memory['building']) {
-            const target = BuilderRole.getTarget(creep);
-            if (target) {
-                if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
-                }
-            }
+            CreepTrait.build(creep, BuilderRole.getTarget(creep));
         } else {
-            const source = BuilderRole.getSource(creep);
-            if (source) {
-                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source, {visualizePathStyle: {stroke: '#ffffff'}});
-                }
-            }
+            CreepTrait.withdraw(creep, BuilderRole.getSource(creep));
         }
 
         CreepTrait.renewIfNeeded(creep);

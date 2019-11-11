@@ -52,19 +52,9 @@ export default class RepairerRole implements Role {
         }
 
         if (creep.memory['repairing']) {
-            const target = RepairerRole.getTarget(creep);
-            if (target) {
-                if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
-                }
-            }
+            CreepTrait.repair(creep, RepairerRole.getTarget(creep));
         } else {
-            const source = RepairerRole.getSource(creep);
-            if (source) {
-                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source, {visualizePathStyle: {stroke: '#ffffff'}});
-                }
-            }
+            CreepTrait.withdraw(creep, RepairerRole.getSource(creep));
         }
 
         CreepTrait.renewIfNeeded(creep);
