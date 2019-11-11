@@ -2,16 +2,37 @@ import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import {UPGRADER_BODY, UPGRADERS_COUNT, UPGRADERS_ENERGY_LIMIT} from "./config";
+import CreepTrait from "./creep_traits";
 
 const ROLE_UPGRADER = 'upgrader';
 
+const SOURCE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_STORAGE,
+    STRUCTURE_CONTAINER,
+    STRUCTURE_SPAWN
+];
+
 export default class UpgraderRole implements Role {
+    private static getSource(creep: Creep): AnyStructure | null {
+        let sources = creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return SOURCE_STRUCTURES.includes(structure.structureType) &&
+                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) > UPGRADERS_ENERGY_LIMIT;
+            }
+        });
+
+        if (sources.length > 0) {
+            return sources[0];
+        }
+
+        return null;
+    }
+
     run(creep: Creep) {
         if (creep.memory['upgrading'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['upgrading'] = false;
             creep.say('🔄 harvest');
-        }
-        if (!creep.memory['upgrading'] && creep['store'].getFreeCapacity() == 0) {
+        } else if (!creep.memory['upgrading'] && creep['store'].getFreeCapacity() == 0) {
             creep.memory['upgrading'] = true;
             creep.say('⚡ upgrade');
         }
@@ -21,18 +42,15 @@ export default class UpgraderRole implements Role {
                 creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         } else {
-            let targets = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.structureType == STRUCTURE_SPAWN &&
-                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) > UPGRADERS_ENERGY_LIMIT;
-                }
-            });
-            if (targets.length > 0) {
-                if (creep.withdraw(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+            const source = UpgraderRole.getSource(creep);
+            if (source) {
+                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }
         }
+
+        CreepTrait.renewIfNeeded(creep);
     }
 
     match(creep: Creep) {

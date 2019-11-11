@@ -9,6 +9,7 @@ import ResourceAssigner from "./resource_assigner";
 import RepairerRole from "./role.repairer";
 import CreepRenewer from "./creep_renewer";
 import PermanentSafeModeActivator from "./permanent_safe_mode_activator";
+import SpawnKeeperRole from "./role.spawn_keeper";
 
 const _ = require('lodash');
 
@@ -16,7 +17,8 @@ const roles = [
     new HarvesterRole(),
     new UpgraderRole(),
     new BuilderRole(),
-    new RepairerRole()
+    new RepairerRole(),
+    new SpawnKeeperRole(),
 ];
 
 module.exports.loop = function () {

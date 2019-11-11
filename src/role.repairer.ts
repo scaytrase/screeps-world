@@ -2,54 +2,72 @@ import Role from "./role";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import SpawnStrategy from "./spawn_strategy";
 import {REPAIRER_BODY, REPAIRERS_COUNT, REPAIRERS_ENERGY_LIMIT} from "./config";
+import CreepTrait from "./creep_traits";
 
 const ROLE_REPAIRER = 'repairer';
 
+const SOURCE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_STORAGE,
+    STRUCTURE_CONTAINER,
+    STRUCTURE_SPAWN
+];
+
 export default class RepairerRole implements Role {
+    private static getTarget(creep: Creep): AnyStructure | null {
+        const targets = creep.room.find(FIND_STRUCTURES, {
+            filter: object => object.hits < object.hitsMax
+        });
+
+        targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
+
+        if (targets.length > 0) {
+            return targets[0];
+        }
+
+        return null
+    }
+
+    private static getSource(creep: Creep): AnyStructure | null {
+        let sources = creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return SOURCE_STRUCTURES.includes(structure.structureType) &&
+                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) > REPAIRERS_ENERGY_LIMIT;
+            }
+        });
+
+        if (sources.length > 0) {
+            return sources[0];
+        }
+
+        return null;
+    }
+
     run(creep: Creep) {
         if (creep.memory['repairing'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['repairing'] = false;
             creep.say('🔄 harvest');
-        }
-        if (!creep.memory['repairing'] && creep['store'].getFreeCapacity() == 0) {
+        } else if (!creep.memory['repairing'] && creep['store'].getFreeCapacity() == 0) {
             creep.memory['repairing'] = true;
             creep.say('🚧 repair');
         }
 
         if (creep.memory['repairing']) {
-            const targets = creep.room.find(FIND_STRUCTURES, {
-                filter: object => object.hits < object.hitsMax
-            });
-
-            targets.sort((a, b) => a.hits - b.hits);
-
-            if (targets.length > 0) {
-                if (creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0]);
-                }
-            } else {
-                let targets = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return structure.structureType == STRUCTURE_SPAWN;
-                    }
-                });
-                if (targets.length > 0) {
-                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+            const target = RepairerRole.getTarget(creep);
+            if (target) {
+                if (creep.repair(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
                 }
             }
         } else {
-            let targets = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.structureType == STRUCTURE_SPAWN &&
-                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) > REPAIRERS_ENERGY_LIMIT;
-                }
-            });
-            if (targets.length > 0) {
-                if (creep.withdraw(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+            const source = RepairerRole.getSource(creep);
+            if (source) {
+                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }
         }
+
+        CreepTrait.renewIfNeeded(creep);
     }
 
     match(creep: Creep) {
