@@ -20,6 +20,8 @@ export default class BuilderRole implements Role {
             }
         });
 
+        sources = sources.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
+
         if (sources.length > 0) {
             return sources[0];
         }

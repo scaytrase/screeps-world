@@ -7,7 +7,7 @@ import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
 
 const _ = require('lodash');
 
-const ROLE_HARVESTER = 'harvester';
+export const ROLE_HARVESTER = 'harvester';
 const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_SPAWN,
     STRUCTURE_STORAGE,
@@ -29,6 +29,8 @@ export default class HarvesterRole implements Role {
                     structure['store'].getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
+
+        targets = targets.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
 
         if (targets.length > 0) {
             return targets[0];
@@ -61,11 +63,11 @@ export default class HarvesterRole implements Role {
 
     private getBody(game: Game) {
         const currentCreepCount = this.getCurrentCreepCount(game);
-        if (currentCreepCount < 5) {
+        if (currentCreepCount < 3) {
             return HARVESTER_BODY;
         }
 
-        if (currentCreepCount < 10) {
+        if (currentCreepCount < 6) {
             return HARVESTER_ADVANCED_BODY;
         }
 

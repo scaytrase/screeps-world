@@ -1,11 +1,18 @@
 import Role from "./role";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import SpawnStrategy from "./spawn_strategy";
-import {REPAIRER_BODY, REPAIRERS_COUNT, REPAIRERS_ENERGY_LIMIT} from "./config";
+import {
+    HARVESTER_ADVANCED_BODY,
+    HARVESTER_BODY, HARVESTER_SUPER_ADVANCED_BODY, REPAIRER_ADVANCED_BODY,
+    REPAIRER_BODY,
+    REPAIRERS_COUNT,
+    REPAIRERS_ENERGY_LIMIT
+} from "./config";
 import CreepTrait from "./creep_traits";
 
-const ROLE_REPAIRER = 'repairer';
+const _ = require('lodash');
 
+const ROLE_REPAIRER = 'repairer';
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
@@ -13,11 +20,11 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 
 export default class RepairerRole implements Role {
     private static getTarget(creep: Creep): AnyStructure | null {
-        const targets = creep.room.find(FIND_STRUCTURES, {
+        let targets = creep.room.find(FIND_STRUCTURES, {
             filter: object => object.structureType !== STRUCTURE_WALL && object.hits < object.hitsMax
         });
 
-        targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
+        targets = targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
 
         if (targets.length > 0) {
             return targets[0];
@@ -33,6 +40,8 @@ export default class RepairerRole implements Role {
                     structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= REPAIRERS_ENERGY_LIMIT;
             }
         });
+
+        sources = sources.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
 
         if (sources.length > 0) {
             return sources[0];
@@ -63,9 +72,22 @@ export default class RepairerRole implements Role {
         return creep.memory['role'] == ROLE_REPAIRER;
     }
 
+    private getBody(game: Game) {
+        const currentCreepCount = this.getCurrentCreepCount(game);
+        if (currentCreepCount < 3) {
+            return REPAIRER_BODY;
+        }
+
+        return REPAIRER_ADVANCED_BODY;
+    }
+
+    getCurrentCreepCount(game: Game): Number {
+        return _.filter(game.creeps, (creep: Creep) => this.match(creep)).length;
+    }
+
     spawn(spawn: StructureSpawn, game: Game) {
         spawn.spawnCreep(
-            REPAIRER_BODY,
+            this.getBody(game),
             'Repairer' + game.time,
             {memory: {role: ROLE_REPAIRER}}
         )

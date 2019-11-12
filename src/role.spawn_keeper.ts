@@ -24,6 +24,8 @@ export default class SpawnKeeperRole implements Role {
             }
         });
 
+        sources = sources.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
+
         if (sources.length > 0) {
             return sources[0];
         }
@@ -38,6 +40,8 @@ export default class SpawnKeeperRole implements Role {
                     structure['store'].getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
+
+        targets = targets.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
 
         if (targets.length > 0) {
             return targets[0];
