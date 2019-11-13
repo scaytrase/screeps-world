@@ -33,6 +33,17 @@ export default class CreepTrait {
         }
     }
 
+    public static attack(creep: Creep, target: Creep | null): void {
+        if (target) {
+            // if (creep.body. && creep.rangedAttack() === ERR_NOT_IN_RANGE) {
+            //     creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0b00'}});
+            // }
+            if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0b00'}});
+            }
+        }
+    }
+
     public static withdraw(creep: Creep, source: AnyStructure | null): void {
         if (source) {
             if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

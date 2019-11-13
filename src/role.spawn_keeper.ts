@@ -11,8 +11,9 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 const TARGET_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_SPAWN,
     STRUCTURE_EXTENSION,
-    STRUCTURE_SPAWN
+    STRUCTURE_TOWER,
 ];
 
 export default class SpawnKeeperRole implements Role {

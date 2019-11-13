@@ -10,15 +10,18 @@ import RepairerRole from "./role.repairer";
 import CreepRenewer from "./creep_renewer";
 import PermanentSafeModeActivator from "./permanent_safe_mode_activator";
 import SpawnKeeperRole from "./role.spawn_keeper";
-
-const _ = require('lodash');
+import EnergyAggregatorRole from "./role.energy_aggregator";
+import GuardRole from "./role.guard";
+import TowerController from "./tower_controller";
 
 const roles = [
     new HarvesterRole(),
+    new GuardRole(),
+    new SpawnKeeperRole(),
+    new RepairerRole(),
+    new EnergyAggregatorRole(),
     new UpgraderRole(),
     new BuilderRole(),
-    new RepairerRole(),
-    new SpawnKeeperRole(),
 ];
 
 module.exports.loop = function () {
@@ -32,6 +35,7 @@ module.exports.loop = function () {
     runnables.push(new CreepRunner(roles));
     runnables.push(new CreepRenewer(spawn));
     runnables.push(new PermanentSafeModeActivator(spawn));
+    runnables.push(new TowerController(spawn.room));
 
     for (let runnable of runnables) {
         runnable.run(Game, Memory);

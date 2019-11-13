@@ -22,7 +22,7 @@ module.exports = function (grunt) {
                 tasks: ['ts', 'screeps'],
                 options: {
                     spawn: false,
-                    debounceDelay: 250,
+                    debounceDelay: 50,
                 },
             },
         },

@@ -1,13 +1,7 @@
 import Role from "./role";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import SpawnStrategy from "./spawn_strategy";
-import {
-    HARVESTER_ADVANCED_BODY,
-    HARVESTER_BODY, HARVESTER_SUPER_ADVANCED_BODY, REPAIRER_ADVANCED_BODY,
-    REPAIRER_BODY,
-    REPAIRERS_COUNT,
-    REPAIRERS_ENERGY_LIMIT
-} from "./config";
+import {REPAIRER_ADVANCED_BODY, REPAIRER_BODY, REPAIRER_HEALTH_LIMIT_RATIO, REPAIRERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
 
 const _ = require('lodash');
@@ -37,7 +31,7 @@ export default class RepairerRole implements Role {
         let sources = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= REPAIRERS_ENERGY_LIMIT;
+                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= creep.carryCapacity;
             }
         });
 
@@ -51,6 +45,17 @@ export default class RepairerRole implements Role {
     }
 
     run(creep: Creep) {
+        if (creep.memory['target'] !== undefined) {
+            let target: AnyStructure = Game.getObjectById(creep.memory['target']);
+            if (target.hits / target.hitsMax > REPAIRER_HEALTH_LIMIT_RATIO) {
+                creep.memory['target'] = undefined;
+            }
+        }
+
+        if (creep.memory['target'] === undefined) {
+            creep.memory['target'] = RepairerRole.getTarget(creep).id;
+        }
+
         if (creep.memory['repairing'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['repairing'] = false;
             creep.say('🔄 harvest');
@@ -60,7 +65,8 @@ export default class RepairerRole implements Role {
         }
 
         if (creep.memory['repairing']) {
-            CreepTrait.repair(creep, RepairerRole.getTarget(creep));
+            let target: AnyStructure = creep.memory['target'] === undefined ? RepairerRole.getTarget(creep) : Game.getObjectById(creep.memory['target']);
+            CreepTrait.repair(creep, target);
         } else {
             CreepTrait.withdraw(creep, RepairerRole.getSource(creep));
         }

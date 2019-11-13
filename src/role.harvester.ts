@@ -63,11 +63,11 @@ export default class HarvesterRole implements Role {
 
     private getBody(game: Game) {
         const currentCreepCount = this.getCurrentCreepCount(game);
-        if (currentCreepCount < 3) {
+        if (currentCreepCount < 2) {
             return HARVESTER_BODY;
         }
 
-        if (currentCreepCount < 6) {
+        if (currentCreepCount < 4) {
             return HARVESTER_ADVANCED_BODY;
         }
 
