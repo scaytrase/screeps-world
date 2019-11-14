@@ -1,4 +1,6 @@
-import {RENEW_CREEPS, TTL_UNTIL_RENEW} from "./config";
+import {RENEW_CREEPS, SUICIDE_CREEPS, TTL_UNTIL_RENEW} from "./config";
+
+const _ = require('lodash');
 
 export default class CreepTrait {
     public static renewIfNeeded(creep: Creep): void {
@@ -7,10 +9,32 @@ export default class CreepTrait {
         }
     }
 
+    public static suicideOldCreep(creep: Creep, ttl: number): void {
+        if (SUICIDE_CREEPS && creep.ticksToLive < ttl) {
+            creep.suicide();
+        }
+    }
+
     public static transferAllEnergy(creep: Creep, target: AnyStructure | null): void {
         if (target !== null) {
             if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: '#00a4ff'}});
+            }
+        }
+    }
+
+    public static transferAllResources(creep: Creep, target: AnyStructure | null): void {
+        if (target !== null) {
+            if (creep.transfer(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {visualizePathStyle: {stroke: '#00a4ff'}});
+            }
+        }
+    }
+
+    public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | null): void {
+        if (target !== null) {
+            if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {visualizePathStyle: {stroke: '#ffdf02'}});
             }
         }
     }
@@ -74,5 +98,15 @@ export default class CreepTrait {
         const spawn = CreepTrait.getClosestSpawn(creep);
         creep.moveTo(spawn, {visualizePathStyle: {stroke: '#ff55f4'}});
         creep.transfer(spawn, RESOURCE_ENERGY);
+    }
+
+    static pickup(creep: Creep, source: Resource | Tombstone | null) {
+        if (source !== null) {
+            if (source instanceof Tombstone) {
+                CreepTrait.withdrawAllResources(creep, source);
+            } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(source, {visualizePathStyle: {stroke: '#ffdf02'}});
+            }
+        }
     }
 }

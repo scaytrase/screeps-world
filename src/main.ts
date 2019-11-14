@@ -13,6 +13,7 @@ import SpawnKeeperRole from "./role.spawn_keeper";
 import EnergyAggregatorRole from "./role.energy_aggregator";
 import GuardRole from "./role.guard";
 import TowerController from "./tower_controller";
+import GraveKeeperRole from "./role.grave_keeper";
 
 const roles = [
     new HarvesterRole(),
@@ -20,6 +21,7 @@ const roles = [
     new SpawnKeeperRole(),
     new RepairerRole(),
     new EnergyAggregatorRole(),
+    new GraveKeeperRole(),
     new UpgraderRole(),
     new BuilderRole(),
 ];
