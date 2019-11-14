@@ -1,16 +1,6 @@
 import {RENEW_CREEPS, TTL_UNTIL_RENEW} from "./config";
 
 export default class CreepTrait {
-    private static getClosestSpawn(creep: Creep): StructureSpawn {
-        return creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-    }
-
-    private static moveToSpawnToRenew(creep: Creep): void {
-        const spawn = CreepTrait.getClosestSpawn(creep);
-        creep.moveTo(spawn, {visualizePathStyle: {stroke: '#ff55f4'}});
-        creep.transfer(spawn, RESOURCE_ENERGY);
-    }
-
     public static renewIfNeeded(creep: Creep): void {
         if (RENEW_CREEPS && creep.ticksToLive < TTL_UNTIL_RENEW) {
             CreepTrait.moveToSpawnToRenew(creep);
@@ -74,5 +64,15 @@ export default class CreepTrait {
                 creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#8bff00'}});
             }
         }
+    }
+
+    private static getClosestSpawn(creep: Creep): StructureSpawn {
+        return creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+    }
+
+    private static moveToSpawnToRenew(creep: Creep): void {
+        const spawn = CreepTrait.getClosestSpawn(creep);
+        creep.moveTo(spawn, {visualizePathStyle: {stroke: '#ff55f4'}});
+        creep.transfer(spawn, RESOURCE_ENERGY);
     }
 }

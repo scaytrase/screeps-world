@@ -1,9 +1,11 @@
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import {GUARD_BODY, GUARDS_COUNT, HARVESTERS_COUNT} from "./config";
+import {GUARD_BODY, GUARDS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
 import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
+import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
 
 const _ = require('lodash');
 
@@ -28,7 +30,11 @@ export default class GuardRole implements Role {
         return null;
     }
 
-    run(creep: Creep) {
+    private static getBody(game: Game): BodyPartConstant[] {
+        return GUARD_BODY;
+    }
+
+    run(creep: Creep): void {
         if (creep['store'].getUsedCapacity() === 0) {
             CreepTrait.harvest(creep, GuardRole.getSource(creep));
         } else {
@@ -40,29 +46,28 @@ export default class GuardRole implements Role {
         CreepTrait.renewIfNeeded(creep);
     }
 
-    match(creep: Creep) {
+    match(creep: Creep): boolean {
         return creep.memory['role'] == ROLE_GUARD;
     }
 
-    spawn(spawn: StructureSpawn, game: Game) {
+    spawn(spawn: StructureSpawn, game: Game): void {
+        if (spawn.room.find(FIND_HOSTILE_CREEPS).length === 0) {
+            return;
+        }
+
         spawn.spawnCreep(
-            this.getBody(game),
+            GuardRole.getBody(game),
             'Guard' + game.time,
             {memory: {role: ROLE_GUARD}}
         )
     }
 
-    private getBody(game: Game) {
-        const currentCreepCount = this.getCurrentCreepCount(game);
-
-        return GUARD_BODY;
-    }
-
-    getCurrentCreepCount(game: Game): Number {
-        return _.filter(game.creeps, (creep: Creep) => this.match(creep)).length;
-    }
-
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(GUARDS_COUNT, this);
+        return new AndChainSpawnStrategy(
+            [
+                new FoundMoreThanLimitSpawnStrategy(0, FIND_HOSTILE_CREEPS),
+                new LimitedSpawnByRoleCountStrategy(GUARDS_COUNT, this),
+            ]
+        );
     }
 }

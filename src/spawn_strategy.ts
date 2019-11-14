@@ -1,3 +1,3 @@
 export default interface SpawnStrategy {
-    shouldSpawn(game: Game): boolean
+    shouldSpawn(spawn: StructureSpawn, game: Game): boolean
 }

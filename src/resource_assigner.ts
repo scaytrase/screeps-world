@@ -13,6 +13,25 @@ export default class ResourceAssigner implements Runnable {
         this.spawn = spawn;
     }
 
+    private static createResourceMap(sources: Source[], creeps: { [p: string]: Creep }): Map<Source, number> {
+        let resourceMap: Map<Source, number> = new Map<Source, number>();
+        for (let source of sources) {
+            resourceMap.set(source, 0);
+        }
+
+        for (let creepName in creeps) {
+            const assignedResource: string = creeps[creepName].memory[RESOURCE_ASSIGNMENT];
+            if (assignedResource === undefined) {
+                continue;
+            }
+
+            let source = Game.getObjectById<Source>(assignedResource);
+
+            resourceMap.set(source, resourceMap.get(source) + 1);
+        }
+        return resourceMap;
+    }
+
     public run(game: Game, memory: Memory): void {
         const sources = this.spawn.room.find(FIND_SOURCES);
         _.forEach(
@@ -57,24 +76,5 @@ export default class ResourceAssigner implements Runnable {
 
         creep.memory[RESOURCE_ASSIGNMENT] = minResource.id;
         creep.memory[ALGO_VER] = RESOURCE_ASSIGN_ALGO_VERSION;
-    }
-
-    private static createResourceMap(sources: Source[], creeps: { [p: string]: Creep }): Map<Source, number> {
-        let resourceMap: Map<Source, number> = new Map<Source, number>();
-        for (let source of sources) {
-            resourceMap.set(source, 0);
-        }
-
-        for (let creepName in creeps) {
-            const assignedResource: string = creeps[creepName].memory[RESOURCE_ASSIGNMENT];
-            if (assignedResource === undefined) {
-                continue;
-            }
-
-            let source = Game.getObjectById<Source>(assignedResource);
-
-            resourceMap.set(source, resourceMap.get(source) + 1);
-        }
-        return resourceMap;
     }
 }

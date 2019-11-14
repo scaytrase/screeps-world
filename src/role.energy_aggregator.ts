@@ -96,7 +96,7 @@ export default class EnergyAggregatorRole implements Role {
         CreepTrait.renewIfNeeded(creep);
     }
 
-    spawn(spawn: StructureSpawn, game: Game) {
+    spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             ENERGY_AGGREGATOR_BODY,
             'EnergyAggregator' + game.time,

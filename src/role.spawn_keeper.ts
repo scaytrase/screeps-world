@@ -69,7 +69,7 @@ export default class SpawnKeeperRole implements Role {
         CreepTrait.renewIfNeeded(creep);
     }
 
-    spawn(spawn: StructureSpawn, game: Game) {
+    spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             SPAWN_KEEPER_BODY,
             'SpawnKeeper' + game.time,

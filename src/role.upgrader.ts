@@ -29,7 +29,7 @@ export default class UpgraderRole implements Role {
         return null;
     }
 
-    run(creep: Creep) {
+    run(creep: Creep): void {
         if (creep.memory['upgrading'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['upgrading'] = false;
             creep.say('🔄 harvest');
@@ -47,11 +47,11 @@ export default class UpgraderRole implements Role {
         CreepTrait.renewIfNeeded(creep);
     }
 
-    match(creep: Creep) {
+    match(creep: Creep): boolean {
         return creep.memory['role'] == ROLE_UPGRADER;
     }
 
-    spawn(spawn: StructureSpawn, game: Game) {
+    spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             UPGRADER_BODY,
             'Upgrader' + game.time,

@@ -3,6 +3,8 @@ import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_co
 import SpawnStrategy from "./spawn_strategy";
 import {BUILDER_BODY, BUILDERS_COUNT, BUILDERS_ENERGY_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
+import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
 
 const ROLE_BUILDER = 'builder';
 
@@ -39,7 +41,7 @@ export default class BuilderRole implements Role {
         return null;
     }
 
-    run(creep: Creep) {
+    run(creep: Creep): void {
         if (creep.memory['building'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['building'] = false;
             creep.say('🔄 harvest');
@@ -58,11 +60,11 @@ export default class BuilderRole implements Role {
         CreepTrait.renewIfNeeded(creep);
     }
 
-    match(creep: Creep) {
+    match(creep: Creep): boolean {
         return creep.memory['role'] == ROLE_BUILDER;
     }
 
-    spawn(spawn: StructureSpawn, game: Game) {
+    spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             BUILDER_BODY,
             'Builder' + game.time,
@@ -71,6 +73,11 @@ export default class BuilderRole implements Role {
     }
 
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(BUILDERS_COUNT, this);
+        return new AndChainSpawnStrategy(
+            [
+                new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_CONSTRUCTION_SITES),
+                new LimitedSpawnByRoleCountStrategy(BUILDERS_COUNT, this),
+            ]
+        );
     }
 }

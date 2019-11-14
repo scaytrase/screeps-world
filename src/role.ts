@@ -5,7 +5,7 @@ export default interface Role {
 
     match(creep: Creep): boolean;
 
-    spawn(spawn: StructureSpawn, game: Game);
+    spawn(spawn: StructureSpawn, game: Game): void;
 
     getSpawnStrategy(): SpawnStrategy;
 }

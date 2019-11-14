@@ -44,12 +44,17 @@ export default class RepairerRole implements Role {
         return null;
     }
 
-    run(creep: Creep) {
+    run(creep: Creep): void {
         if (creep.memory['target'] !== undefined) {
             let target: AnyStructure = Game.getObjectById(creep.memory['target']);
-            if (target.hits / target.hitsMax > REPAIRER_HEALTH_LIMIT_RATIO) {
+            if (target) {
+                if (target.hits / target.hitsMax > REPAIRER_HEALTH_LIMIT_RATIO) {
+                    creep.memory['target'] = undefined;
+                }
+            } else {
                 creep.memory['target'] = undefined;
             }
+
         }
 
         if (creep.memory['target'] === undefined) {
@@ -74,24 +79,15 @@ export default class RepairerRole implements Role {
         CreepTrait.renewIfNeeded(creep);
     }
 
-    match(creep: Creep) {
+    match(creep: Creep): boolean {
         return creep.memory['role'] == ROLE_REPAIRER;
-    }
-
-    private getBody(game: Game) {
-        const currentCreepCount = this.getCurrentCreepCount(game);
-        if (currentCreepCount < 3) {
-            return REPAIRER_BODY;
-        }
-
-        return REPAIRER_ADVANCED_BODY;
     }
 
     getCurrentCreepCount(game: Game): Number {
         return _.filter(game.creeps, (creep: Creep) => this.match(creep)).length;
     }
 
-    spawn(spawn: StructureSpawn, game: Game) {
+    spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             this.getBody(game),
             'Repairer' + game.time,
@@ -101,5 +97,14 @@ export default class RepairerRole implements Role {
 
     getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(REPAIRERS_COUNT, this);
+    }
+
+    private getBody(game: Game) {
+        const currentCreepCount = this.getCurrentCreepCount(game);
+        if (currentCreepCount < 3) {
+            return REPAIRER_BODY;
+        }
+
+        return REPAIRER_ADVANCED_BODY;
     }
 }

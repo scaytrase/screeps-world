@@ -39,7 +39,7 @@ export default class HarvesterRole implements Role {
         return null;
     }
 
-    run(creep: Creep) {
+    run(creep: Creep): void {
         if (creep['store'].getFreeCapacity() > 0) {
             CreepTrait.harvest(creep, HarvesterRole.getSource(creep));
         } else {
@@ -49,16 +49,24 @@ export default class HarvesterRole implements Role {
         CreepTrait.renewIfNeeded(creep);
     }
 
-    match(creep: Creep) {
+    match(creep: Creep): boolean {
         return creep.memory['role'] == ROLE_HARVESTER;
     }
 
-    spawn(spawn: StructureSpawn, game: Game) {
+    spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             this.getBody(game),
             'Harvester' + game.time,
             {memory: {role: ROLE_HARVESTER}}
         )
+    }
+
+    getCurrentCreepCount(game: Game): Number {
+        return _.filter(game.creeps, (creep: Creep) => this.match(creep)).length;
+    }
+
+    getSpawnStrategy(): SpawnStrategy {
+        return new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT, this);
     }
 
     private getBody(game: Game) {
@@ -72,13 +80,5 @@ export default class HarvesterRole implements Role {
         }
 
         return HARVESTER_SUPER_ADVANCED_BODY;
-    }
-
-    getCurrentCreepCount(game: Game): Number {
-        return _.filter(game.creeps, (creep: Creep) => this.match(creep)).length;
-    }
-
-    getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT, this);
     }
 }

@@ -12,7 +12,7 @@ export default class LimitedSpawnByRoleCountStrategy implements SpawnStrategy {
         this.role = role;
     }
 
-    shouldSpawn(game: Game): boolean {
+    shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
         return _.filter(game.creeps, (creep: Creep) => this.role.match(creep)).length < this.limit;
     }
 }

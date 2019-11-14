@@ -11,7 +11,7 @@ export default class RoleSpawner implements Runnable {
     }
 
     run(game: Game, memory: Memory): void {
-        if (this.role.getSpawnStrategy().shouldSpawn(game)) {
+        if (this.role.getSpawnStrategy().shouldSpawn(this.spawn, game)) {
             this.role.spawn(this.spawn, game);
         }
     }
