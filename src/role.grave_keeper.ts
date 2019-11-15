@@ -10,10 +10,21 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 
+const _ = require('lodash');
+
 export default class GraveKeeperRole implements Role {
     private static getSource(creep: Creep): Resource | Tombstone | null {
-        let resources = creep.room.find(FIND_DROPPED_RESOURCES);
-        let tombstones = creep.room.find(FIND_TOMBSTONES);
+        let resources = creep.room.find(FIND_DROPPED_RESOURCES, {
+            filter(resource) {
+                return resource.amount > 0
+            }
+
+        });
+        let tombstones = creep.room.find(FIND_TOMBSTONES, {
+            filter(tombstone) {
+                return tombstone['store'][_.findKey(tombstone['store'])] > 0;
+            }
+        });
 
         let targets: Array<Resource | Tombstone> = [];
         targets.push(...resources);

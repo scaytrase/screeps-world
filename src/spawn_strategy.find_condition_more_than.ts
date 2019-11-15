@@ -1,9 +1,9 @@
 import SpawnStrategy from "./spawn_strategy";
 
 export default class FoundMoreThanLimitSpawnStrategy<K extends FindConstant> implements SpawnStrategy {
-    private condition: K;
-    private filter: FilterOptions<K>;
-    private limit: number;
+    private readonly condition: K;
+    private readonly filter: FilterOptions<K>;
+    private readonly limit: number;
 
     constructor(limit: number, condition: K, filter?: FilterOptions<K>) {
         this.condition = condition;

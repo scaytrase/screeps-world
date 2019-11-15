@@ -14,6 +14,7 @@ import EnergyAggregatorRole from "./role.energy_aggregator";
 import GuardRole from "./role.guard";
 import TowerController from "./tower_controller";
 import GraveKeeperRole from "./role.grave_keeper";
+import WallKeeperRole from "./role.wall_keeper";
 
 const roles = [
     new HarvesterRole(),
@@ -24,6 +25,7 @@ const roles = [
     new GraveKeeperRole(),
     new UpgraderRole(),
     new BuilderRole(),
+    new WallKeeperRole(),
 ];
 
 module.exports.loop = function () {
