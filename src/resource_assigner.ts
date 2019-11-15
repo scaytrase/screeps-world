@@ -38,11 +38,6 @@ export default class ResourceAssigner implements Runnable {
             game.creeps,
             (creep: Creep) => this.assignResource(creep, sources, game.creeps)
         );
-
-        let map = ResourceAssigner.createResourceMap(sources, game.creeps);
-        for (let resource of map.keys()) {
-            console.log(`Resource "${resource.id}": ${map.get(resource)} Creeps assigned`)
-        }
     }
 
     private assignResource(creep: Creep, sources: Source[], creeps: { [creepName: string]: Creep }): void {

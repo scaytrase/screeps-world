@@ -60,7 +60,10 @@ export default class WallKeeperRole implements Role {
         }
 
         if (creep.memory['target'] === undefined) {
-            creep.memory['target'] = WallKeeperRole.getTarget(creep).id;
+            const target = WallKeeperRole.getTarget(creep);
+            if (target) {
+                creep.memory['target'] = target.id;
+            }
         }
 
         if (creep.memory['repairing'] && creep['store'][RESOURCE_ENERGY] == 0) {
