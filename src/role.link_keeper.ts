@@ -1,24 +1,21 @@
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import {ENERGY_AGGREGATOR_BODY, ENERGY_AGGREGATORS_COUNT, ENERGY_CENTER} from "./config";
+import {ENERGY_AGGREGATOR_BODY, ENERGY_CENTER, LINK_KEEPERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
 
-const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
+const ROLE_LINK_KEEPER = 'link_keeper';
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
-    STRUCTURE_STORAGE,
-    STRUCTURE_CONTAINER,
 ];
 const TARGET_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
-    STRUCTURE_CONTAINER,
 ];
 
-export default class EnergyAggregatorRole implements Role {
+export default class LinkKeeperRole implements Role {
     private static getSource(creep: Creep): AnyStructure | null {
-        const flag = EnergyAggregatorRole.getFlag(creep);
+        const flag = LinkKeeperRole.getFlag(creep);
 
         if (!flag) {
             return null;
@@ -27,8 +24,8 @@ export default class EnergyAggregatorRole implements Role {
         const sources = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= creep.carryCapacity &&
-                    structure.pos.getRangeTo(flag) > 1
+                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= creep.carryCapacity &&
+                    structure.pos.getRangeTo(flag) < 5
                     ;
             }
         });
@@ -58,7 +55,7 @@ export default class EnergyAggregatorRole implements Role {
             }
         });
 
-        const flag = EnergyAggregatorRole.getFlag(creep);
+        const flag = LinkKeeperRole.getFlag(creep);
 
         if (!flag) {
             return null;
@@ -74,18 +71,18 @@ export default class EnergyAggregatorRole implements Role {
     }
 
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT, this);
+        return new LimitedSpawnByRoleCountStrategy(LINK_KEEPERS_COUNT, this);
     }
 
     match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_ENERGY_AGGREGATOR;
+        return creep.memory['role'] == ROLE_LINK_KEEPER;
     }
 
     run(creep: Creep): void {
         if (creep['store'].getFreeCapacity() > 0) {
-            CreepTrait.withdraw(creep, EnergyAggregatorRole.getSource(creep));
+            CreepTrait.withdraw(creep, LinkKeeperRole.getSource(creep));
         } else {
-            CreepTrait.transferAllEnergy(creep, EnergyAggregatorRole.getTarget(creep))
+            CreepTrait.transferAllEnergy(creep, LinkKeeperRole.getTarget(creep))
         }
 
         CreepTrait.renewIfNeeded(creep);
@@ -94,8 +91,8 @@ export default class EnergyAggregatorRole implements Role {
     spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             ENERGY_AGGREGATOR_BODY,
-            'EnergyAggregator' + game.time,
-            {memory: {role: ROLE_ENERGY_AGGREGATOR}}
+            'LinkKeeper' + game.time,
+            {memory: {role: ROLE_LINK_KEEPER}}
         )
     }
 }

@@ -57,7 +57,7 @@ export default class GraveKeeperRole implements Role {
     }
 
     run(creep: Creep): void {
-        if (creep['store'].getFreeCapacity() > 0) {
+        if (creep['store'].getFreeCapacity() > 0 && creep.ticksToLive > 300) {
             CreepTrait.pickup(creep, GraveKeeperRole.getSource(creep));
         } else {
             CreepTrait.transferAllResources(creep, GraveKeeperRole.getTarget(creep));

@@ -8,6 +8,7 @@ const _ = require('lodash');
 
 const ROLE_REPAIRER = 'repairer';
 const SOURCE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_LINK,
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
 ];

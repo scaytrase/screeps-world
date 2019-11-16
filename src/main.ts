@@ -16,6 +16,7 @@ import TowerController from "./tower_controller";
 import GraveKeeperRole from "./role.grave_keeper";
 import WallKeeperRole from "./role.wall_keeper";
 import LinkController from "./link_controller";
+import LinkKeeperRole from "./role.link_keeper";
 
 const roles = [
     new HarvesterRole(),
@@ -27,6 +28,7 @@ const roles = [
     new UpgraderRole(),
     new BuilderRole(),
     new WallKeeperRole(),
+    new LinkKeeperRole(),
 ];
 
 module.exports.loop = function () {

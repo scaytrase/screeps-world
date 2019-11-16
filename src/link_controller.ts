@@ -19,7 +19,9 @@ export default class LinkController implements Runnable {
         const target = links.shift();
 
         for (let source of links) {
-            source.transferEnergy(target);
+            if (source['store'].getUsedCapacity(RESOURCE_ENERGY) >= 400) {
+                source.transferEnergy(target);
+            }
         }
     }
 }
