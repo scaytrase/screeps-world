@@ -7,6 +7,7 @@ import CreepTrait from "./creep_traits";
 const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_LINK,
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
 ];
@@ -26,7 +27,7 @@ export default class EnergyAggregatorRole implements Role {
         let sources = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) > creep.carryCapacity * 2 &&
+                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) > creep.carryCapacity * 2 &&
                     structure.pos.getRangeTo(flag) > 2
                     ;
             }

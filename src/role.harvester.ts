@@ -9,6 +9,7 @@ const _ = require('lodash');
 
 export const ROLE_HARVESTER = 'harvester';
 const STORAGE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_LINK,
     STRUCTURE_SPAWN,
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,

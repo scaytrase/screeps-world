@@ -2,6 +2,12 @@ import {RENEW_CREEPS, SUICIDE_CREEPS, TTL_UNTIL_RENEW} from "./config";
 
 const _ = require('lodash');
 
+const COLOR_HARVEST_RESOURCE = '#ffdf02';
+const COLOR_TRANSFER_RESOURCE = '#00a4ff';
+const COLOR_BUILD = '#8bff00';
+const COLOR_ATTACK = '#ff0b00';
+const COLOR_SPECIAL_TASKS = '#ff55f4';
+
 export default class CreepTrait {
     public static renewIfNeeded(creep: Creep): void {
         if (RENEW_CREEPS && creep.ticksToLive < TTL_UNTIL_RENEW) {
@@ -18,15 +24,15 @@ export default class CreepTrait {
     public static transferAllEnergy(creep: Creep, target: AnyStructure | null): void {
         if (target !== null) {
             if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#00a4ff'}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE}});
             }
         }
     }
 
     public static transferAllResources(creep: Creep, target: AnyStructure | null): void {
         if (target !== null) {
-            if (creep.transfer(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#00a4ff'}});
+            if (creep.transfer(target, _.findKey(creep['store'])) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE}});
             }
         }
     }
@@ -34,7 +40,7 @@ export default class CreepTrait {
     public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | null): void {
         if (target !== null) {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#ffdf02'}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
             }
         }
     }
@@ -42,18 +48,17 @@ export default class CreepTrait {
     public static harvest(creep: Creep, source: Source | null): void {
         if (source) {
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ffdf02'}});
+                creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
             }
         }
     }
 
     public static attack(creep: Creep, target: Creep | null): void {
         if (target) {
-            // if (creep.body. && creep.rangedAttack() === ERR_NOT_IN_RANGE) {
-            //     creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0b00'}});
-            // }
-            if (creep.attack(target) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0b00'}});
+            if (creep.rangedAttack(target) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}});
+            } else if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}});
             }
         }
     }
@@ -61,7 +66,7 @@ export default class CreepTrait {
     public static withdraw(creep: Creep, source: AnyStructure | null): void {
         if (source) {
             if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ffdf02'}});
+                creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
             }
         }
     }
@@ -69,7 +74,7 @@ export default class CreepTrait {
     public static build(creep: Creep, target: ConstructionSite | null): void {
         if (target) {
             if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#8bff00'}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_BUILD}});
             }
         }
     }
@@ -77,7 +82,7 @@ export default class CreepTrait {
     public static repair(creep: Creep, target: AnyStructure | null): void {
         if (target) {
             if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#8bff00'}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_BUILD}});
             }
         }
     }
@@ -85,7 +90,7 @@ export default class CreepTrait {
     public static upgradeController(creep: Creep): void {
         if (creep.room.controller) {
             if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#8bff00'}});
+                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: COLOR_BUILD}});
             }
         }
     }
@@ -96,7 +101,7 @@ export default class CreepTrait {
 
     private static moveToSpawnToRenew(creep: Creep): void {
         const spawn = CreepTrait.getClosestSpawn(creep);
-        creep.moveTo(spawn, {visualizePathStyle: {stroke: '#ff55f4'}});
+        creep.moveTo(spawn, {visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}});
         creep.transfer(spawn, RESOURCE_ENERGY);
     }
 
@@ -105,7 +110,7 @@ export default class CreepTrait {
             if (source instanceof Tombstone) {
                 CreepTrait.withdrawAllResources(creep, source);
             } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ffdf02'}});
+                creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
             }
         }
     }

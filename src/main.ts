@@ -15,6 +15,7 @@ import GuardRole from "./role.guard";
 import TowerController from "./tower_controller";
 import GraveKeeperRole from "./role.grave_keeper";
 import WallKeeperRole from "./role.wall_keeper";
+import LinkController from "./link_controller";
 
 const roles = [
     new HarvesterRole(),
@@ -40,6 +41,7 @@ module.exports.loop = function () {
     runnables.push(new CreepRenewer(spawn));
     runnables.push(new PermanentSafeModeActivator(spawn));
     runnables.push(new TowerController(spawn.room));
+    runnables.push(new LinkController(spawn));
 
     for (let runnable of runnables) {
         runnable.run(Game, Memory);

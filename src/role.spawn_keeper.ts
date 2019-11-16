@@ -7,6 +7,7 @@ import CreepTrait from "./creep_traits";
 const ROLE_SPAWN_KEEPER = 'spawn_keeper';
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_LINK,
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
 ];
