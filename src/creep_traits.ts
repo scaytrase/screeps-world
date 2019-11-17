@@ -16,8 +16,21 @@ export default class CreepTrait {
     }
 
     public static suicideOldCreep(creep: Creep, ttl: number): void {
-        if (SUICIDE_CREEPS && creep.ticksToLive < ttl) {
+        if (!SUICIDE_CREEPS) {
+            return;
+        }
+
+        if (creep.ticksToLive >= ttl) {
+            return;
+        }
+
+        if (creep['store'].getUsedCapacity() === 0) {
             creep.suicide();
+        } else {
+            const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK];
+            CreepTrait.transferAllResources(creep, creep.room.find(FIND_MY_STRUCTURES, {
+                filter: (structure) => types.includes(structure.structureType) && structure['store'].getFreeCapacity() > creep['store'].getUsedCapacity()
+            }).shift())
         }
     }
 
@@ -44,7 +57,6 @@ export default class CreepTrait {
             }
         }
     }
-
     public static harvest(creep: Creep, source: Source | null): void {
         if (source) {
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {

@@ -17,6 +17,7 @@ import GraveKeeperRole from "./role.grave_keeper";
 import WallKeeperRole from "./role.wall_keeper";
 import LinkController from "./link_controller";
 import LinkKeeperRole from "./role.link_keeper";
+import CreepSpawnBound from "./creep_spawn_bound";
 
 const roles = [
     new HarvesterRole(),
@@ -40,6 +41,7 @@ module.exports.loop = function () {
     runnables.push(new ResourceAssigner(spawn));
     runnables.push(new CreepSpawner(roles, spawn));
     runnables.push(new CreepRunner(roles));
+    runnables.push(new CreepSpawnBound(spawn));
     runnables.push(new CreepRenewer(spawn));
     runnables.push(new PermanentSafeModeActivator(spawn));
     runnables.push(new TowerController(spawn.room));

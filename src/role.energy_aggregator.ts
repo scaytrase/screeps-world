@@ -8,12 +8,10 @@ const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
-    STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
 ];
 const TARGET_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
-    STRUCTURE_CONTAINER,
 ];
 
 export default class EnergyAggregatorRole implements Role {
@@ -27,7 +25,7 @@ export default class EnergyAggregatorRole implements Role {
         const sources = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= creep.carryCapacity &&
+                        structure['store'].getUsedCapacity() >= 0 &&
                     structure.pos.getRangeTo(flag) > 1
                     ;
             }
@@ -82,10 +80,10 @@ export default class EnergyAggregatorRole implements Role {
     }
 
     run(creep: Creep): void {
-        if (creep['store'].getFreeCapacity() > 0) {
-            CreepTrait.withdraw(creep, EnergyAggregatorRole.getSource(creep));
+        if (creep['store'].getUsedCapacity() > 0) {
+            CreepTrait.withdrawAllResources(creep, EnergyAggregatorRole.getSource(creep));
         } else {
-            CreepTrait.transferAllEnergy(creep, EnergyAggregatorRole.getTarget(creep))
+            CreepTrait.transferAllResources(creep, EnergyAggregatorRole.getTarget(creep))
         }
 
         CreepTrait.renewIfNeeded(creep);

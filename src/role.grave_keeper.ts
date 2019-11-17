@@ -63,6 +63,10 @@ export default class GraveKeeperRole implements Role {
             CreepTrait.transferAllResources(creep, GraveKeeperRole.getTarget(creep));
         }
 
+        if (creep.ticksToLive < 300) {
+            creep.moveTo(Game.spawns['Spawn1']);
+        }
+
         CreepTrait.renewIfNeeded(creep);
         CreepTrait.suicideOldCreep(creep, 100);
     }
