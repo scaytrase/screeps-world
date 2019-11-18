@@ -53,7 +53,7 @@ export default class CreepTrait {
     public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | null): void {
         if (target !== null) {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}, maxRooms: 1, ignoreCreeps: true});
             }
         }
     }
@@ -122,7 +122,7 @@ export default class CreepTrait {
             if (source instanceof Tombstone) {
                 CreepTrait.withdrawAllResources(creep, source);
             } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
+                creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}, maxRooms: 1, ignoreCreeps: true});
             }
         }
     }
