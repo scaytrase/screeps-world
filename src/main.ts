@@ -1,5 +1,6 @@
 import Cleaner from "./cleaner";
 import CreepRenewer from "./creep_renewer";
+import CreepRetirementProgram from "./creep_retirement_program";
 import CreepRunner from "./creep_runner";
 import CreepSpawnBound from "./creep_spawn_bound";
 import CreepSpawner from "./creep_spawner";
@@ -46,8 +47,10 @@ module.exports.loop = function () {
     runnables.push(new PermanentSafeModeActivator(spawn));
     runnables.push(new TowerController(spawn.room));
     runnables.push(new LinkController(spawn));
+    runnables.push(new CreepRetirementProgram());
 
     for (let runnable of runnables) {
+        console.log(runnable.constructor.name);
         runnable.run(Game, Memory);
     }
 };

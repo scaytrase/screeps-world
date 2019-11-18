@@ -1,14 +1,14 @@
 import {WALL_DESIRED_HITS, WALL_KEEPER_BODY, WALL_KEEPERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
-import Role from "./role";
+import TargetAwareCreepRole from "./role.target_aware_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import Utils from "./utils";
 
 const _ = require('lodash');
 
-const ROLE_WALL_KEEPER = 'wall_keeper';
 const TARGET_STRUCTURES: StructureConstant[] = [
     STRUCTURE_WALL,
     STRUCTURE_RAMPART,
@@ -18,50 +18,10 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 
-const wallToRepairFilter = (object: AnyStructure) => TARGET_STRUCTURES.includes(object.structureType) && object.hits < WALL_DESIRED_HITS;
+const repairFilter = (object: AnyStructure) => TARGET_STRUCTURES.includes(object.structureType) && object.hits < WALL_DESIRED_HITS;
 
-export default class WallKeeperRole implements Role {
-    private static getTarget(creep: Creep): AnyStructure | null {
-        let targets = creep.room.find(FIND_STRUCTURES, {filter: wallToRepairFilter});
-
-        targets = targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
-
-        return targets.shift();
-    }
-
-    private static getSource(creep: Creep): AnyStructure | null {
-        let sources = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= creep.carryCapacity;
-            }
-        });
-
-        sources = sources.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
-
-        return sources.shift();
-    }
-
-    private static getBody(game: Game) {
-        return WALL_KEEPER_BODY;
-    }
-
-    run(creep: Creep, game: Game): void {
-        if (creep.memory['target'] !== undefined) {
-            let target: AnyStructure = Game.getObjectById(creep.memory['target']);
-            if (!target || target.hits > WALL_DESIRED_HITS) {
-                creep.memory['target'] = undefined;
-            }
-
-        }
-
-        if (creep.memory['target'] === undefined) {
-            const target = WallKeeperRole.getTarget(creep);
-            if (target) {
-                creep.memory['target'] = target.id;
-            }
-        }
-
+export default class WallKeeperRole extends TargetAwareCreepRole {
+    doRun(creep: Creep, game: Game): void {
         if (creep.memory['repairing'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['repairing'] = false;
             creep.say('🔄 harvest');
@@ -71,33 +31,36 @@ export default class WallKeeperRole implements Role {
         }
 
         if (creep.memory['repairing']) {
-            let target: AnyStructure = creep.memory['target'] === undefined ? WallKeeperRole.getTarget(creep) : Game.getObjectById(creep.memory['target']);
-            CreepTrait.repair(creep, target);
+            CreepTrait.repair(creep, this.getCurrentStructureTarget(creep));
         } else {
-            CreepTrait.withdrawAllEnergy(creep, WallKeeperRole.getSource(creep));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.carryCapacity));
         }
-
-        CreepTrait.renewIfNeeded(creep);
     }
 
-    match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_WALL_KEEPER;
-    }
-
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
-            WallKeeperRole.getBody(game),
-            'WallKeeper' + game.time,
-            {memory: {role: ROLE_WALL_KEEPER}}
-        );
-    }
-
-    getSpawnStrategy(): SpawnStrategy {
+    public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: wallToRepairFilter}),
+                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: repairFilter}),
                 new LimitedSpawnByRoleCountStrategy(WALL_KEEPERS_COUNT, this),
             ]
         );
+    }
+
+    protected shouldRenewTarget(creep: Creep, game: Game): boolean {
+        const current = this.getCurrentStructureTarget(creep);
+
+        return !current || current.hits > WALL_DESIRED_HITS;
+    }
+
+    protected getRoleName(): string {
+        return 'wall_keeper';
+    }
+
+    protected getBody(game: Game) {
+        return WALL_KEEPER_BODY;
+    }
+
+    protected getTarget(creep: Creep, game: Game): AnyStructure | null {
+        return creep.room.find(FIND_STRUCTURES, {filter: repairFilter}).sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax).shift();
     }
 }

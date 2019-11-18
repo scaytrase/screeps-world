@@ -114,7 +114,7 @@ export default class CreepTrait {
         }
     }
 
-    static pickup(creep: Creep, source: Resource | Tombstone | null) {
+    static pickupAllResources(creep: Creep, source: Resource | Tombstone | null) {
         if (source !== null) {
             if (source instanceof Tombstone) {
                 CreepTrait.withdrawAllResources(creep, source);

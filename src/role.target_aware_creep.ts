@@ -27,7 +27,7 @@ export default abstract class TargetAwareCreepRole extends BaseCreepRole {
     protected abstract getTarget(creep: Creep, game: Game): AnyStructure;
 
     protected renewTarget(creep: Creep, game: Game): void {
-        if (this.shouldRenewTarget(creep, game)) {
+        if (this.getCurrentStructureTarget(creep) === null || this.shouldRenewTarget(creep, game)) {
             this.setTarget(creep, this.getTarget(creep, game));
         }
     }

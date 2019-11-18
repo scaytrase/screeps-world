@@ -2,20 +2,24 @@ import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 
 export default abstract class BaseCreepRole implements Role {
-    abstract getSpawnStrategy(): SpawnStrategy;
+    public abstract getSpawnStrategy(): SpawnStrategy;
 
-    match(creep: Creep): boolean {
+    public match(creep: Creep): boolean {
         return creep.memory['role'] == this.getRoleName();
     }
 
-    abstract run(creep: Creep, game: Game): void;
+    public abstract run(creep: Creep, game: Game): void;
 
     spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
             this.getBody(game),
             this.getName(game),
-            {memory: {role: this.getRoleName()}}
+            {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn, game)}}
         );
+    }
+
+    protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {
+        return {};
     }
 
     protected abstract getRoleName(): string;

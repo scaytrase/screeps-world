@@ -1,34 +1,16 @@
 import {UPGRADER_BODY, UPGRADERS_COUNT, UPGRADERS_ENERGY_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
-import Role from "./role";
+import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-
-const ROLE_UPGRADER = 'upgrader';
+import Utils from "./utils";
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
 ];
 
-export default class UpgraderRole implements Role {
-    private static getSource(creep: Creep): AnyStructure | null {
-        let sources = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= UPGRADERS_ENERGY_LIMIT;
-            }
-        });
-
-        sources = sources.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
-
-        if (sources.length > 0) {
-            return sources[0];
-        }
-
-        return null;
-    }
-
+export default class UpgraderRole extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
         if (creep.memory['upgrading'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['upgrading'] = false;
@@ -41,25 +23,19 @@ export default class UpgraderRole implements Role {
         if (creep.memory['upgrading']) {
             CreepTrait.upgradeController(creep);
         } else {
-            CreepTrait.withdrawAllEnergy(creep, UpgraderRole.getSource(creep));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, UPGRADERS_ENERGY_LIMIT));
         }
-
-        CreepTrait.renewIfNeeded(creep);
-    }
-
-    match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_UPGRADER;
-    }
-
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
-            UPGRADER_BODY,
-            'Upgrader' + game.time,
-            {memory: {role: ROLE_UPGRADER}}
-        );
     }
 
     getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(UPGRADERS_COUNT, this);
+    }
+
+    protected getRoleName(): string {
+        return 'upgrader';
+    }
+
+    protected getBody(game: Game): BodyPartConstant[] {
+        return UPGRADER_BODY;
     }
 }

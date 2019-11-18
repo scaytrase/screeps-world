@@ -1,13 +1,13 @@
 import {HARVESTER_ADVANCED_BODY, HARVESTER_BODY, HARVESTER_SUPER_ADVANCED_BODY, HARVESTERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
 import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
-import Role from "./role";
+import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import Utils from "./utils";
 
 const _ = require('lodash');
 
-export const ROLE_HARVESTER = 'harvester';
 const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
     STRUCTURE_SPAWN,
@@ -16,50 +16,23 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_EXTENSION,
 ];
 
-export default class HarvesterRole implements Role {
-    private static getSource(creep: Creep): Source | null {
-        return creep.memory[RESOURCE_ASSIGNMENT] === undefined
-            ? null
-            : Game.getObjectById(creep.memory[RESOURCE_ASSIGNMENT]);
-    }
-
-    private static getTarget(creep: Creep): AnyStructure | null {
-        let targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return STORAGE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-
-        targets = targets.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
-
-        if (targets.length > 0) {
-            return targets[0];
+export default class HarvesterRole extends BaseCreepRole {
+    private static getRecipientStructures(creep: Creep): StructureConstant[] {
+        if (creep.room.energyAvailable < 300) {
+            return [STRUCTURE_SPAWN];
+        } else if (creep.room.energyAvailable < 600) {
+            return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
+        } else {
+            return STORAGE_STRUCTURES;
         }
-
-        return null;
     }
 
     run(creep: Creep, game: Game): void {
         if (creep['store'].getFreeCapacity() > 0) {
-            CreepTrait.harvest(creep, HarvesterRole.getSource(creep));
+            CreepTrait.harvest(creep, Game.getObjectById(creep.memory[RESOURCE_ASSIGNMENT]));
         } else {
-            CreepTrait.transferAllEnergy(creep, HarvesterRole.getTarget(creep));
+            CreepTrait.transferAllEnergy(creep, Utils.getClosestEnergyRecipient(creep, HarvesterRole.getRecipientStructures(creep)));
         }
-
-        CreepTrait.renewIfNeeded(creep);
-    }
-
-    match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_HARVESTER;
-    }
-
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
-            this.getBody(game),
-            'Harvester' + game.time,
-            {memory: {role: ROLE_HARVESTER}}
-        );
     }
 
     getCurrentCreepCount(game: Game): Number {
@@ -70,7 +43,7 @@ export default class HarvesterRole implements Role {
         return new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT, this);
     }
 
-    private getBody(game: Game) {
+    protected getBody(game: Game) {
         const currentCreepCount = this.getCurrentCreepCount(game);
         if (currentCreepCount < 2) {
             return HARVESTER_BODY;
@@ -81,5 +54,9 @@ export default class HarvesterRole implements Role {
         }
 
         return HARVESTER_SUPER_ADVANCED_BODY;
+    }
+
+    protected getRoleName(): string {
+        return 'harvester';
     }
 }

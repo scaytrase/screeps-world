@@ -3,8 +3,8 @@ import Runnable from "./runnable";
 
 const _ = require('lodash');
 
-export const RESOURCE_ASSIGNMENT = 'assigned_to_resource_id';
-const ALGO_VER = 'assigned_to_resource_algo_ver';
+export const RESOURCE_ASSIGNMENT = 'target';
+const ALGO_VER = 'assign_algo';
 
 export default class ResourceAssigner implements Runnable {
     private readonly spawn: StructureSpawn;

@@ -5,7 +5,11 @@ export enum SORT {
 
 export default class Utils {
     public static sortByDistance(target: RoomObject, direction: SORT = SORT.ASC): (a: RoomObject, b: RoomObject) => number {
-        return (a, b) => (direction === SORT.ASC ? 1 : -1) * Math.sign(b.pos.getRangeTo(target) - a.pos.getRangeTo(target));
+        return (a, b) => (direction === SORT.ASC ? 1 : -1) * Math.sign(a.pos.getRangeTo(target) - b.pos.getRangeTo(target));
+    }
+
+    public static sortByHealthPercent(direction: SORT = SORT.ASC): (a: AnyStructure, b: AnyStructure) => number {
+        return (a, b) => (direction === SORT.ASC ? 1 : -1) * Math.sign(a.hits / a.hitsMax - b.hits / b.hitsMax);
     }
 
     public static getFlagByName(name: string, room: Room): Flag | null {
@@ -22,7 +26,25 @@ export default class Utils {
             .find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return allowedTypes.includes(structure.structureType) &&
-                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= lowerStructureLimit &&
+                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) > lowerStructureLimit &&
+                        additionalFilter(structure);
+                }
+            })
+            .sort(this.sortByDistance(target))
+            .shift();
+    }
+
+    public static getClosestEnergyRecipient(
+        target: RoomObject,
+        allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],
+        lowerStructureLimit: number = 0,
+        additionalFilter: (structure: AnyStructure) => boolean = () => true
+    ): AnyStructure | null {
+        return target.room
+            .find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return allowedTypes.includes(structure.structureType) &&
+                        structure['store'].getFreeCapacity(RESOURCE_ENERGY) > lowerStructureLimit &&
                         additionalFilter(structure);
                 }
             })

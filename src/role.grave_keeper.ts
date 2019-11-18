@@ -1,10 +1,10 @@
 import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
-import Role from "./role";
+import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import Utils from "./utils";
 
-export const ROLE_GRAVE_KEEPER = 'grave_keeper';
 const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
@@ -12,81 +12,57 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 
 const _ = require('lodash');
 
-export default class GraveKeeperRole implements Role {
+export default class GraveKeeperRole extends BaseCreepRole {
     private static getSource(creep: Creep): Resource | Tombstone | null {
-        let resources = creep.room.find(FIND_DROPPED_RESOURCES, {
-            filter(resource) {
-                return resource.amount > 0;
-            }
+        return [
+            ...(creep.room.find(FIND_DROPPED_RESOURCES, {
+                filter(resource) {
+                    return resource.amount > 0;
+                }
 
-        });
-        let tombstones = creep.room.find(FIND_TOMBSTONES, {
-            filter(tombstone) {
-                return tombstone['store'][_.findKey(tombstone['store'])] > 0;
-            }
-        });
-
-        let targets: Array<Resource | Tombstone> = [];
-        targets.push(...resources);
-        targets.push(...tombstones);
-
-        if (targets.length === 0) {
-            return null;
-        }
-
-        targets = targets.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
-
-        return targets[0];
+            })),
+            ...(creep.room.find(FIND_TOMBSTONES, {
+                filter(tombstone) {
+                    return tombstone['store'][_.findKey(tombstone['store'])] > 0;
+                }
+            }))
+        ].sort(Utils.sortByDistance(creep)).shift();
     }
 
     private static getTarget(creep: Creep): AnyStructure | null {
-        let targets = creep.room.find(FIND_STRUCTURES, {
+        return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return STORAGE_STRUCTURES.includes(structure.structureType) &&
                     structure['store'].getFreeCapacity() > 0;
             }
-        });
-
-        targets = targets.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
-
-        if (targets.length > 0) {
-            return targets[0];
-        }
-
-        return null;
-    }
-
-    private static getBody(game: Game): BodyPartConstant[] {
-        return GRAVE_KEEPER_BODY;
+        }).sort(Utils.sortByDistance(creep)).shift();
     }
 
     run(creep: Creep, game: Game): void {
         if (creep['store'].getFreeCapacity() > 0 && creep.ticksToLive > 300) {
-            CreepTrait.pickup(creep, GraveKeeperRole.getSource(creep));
+            CreepTrait.pickupAllResources(creep, GraveKeeperRole.getSource(creep));
         } else {
             CreepTrait.transferAllResources(creep, GraveKeeperRole.getTarget(creep));
         }
-
-        if (creep.ticksToLive < 300) {
-            creep.moveTo(Game.spawns['Spawn1']);
-        }
-
-        CreepTrait.suicideOldCreep(creep, 100);
-    }
-
-    match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_GRAVE_KEEPER;
-    }
-
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
-            GraveKeeperRole.getBody(game),
-            'GraveKeeper' + game.time,
-            {memory: {role: ROLE_GRAVE_KEEPER}}
-        );
     }
 
     getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(GRAVE_KEEPERS_COUNT, this);
+    }
+
+    protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {
+        return {
+            suicide_from: 300,
+            suicide_at: 100,
+            suicide_destination: spawn.id
+        };
+    }
+
+    protected getBody(game: Game): BodyPartConstant[] {
+        return GRAVE_KEEPER_BODY;
+    }
+
+    protected getRoleName(): string {
+        return 'grave_keeper';
     }
 }
