@@ -1,5 +1,5 @@
-import Runnable from "./runnable";
 import {RESOURCE_ASSIGN_ALGO_VERSION, RESOURCE_ASSIGN_NORMALIZE_DISTANCE} from "./config";
+import Runnable from "./runnable";
 
 const _ = require('lodash');
 
@@ -58,7 +58,7 @@ export default class ResourceAssigner implements Runnable {
 
         if (RESOURCE_ASSIGN_NORMALIZE_DISTANCE) {
             for (let resource of resourceMap.keys()) {
-                resourceMap.set(resource, resourceMap.get(resource) / resource.pos.getRangeTo(this.spawn))
+                resourceMap.set(resource, resourceMap.get(resource) / resource.pos.getRangeTo(this.spawn));
             }
         }
 

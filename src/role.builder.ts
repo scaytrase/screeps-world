@@ -1,10 +1,11 @@
-import Role from "./role";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import SpawnStrategy from "./spawn_strategy";
 import {BUILDER_BODY, BUILDERS_COUNT, BUILDERS_ENERGY_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
+import BaseCreepRole from "./role.base_creep";
+import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
+import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import Utils from "./utils";
 
 const ROLE_BUILDER = 'builder';
 
@@ -13,35 +14,12 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 
-export default class BuilderRole implements Role {
-    private static getSource(creep: Creep): AnyStructure | null {
-        let sources = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= BUILDERS_ENERGY_LIMIT;
-            }
-        });
-
-        sources = sources.sort((a, b) => Math.sign(a.pos.getRangeTo(creep) - b.pos.getRangeTo(creep)));
-
-        if (sources.length > 0) {
-            return sources[0];
-        }
-
-        return null;
-    }
-
+export default class BuilderRole extends BaseCreepRole {
     private static getTarget(creep: Creep): ConstructionSite | null {
-        let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-
-        if (targets.length > 0) {
-            return targets[0];
-        }
-
-        return null;
+        return creep.room.find(FIND_CONSTRUCTION_SITES).shift();
     }
 
-    run(creep: Creep): void {
+    run(creep: Creep, game: Game): void {
         if (creep.memory['building'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['building'] = false;
             creep.say('🔄 harvest');
@@ -54,22 +32,8 @@ export default class BuilderRole implements Role {
         if (creep.memory['building']) {
             CreepTrait.build(creep, BuilderRole.getTarget(creep));
         } else {
-            CreepTrait.withdraw(creep, BuilderRole.getSource(creep));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, BUILDERS_ENERGY_LIMIT));
         }
-
-        CreepTrait.renewIfNeeded(creep);
-    }
-
-    match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_BUILDER;
-    }
-
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
-            BUILDER_BODY,
-            'Builder' + game.time,
-            {memory: {role: ROLE_BUILDER}}
-        )
     }
 
     getSpawnStrategy(): SpawnStrategy {
@@ -79,5 +43,13 @@ export default class BuilderRole implements Role {
                 new LimitedSpawnByRoleCountStrategy(BUILDERS_COUNT, this),
             ]
         );
+    }
+
+    protected getBody(game: Game): BodyPartConstant[] {
+        return BUILDER_BODY;
+    }
+
+    protected getRoleName(): string {
+        return ROLE_BUILDER;
     }
 }

@@ -1,11 +1,11 @@
-import Role from "./role";
-import SpawnStrategy from "./spawn_strategy";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import {GUARD_BODY, GUARDS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
 import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
+import Role from "./role";
+import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
+import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 
 const _ = require('lodash');
 
@@ -34,7 +34,7 @@ export default class GuardRole implements Role {
         return GUARD_BODY;
     }
 
-    run(creep: Creep): void {
+    run(creep: Creep, game: Game): void {
         if (creep['store'].getUsedCapacity() === 0) {
             CreepTrait.harvest(creep, GuardRole.getSource(creep));
         } else {
@@ -59,7 +59,7 @@ export default class GuardRole implements Role {
             GuardRole.getBody(game),
             'Guard' + game.time,
             {memory: {role: ROLE_GUARD}}
-        )
+        );
     }
 
     getSpawnStrategy(): SpawnStrategy {

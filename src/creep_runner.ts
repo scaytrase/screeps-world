@@ -1,5 +1,5 @@
-import Runnable from "./runnable";
 import Role from "./role";
+import Runnable from "./runnable";
 
 export default class CreepRunner implements Runnable {
     private readonly roles: Array<Role>;
@@ -18,7 +18,7 @@ export default class CreepRunner implements Runnable {
 
             for (let role of this.roles) {
                 if (role.match(creep)) {
-                    role.run(creep);
+                    role.run(creep, game);
                 }
             }
         }

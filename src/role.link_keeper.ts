@@ -1,98 +1,61 @@
-import Role from "./role";
-import SpawnStrategy from "./spawn_strategy";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import {ENERGY_AGGREGATOR_BODY, ENERGY_CENTER, LINK_KEEPERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
+import TargetAwareCreepRole from "./role.target_aware_creep";
+import SpawnStrategy from "./spawn_strategy";
+import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import Utils from "./utils";
 
 const ROLE_LINK_KEEPER = 'link_keeper';
 
-const SOURCE_STRUCTURES: StructureConstant[] = [
-    STRUCTURE_LINK,
-];
-const TARGET_STRUCTURES: StructureConstant[] = [
-    STRUCTURE_STORAGE,
-];
-
-export default class LinkKeeperRole implements Role {
-    private static getSource(creep: Creep): AnyStructure | null {
-        const flag = LinkKeeperRole.getFlag(creep);
-
-        if (!flag) {
-            return null;
-        }
-
-        const sources = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getUsedCapacity(RESOURCE_ENERGY) >= creep.carryCapacity &&
-                    structure.pos.getRangeTo(flag) < 5
-                    ;
-            }
-        });
-
-        return sources.sort((a, b) => Math.sign(b.pos.getRangeTo(flag) - a.pos.getRangeTo(flag))).shift();
-    }
-
-    private static getFlag(creep: Creep): Flag | null {
-        const flags = creep.room.find(FIND_FLAGS, {
-            filter: (flag) => {
-                return flag.name === ENERGY_CENTER;
-            }
-        });
-
-        if (flags.length === 0) {
-            return null;
-        }
-
-        return flags[0];
-    }
-
-    private static getTarget(creep: Creep): AnyStructure | null {
-        let targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return TARGET_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-
-        const flag = LinkKeeperRole.getFlag(creep);
-
-        if (!flag) {
-            return null;
-        }
-
-        targets = targets.sort((a, b) => Math.sign(a.pos.getRangeTo(flag) - b.pos.getRangeTo(flag)));
-
-        if (targets.length > 0) {
-            return targets[0];
-        }
-
-        return null;
-    }
-
+export default class LinkKeeperRole extends TargetAwareCreepRole {
     getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(LINK_KEEPERS_COUNT, this);
     }
 
-    match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_LINK_KEEPER;
+    protected shouldRenewTarget(creep: Creep, game: Game): boolean {
+        const target = this.getCurrentStructureTarget(creep);
+
+        if (target) {
+            return target['store'].getUsedCapacity() === 0;
+        }
+
+        return true;
     }
 
-    run(creep: Creep): void {
+    protected getTarget(creep: Creep): AnyStructure | null {
+        const flag = Utils.getFlagByName(ENERGY_CENTER, creep.room);
+
+        if (!flag) {
+            return null;
+        }
+
+        return creep.room
+            .find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return structure.structureType === STRUCTURE_LINK &&
+                        structure['store'].getUsedCapacity() >= 0 &&
+                        structure.pos.getRangeTo(flag) < 5;
+                }
+            })
+            .sort(Utils.sortByDistance(flag))
+            .shift();
+    }
+
+    protected doRun(creep: Creep): void {
         if (creep['store'].getFreeCapacity() > 0) {
-            CreepTrait.withdraw(creep, LinkKeeperRole.getSource(creep));
+            CreepTrait.withdrawAllEnergy(creep, this.getCurrentStructureTarget(creep));
         } else {
-            CreepTrait.transferAllEnergy(creep, LinkKeeperRole.getTarget(creep))
+            CreepTrait.transferAllEnergy(creep, creep.room.storage);
         }
 
         CreepTrait.renewIfNeeded(creep);
     }
 
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
-            ENERGY_AGGREGATOR_BODY,
-            'LinkKeeper' + game.time,
-            {memory: {role: ROLE_LINK_KEEPER}}
-        )
+    protected getBody(game: Game): BodyPartConstant[] {
+        return ENERGY_AGGREGATOR_BODY;
+    }
+
+    protected getRoleName(): string {
+        return ROLE_LINK_KEEPER;
     }
 }

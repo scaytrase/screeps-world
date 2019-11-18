@@ -1,8 +1,8 @@
+import {UPGRADER_BODY, UPGRADERS_COUNT, UPGRADERS_ENERGY_LIMIT} from "./config";
+import CreepTrait from "./creep_traits";
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import {UPGRADER_BODY, UPGRADERS_COUNT, UPGRADERS_ENERGY_LIMIT} from "./config";
-import CreepTrait from "./creep_traits";
 
 const ROLE_UPGRADER = 'upgrader';
 
@@ -29,7 +29,7 @@ export default class UpgraderRole implements Role {
         return null;
     }
 
-    run(creep: Creep): void {
+    run(creep: Creep, game: Game): void {
         if (creep.memory['upgrading'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['upgrading'] = false;
             creep.say('🔄 harvest');
@@ -41,7 +41,7 @@ export default class UpgraderRole implements Role {
         if (creep.memory['upgrading']) {
             CreepTrait.upgradeController(creep);
         } else {
-            CreepTrait.withdraw(creep, UpgraderRole.getSource(creep));
+            CreepTrait.withdrawAllEnergy(creep, UpgraderRole.getSource(creep));
         }
 
         CreepTrait.renewIfNeeded(creep);
@@ -56,7 +56,7 @@ export default class UpgraderRole implements Role {
             UPGRADER_BODY,
             'Upgrader' + game.time,
             {memory: {role: ROLE_UPGRADER}}
-        )
+        );
     }
 
     getSpawnStrategy(): SpawnStrategy {

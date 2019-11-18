@@ -1,6 +1,6 @@
-import Runnable from "./runnable";
 import Role from "./role";
 import RoleSpawner from "./role_spawner";
+import Runnable from "./runnable";
 
 export default class CreepSpawner implements Runnable {
     private readonly spawners: Array<RoleSpawner> = [];
@@ -13,7 +13,7 @@ export default class CreepSpawner implements Runnable {
 
     run(game: Game, memory: Memory): void {
         for (let spawner of this.spawners) {
-            spawner.run(game, memory)
+            spawner.run(game, memory);
         }
     }
 }

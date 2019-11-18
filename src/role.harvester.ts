@@ -1,9 +1,9 @@
-import Role from "./role";
-import SpawnStrategy from "./spawn_strategy";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import {HARVESTER_ADVANCED_BODY, HARVESTER_BODY, HARVESTER_SUPER_ADVANCED_BODY, HARVESTERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
 import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
+import Role from "./role";
+import SpawnStrategy from "./spawn_strategy";
+import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 
 const _ = require('lodash');
 
@@ -40,7 +40,7 @@ export default class HarvesterRole implements Role {
         return null;
     }
 
-    run(creep: Creep): void {
+    run(creep: Creep, game: Game): void {
         if (creep['store'].getFreeCapacity() > 0) {
             CreepTrait.harvest(creep, HarvesterRole.getSource(creep));
         } else {
@@ -59,7 +59,7 @@ export default class HarvesterRole implements Role {
             this.getBody(game),
             'Harvester' + game.time,
             {memory: {role: ROLE_HARVESTER}}
-        )
+        );
     }
 
     getCurrentCreepCount(game: Game): Number {

@@ -1,99 +1,49 @@
-import Role from "./role";
-import SpawnStrategy from "./spawn_strategy";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import {ENERGY_AGGREGATOR_BODY, ENERGY_AGGREGATORS_COUNT, ENERGY_CENTER} from "./config";
+import {ENERGY_AGGREGATOR_BODY, ENERGY_AGGREGATORS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
+import TargetAwareCreepRole from "./role.target_aware_creep";
+import SpawnStrategy from "./spawn_strategy";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
+import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
+import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import Utils from "./utils";
 
 const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
 
-const SOURCE_STRUCTURES: StructureConstant[] = [
-    STRUCTURE_LINK,
-    STRUCTURE_CONTAINER,
-];
-const TARGET_STRUCTURES: StructureConstant[] = [
-    STRUCTURE_STORAGE,
-];
-
-export default class EnergyAggregatorRole implements Role {
-    private static getSource(creep: Creep): AnyStructure | null {
-        const flag = EnergyAggregatorRole.getFlag(creep);
-
-        if (!flag) {
-            return null;
-        }
-
-        const sources = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return SOURCE_STRUCTURES.includes(structure.structureType) &&
-                        structure['store'].getUsedCapacity() >= 0 &&
-                    structure.pos.getRangeTo(flag) > 1
-                    ;
-            }
-        });
-
-        return sources.sort((a, b) => Math.sign(b.pos.getRangeTo(flag) - a.pos.getRangeTo(flag))).shift();
+export default class EnergyAggregatorRole extends TargetAwareCreepRole {
+    public getSpawnStrategy(): SpawnStrategy {
+        return new AndChainSpawnStrategy([
+            new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT, this),
+            new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE}})
+        ]);
     }
 
-    private static getFlag(creep: Creep): Flag | null {
-        const flags = creep.room.find(FIND_FLAGS, {
-            filter: (flag) => {
-                return flag.name === ENERGY_CENTER;
-            }
-        });
-
-        if (flags.length === 0) {
-            return null;
-        }
-
-        return flags[0];
+    protected getTarget(creep: Creep, game: Game): AnyStructure | null {
+        return Utils.getClosestEnergySource(creep.room.storage, [STRUCTURE_CONTAINER, STRUCTURE_LINK]);
     }
 
-    private static getTarget(creep: Creep): AnyStructure | null {
-        let targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return TARGET_STRUCTURES.includes(structure.structureType) &&
-                    structure['store'].getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-
-        const flag = EnergyAggregatorRole.getFlag(creep);
-
-        if (!flag) {
-            return null;
-        }
-
-        targets = targets.sort((a, b) => Math.sign(a.pos.getRangeTo(flag) - b.pos.getRangeTo(flag)));
-
-        if (targets.length > 0) {
-            return targets[0];
-        }
-
-        return null;
-    }
-
-    getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT, this);
-    }
-
-    match(creep: Creep): boolean {
-        return creep.memory['role'] == ROLE_ENERGY_AGGREGATOR;
-    }
-
-    run(creep: Creep): void {
-        if (creep['store'].getUsedCapacity() > 0) {
-            CreepTrait.withdrawAllResources(creep, EnergyAggregatorRole.getSource(creep));
+    protected doRun(creep: Creep, game: Game): void {
+        if (creep['store'].getFreeCapacity() > 0) {
+            CreepTrait.withdrawAllEnergy(creep, this.getCurrentStructureTarget(creep));
         } else {
-            CreepTrait.transferAllResources(creep, EnergyAggregatorRole.getTarget(creep))
+            CreepTrait.transferAllEnergy(creep, creep.room.storage);
         }
-
-        CreepTrait.renewIfNeeded(creep);
     }
 
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
-            ENERGY_AGGREGATOR_BODY,
-            'EnergyAggregator' + game.time,
-            {memory: {role: ROLE_ENERGY_AGGREGATOR}}
-        )
+    protected getBody(game: Game): BodyPartConstant[] {
+        return ENERGY_AGGREGATOR_BODY;
+    }
+
+    protected getRoleName(): string {
+        return ROLE_ENERGY_AGGREGATOR;
+    }
+
+    protected shouldRenewTarget(creep: Creep, game: Game): boolean {
+        const target = this.getCurrentStructureTarget(creep);
+
+        if (target) {
+            return target['store'].getUsedCapacity(RESOURCE_ENERGY) === 0;
+        }
+
+        return true;
     }
 }

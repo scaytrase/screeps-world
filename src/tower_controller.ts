@@ -10,14 +10,14 @@ export default class TowerController implements Runnable {
     run(game: Game, memory: Memory): void {
         const towers = this.room.find(FIND_STRUCTURES, {
             filter(structure) {
-                return structure.structureType === STRUCTURE_TOWER
+                return structure.structureType === STRUCTURE_TOWER;
             }
         });
 
         towers.forEach((tower: StructureTower) => {
             const hostiles = this.room.find(FIND_HOSTILE_CREEPS, {
                 filter(creep) {
-                    return creep.pos.getRangeTo(tower) < 50
+                    return creep.pos.getRangeTo(tower) < 50;
                 }
             });
 

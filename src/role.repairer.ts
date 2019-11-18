@@ -1,12 +1,18 @@
-import Role from "./role";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import SpawnStrategy from "./spawn_strategy";
 import {REPAIRER_ADVANCED_BODY, REPAIRER_BODY, REPAIRER_HEALTH_LIMIT_RATIO, REPAIRERS_COUNT} from "./config";
 import CreepTrait from "./creep_traits";
+import Role from "./role";
+import SpawnStrategy from "./spawn_strategy";
+import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 
 const _ = require('lodash');
 
 const ROLE_REPAIRER = 'repairer';
+
+const FORBIDDEN_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_WALL,
+    STRUCTURE_RAMPART,
+];
+
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
     STRUCTURE_STORAGE,
@@ -16,7 +22,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 export default class RepairerRole implements Role {
     private static getTarget(creep: Creep): AnyStructure | null {
         let targets = creep.room.find(FIND_STRUCTURES, {
-            filter: object => object.structureType !== STRUCTURE_WALL && object.hits < object.hitsMax
+            filter: object => !FORBIDDEN_STRUCTURES.includes(object.structureType) && object.hits < object.hitsMax
         });
 
         targets = targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
@@ -25,7 +31,7 @@ export default class RepairerRole implements Role {
             return targets[0];
         }
 
-        return null
+        return null;
     }
 
     private static getSource(creep: Creep): AnyStructure | null {
@@ -45,7 +51,7 @@ export default class RepairerRole implements Role {
         return null;
     }
 
-    run(creep: Creep): void {
+    run(creep: Creep, game: Game): void {
         if (creep.memory['target'] !== undefined) {
             let target: AnyStructure = Game.getObjectById(creep.memory['target']);
             if (target) {
@@ -74,7 +80,7 @@ export default class RepairerRole implements Role {
             let target: AnyStructure = creep.memory['target'] === undefined ? RepairerRole.getTarget(creep) : Game.getObjectById(creep.memory['target']);
             CreepTrait.repair(creep, target);
         } else {
-            CreepTrait.withdraw(creep, RepairerRole.getSource(creep));
+            CreepTrait.withdrawAllEnergy(creep, RepairerRole.getSource(creep));
         }
 
         CreepTrait.renewIfNeeded(creep);
@@ -93,7 +99,7 @@ export default class RepairerRole implements Role {
             this.getBody(game),
             'Repairer' + game.time,
             {memory: {role: ROLE_REPAIRER}}
-        )
+        );
     }
 
     getSpawnStrategy(): SpawnStrategy {

@@ -1,5 +1,5 @@
-import Runnable from "./runnable";
 import {USE_PERMANENT_SAFE_MODE} from "./config";
+import Runnable from "./runnable";
 
 export default class PermanentSafeModeActivator implements Runnable {
     private readonly spawn: StructureSpawn;

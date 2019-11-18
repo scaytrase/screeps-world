@@ -1,8 +1,8 @@
+import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT} from "./config";
+import CreepTrait from "./creep_traits";
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
-import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT} from "./config";
-import CreepTrait from "./creep_traits";
 
 export const ROLE_GRAVE_KEEPER = 'grave_keeper';
 const STORAGE_STRUCTURES: StructureConstant[] = [
@@ -16,7 +16,7 @@ export default class GraveKeeperRole implements Role {
     private static getSource(creep: Creep): Resource | Tombstone | null {
         let resources = creep.room.find(FIND_DROPPED_RESOURCES, {
             filter(resource) {
-                return resource.amount > 0
+                return resource.amount > 0;
             }
 
         });
@@ -56,7 +56,11 @@ export default class GraveKeeperRole implements Role {
         return null;
     }
 
-    run(creep: Creep): void {
+    private static getBody(game: Game): BodyPartConstant[] {
+        return GRAVE_KEEPER_BODY;
+    }
+
+    run(creep: Creep, game: Game): void {
         if (creep['store'].getFreeCapacity() > 0 && creep.ticksToLive > 300) {
             CreepTrait.pickup(creep, GraveKeeperRole.getSource(creep));
         } else {
@@ -67,7 +71,6 @@ export default class GraveKeeperRole implements Role {
             creep.moveTo(Game.spawns['Spawn1']);
         }
 
-        CreepTrait.renewIfNeeded(creep);
         CreepTrait.suicideOldCreep(creep, 100);
     }
 
@@ -80,15 +83,10 @@ export default class GraveKeeperRole implements Role {
             GraveKeeperRole.getBody(game),
             'GraveKeeper' + game.time,
             {memory: {role: ROLE_GRAVE_KEEPER}}
-        )
+        );
     }
-
 
     getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(GRAVE_KEEPERS_COUNT, this);
-    }
-
-    private static getBody(game: Game): BodyPartConstant[] {
-        return GRAVE_KEEPER_BODY;
     }
 }

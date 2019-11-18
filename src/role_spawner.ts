@@ -1,5 +1,5 @@
-import Runnable from "./runnable";
 import Role from "./role";
+import Runnable from "./runnable";
 
 export default class RoleSpawner implements Runnable {
     private readonly role: Role;

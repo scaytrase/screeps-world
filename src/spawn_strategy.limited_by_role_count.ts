@@ -1,5 +1,5 @@
-import SpawnStrategy from "./spawn_strategy";
 import Role from "./role";
+import SpawnStrategy from "./spawn_strategy";
 
 const _ = require('lodash');
 

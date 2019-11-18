@@ -30,7 +30,7 @@ export default class CreepTrait {
             const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK];
             CreepTrait.transferAllResources(creep, creep.room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => types.includes(structure.structureType) && structure['store'].getFreeCapacity() > creep['store'].getUsedCapacity()
-            }).shift())
+            }).shift());
         }
     }
 
@@ -45,7 +45,10 @@ export default class CreepTrait {
     public static transferAllResources(creep: Creep, target: AnyStructure | null): void {
         if (target !== null) {
             if (creep.transfer(target, _.findKey(creep['store'])) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE}});
+                creep.moveTo(target, {
+                    visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE},
+                    maxRooms: 1
+                });
             }
         }
     }
@@ -53,10 +56,14 @@ export default class CreepTrait {
     public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | null): void {
         if (target !== null) {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}, maxRooms: 1, ignoreCreeps: true});
+                creep.moveTo(target, {
+                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
+                    maxRooms: 1
+                });
             }
         }
     }
+
     public static harvest(creep: Creep, source: Source | null): void {
         if (source) {
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
@@ -75,7 +82,7 @@ export default class CreepTrait {
         }
     }
 
-    public static withdraw(creep: Creep, source: AnyStructure | null): void {
+    public static withdrawAllEnergy(creep: Creep, source: AnyStructure | null): void {
         if (source) {
             if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
@@ -107,6 +114,19 @@ export default class CreepTrait {
         }
     }
 
+    static pickup(creep: Creep, source: Resource | Tombstone | null) {
+        if (source !== null) {
+            if (source instanceof Tombstone) {
+                CreepTrait.withdrawAllResources(creep, source);
+            } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(source, {
+                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
+                    maxRooms: 1
+                });
+            }
+        }
+    }
+
     private static getClosestSpawn(creep: Creep): StructureSpawn {
         return creep.pos.findClosestByPath(FIND_MY_SPAWNS);
     }
@@ -115,15 +135,5 @@ export default class CreepTrait {
         const spawn = CreepTrait.getClosestSpawn(creep);
         creep.moveTo(spawn, {visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}});
         creep.transfer(spawn, RESOURCE_ENERGY);
-    }
-
-    static pickup(creep: Creep, source: Resource | Tombstone | null) {
-        if (source !== null) {
-            if (source instanceof Tombstone) {
-                CreepTrait.withdrawAllResources(creep, source);
-            } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}, maxRooms: 1, ignoreCreeps: true});
-            }
-        }
     }
 }
