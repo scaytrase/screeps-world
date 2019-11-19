@@ -17,13 +17,15 @@ export default class GraveKeeperRole extends BaseCreepRole {
         return [
             ...(creep.room.find(FIND_DROPPED_RESOURCES, {
                 filter(resource) {
-                    return resource.amount > 0;
+                    return resource.amount > 0
+                        && Utils.isWithinTraversableBorders(resource);
                 }
 
             })),
             ...(creep.room.find(FIND_TOMBSTONES, {
                 filter(tombstone) {
-                    return tombstone['store'][_.findKey(tombstone['store'])] > 0;
+                    return tombstone['store'][_.findKey(tombstone['store'])] > 0
+                        && Utils.isWithinTraversableBorders(tombstone);
                 }
             }))
         ].sort(Utils.sortByDistance(creep)).shift();

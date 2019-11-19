@@ -42,7 +42,11 @@ export default class RepairerRole extends TargetAwareCreepRole {
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
         const current = this.getCurrentStructureTarget(creep);
 
-        return !current || current.hits / current.hitsMax > REPAIRER_HEALTH_LIMIT_RATIO;
+        if (!current) {
+            return undefined;
+        }
+
+        return (current.hits / current.hitsMax) > REPAIRER_HEALTH_LIMIT_RATIO;
     }
 
     protected getTarget(creep: Creep): AnyStructure | null {

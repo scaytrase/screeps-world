@@ -50,7 +50,6 @@ module.exports.loop = function () {
     runnables.push(new CreepRetirementProgram());
 
     for (let runnable of runnables) {
-        console.log(runnable.constructor.name);
         runnable.run(Game, Memory);
     }
 };

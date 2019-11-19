@@ -51,4 +51,11 @@ export default class Utils {
             .sort(this.sortByDistance(target))
             .shift();
     }
+
+    public static isWithinTraversableBorders(object: RoomObject): boolean {
+        return object.pos.y > 1
+            && object.pos.y < 48
+            && object.pos.x > 1
+            && object.pos.x < 48;
+    }
 }

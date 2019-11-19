@@ -40,10 +40,10 @@ export default class EnergyAggregatorRole extends TargetAwareCreepRole {
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
         const target = this.getCurrentStructureTarget(creep);
 
-        if (target) {
-            return target['store'].getUsedCapacity(RESOURCE_ENERGY) === 0;
+        if (!target) {
+            return undefined;
         }
 
-        return true;
+        return target['store'].getUsedCapacity(RESOURCE_ENERGY) === 0;
     }
 }

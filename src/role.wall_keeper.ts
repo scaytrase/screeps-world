@@ -49,7 +49,11 @@ export default class WallKeeperRole extends TargetAwareCreepRole {
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
         const current = this.getCurrentStructureTarget(creep);
 
-        return !current || current.hits > WALL_DESIRED_HITS;
+        if (!current) {
+            return undefined;
+        }
+
+        return current.hits > WALL_DESIRED_HITS;
     }
 
     protected getRoleName(): string {

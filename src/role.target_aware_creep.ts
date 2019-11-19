@@ -1,5 +1,7 @@
 import BaseCreepRole from "./role.base_creep";
 
+const TARGET_FIELD = 'target';
+
 export default abstract class TargetAwareCreepRole extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
         this.renewTarget(creep, game);
@@ -8,7 +10,7 @@ export default abstract class TargetAwareCreepRole extends BaseCreepRole {
     }
 
     protected getCurrentTargetId(creep: Creep): string | null {
-        return creep.memory['target'];
+        return creep.memory[TARGET_FIELD];
     }
 
     protected getCurrentStructureTarget(creep: Creep): AnyStructure | null {
@@ -16,9 +18,9 @@ export default abstract class TargetAwareCreepRole extends BaseCreepRole {
     }
 
     protected setTarget(creep: Creep, target: AnyStructure | null): void {
-        creep.memory['target'] = undefined;
+        creep.memory[TARGET_FIELD] = undefined;
         if (target) {
-            creep.memory['target'] = target.id;
+            creep.memory[TARGET_FIELD] = target.id;
         }
     }
 
@@ -27,7 +29,9 @@ export default abstract class TargetAwareCreepRole extends BaseCreepRole {
     protected abstract getTarget(creep: Creep, game: Game): AnyStructure;
 
     protected renewTarget(creep: Creep, game: Game): void {
-        if (this.getCurrentStructureTarget(creep) === null || this.shouldRenewTarget(creep, game)) {
+        const noTarget = this.getCurrentStructureTarget(creep) === null;
+        const shouldRenew = this.shouldRenewTarget(creep, game);
+        if (noTarget || shouldRenew) {
             this.setTarget(creep, this.getTarget(creep, game));
         }
     }

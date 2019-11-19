@@ -13,11 +13,11 @@ export default class LinkKeeperRole extends TargetAwareCreepRole {
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
         const target = this.getCurrentStructureTarget(creep);
 
-        if (target) {
-            return target['store'].getUsedCapacity() === 0;
+        if (!target) {
+            return undefined;
         }
 
-        return true;
+        return target['store'].getUsedCapacity() === 0;
     }
 
     protected getTarget(creep: Creep): AnyStructure | null {

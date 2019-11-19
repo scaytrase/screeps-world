@@ -42,7 +42,6 @@ export default class ResourceAssigner implements Runnable {
 
     private assignResource(creep: Creep, sources: Source[], creeps: { [creepName: string]: Creep }): void {
         if (creep.memory['role'] !== 'harvester') {
-            creep.memory[RESOURCE_ASSIGNMENT] = undefined;
             return;
         }
 
