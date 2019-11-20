@@ -53,7 +53,7 @@ export default class WallKeeperRole extends TargetAwareCreepRole {
             return undefined;
         }
 
-        return current.hits > WALL_DESIRED_HITS;
+        return current.hits > WALL_DESIRED_HITS * 1.5;
     }
 
     protected getRoleName(): string {
