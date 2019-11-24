@@ -35,7 +35,7 @@ export default class CreepTrait {
     }
 
     public static transferAllEnergy(creep: Creep, target: AnyStructure | null): void {
-        if (target !== null) {
+        if (target) {
             if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE}});
             }
@@ -43,8 +43,10 @@ export default class CreepTrait {
     }
 
     public static transferAllResources(creep: Creep, target: AnyStructure | null): void {
-        if (target !== null) {
-            if (creep.transfer(target, _.findKey(creep['store'])) == ERR_NOT_IN_RANGE) {
+        if (target) {
+            const resourceType = _.findKey(creep['store']);
+            console.log(creep.name, resourceType, target.id);
+            if (creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
                     visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE},
                     maxRooms: 1
@@ -54,7 +56,7 @@ export default class CreepTrait {
     }
 
     public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | null): void {
-        if (target !== null) {
+        if (target) {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
                     visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
@@ -64,7 +66,7 @@ export default class CreepTrait {
         }
     }
 
-    public static harvest(creep: Creep, source: Source | null): void {
+    public static harvest(creep: Creep, source: Source | Mineral | null): void {
         if (source) {
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
@@ -115,7 +117,7 @@ export default class CreepTrait {
     }
 
     static pickupAllResources(creep: Creep, source: Resource | Tombstone | null) {
-        if (source !== null) {
+        if (source) {
             if (source instanceof Tombstone) {
                 CreepTrait.withdrawAllResources(creep, source);
             } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {

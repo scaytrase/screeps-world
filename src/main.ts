@@ -13,7 +13,9 @@ import GraveKeeperRole from "./role.grave_keeper";
 import GuardRole from "./role.guard";
 import HarvesterRole from "./role.harvester";
 import LinkKeeperRole from "./role.link_keeper";
+import MinerRole from "./role.miner";
 import RepairerRole from "./role.repairer";
+import ResourceCarrier from "./role.resource_carrier";
 import SpawnKeeperRole from "./role.spawn_keeper";
 import UpgraderRole from "./role.upgrader";
 import WallKeeperRole from "./role.wall_keeper";
@@ -31,6 +33,8 @@ const roles = [
     new BuilderRole(),
     new WallKeeperRole(),
     new LinkKeeperRole(),
+    new MinerRole(),
+    new ResourceCarrier(),
 ];
 
 module.exports.loop = function () {
