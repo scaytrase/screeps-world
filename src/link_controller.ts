@@ -1,4 +1,6 @@
+import {UPGRADE_LINK} from "./config";
 import Runnable from "./runnable";
+import Utils from "./utils";
 
 export default class LinkController implements Runnable {
     private readonly spawn: StructureSpawn;
@@ -14,7 +16,13 @@ export default class LinkController implements Runnable {
             return;
         }
 
-        links = links.sort((a, b) => Math.sign(a.pos.getRangeTo(this.spawn) - b.pos.getRangeTo(this.spawn)));
+        const flag = Utils.getFlagByName(UPGRADE_LINK, this.spawn.room);
+
+        if (!flag) {
+            return;
+        }
+
+        links = links.sort(Utils.sortByDistance(flag));
 
         const target = links.shift();
 

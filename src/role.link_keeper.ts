@@ -41,9 +41,9 @@ export default class LinkKeeperRole extends TargetAwareCreepRole {
 
     protected doRun(creep: Creep): void {
         if (creep['store'].getFreeCapacity() > 0) {
-            CreepTrait.withdrawAllEnergy(creep, this.getCurrentStructureTarget(creep));
+            CreepTrait.withdrawAllEnergy(creep, creep.room.storage);
         } else {
-            CreepTrait.transferAllEnergy(creep, creep.room.storage);
+            CreepTrait.transferAllEnergy(creep, this.getCurrentStructureTarget(creep));
         }
     }
 

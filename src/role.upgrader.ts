@@ -6,6 +6,7 @@ import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_co
 import Utils from "./utils";
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_LINK,
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
 ];
