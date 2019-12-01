@@ -18,7 +18,7 @@ export default class EnergyAggregatorRole extends TargetAwareCreepRole {
     }
 
     protected getTarget(creep: Creep, game: Game): AnyStructure | null {
-        return Utils.getClosestEnergySource(creep.room.storage, [STRUCTURE_CONTAINER, STRUCTURE_LINK]);
+        return Utils.getClosestEnergySource(creep.room.storage, [STRUCTURE_CONTAINER]);
     }
 
     protected doRun(creep: Creep, game: Game): void {
