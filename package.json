@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@types/node": "^12.12.7",
-    "@types/screeps": "^2.5.5",
+    "@types/screeps": "^3.0.0",
     "grunt": "^1.0.4",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-screeps": "^1.4.0",

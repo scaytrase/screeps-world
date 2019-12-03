@@ -18,13 +18,13 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 
-export default class RepairerRole extends TargetAwareCreepRole {
+export default class RepairerRole extends TargetAwareCreepRole<AnyStructure> {
     public getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(REPAIRERS_COUNT, this);
     }
 
     protected doRun(creep: Creep, game: Game): void {
-        if (creep.memory['repairing'] && creep['store'][RESOURCE_ENERGY] == 0) {
+        if (creep.memory['repairing'] && creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
             creep.memory['repairing'] = false;
             creep.say('🔄 harvest');
         } else if (!creep.memory['repairing'] && creep['store'].getFreeCapacity() == 0) {
@@ -35,7 +35,7 @@ export default class RepairerRole extends TargetAwareCreepRole {
         if (creep.memory['repairing']) {
             CreepTrait.repair(creep, this.getCurrentStructureTarget(creep));
         } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.carryCapacity));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.store.getCapacity()));
         }
     }
 

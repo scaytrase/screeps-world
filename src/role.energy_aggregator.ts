@@ -9,7 +9,7 @@ import Utils from "./utils";
 
 const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
 
-export default class EnergyAggregatorRole extends TargetAwareCreepRole {
+export default class EnergyAggregatorRole extends TargetAwareCreepRole<StructureContainer> {
     public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
             new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT, this),
@@ -17,8 +17,8 @@ export default class EnergyAggregatorRole extends TargetAwareCreepRole {
         ]);
     }
 
-    protected getTarget(creep: Creep, game: Game): AnyStructure | null {
-        return Utils.getClosestEnergySource(creep.room.storage, [STRUCTURE_CONTAINER]);
+    protected getTarget(creep: Creep, game: Game): StructureContainer | null {
+        return Utils.getClosestEnergySource<StructureContainer>(creep.room.storage, [STRUCTURE_CONTAINER]);
     }
 
     protected doRun(creep: Creep, game: Game): void {

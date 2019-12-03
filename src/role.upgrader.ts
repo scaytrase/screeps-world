@@ -13,7 +13,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 
 export default class UpgraderRole extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
-        if (creep.memory['upgrading'] && creep['store'][RESOURCE_ENERGY] == 0) {
+        if (creep.memory['upgrading'] && creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
             creep.memory['upgrading'] = false;
             creep.say('🔄 harvest');
         } else if (!creep.memory['upgrading'] && creep['store'].getFreeCapacity() == 0) {

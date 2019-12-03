@@ -5,7 +5,7 @@ import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils from "./utils";
 
-export default class LinkKeeperRole extends TargetAwareCreepRole {
+export default class LinkKeeperRole extends TargetAwareCreepRole<StructureLink> {
     getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(LINK_KEEPERS_COUNT, this);
     }
@@ -20,7 +20,7 @@ export default class LinkKeeperRole extends TargetAwareCreepRole {
         return target['store'].getUsedCapacity() === 0;
     }
 
-    protected getTarget(creep: Creep): AnyStructure | null {
+    protected getTarget(creep: Creep): StructureLink | null {
         const flag = Utils.getFlagByName(ENERGY_CENTER, creep.room);
 
         if (!flag) {
@@ -28,10 +28,11 @@ export default class LinkKeeperRole extends TargetAwareCreepRole {
         }
 
         return creep.room
-            .find(FIND_STRUCTURES, {
+            .find<StructureLink>(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return structure.structureType === STRUCTURE_LINK &&
-                        structure['store'].getUsedCapacity() >= 0 &&
+                        // @ts-ignore
+                        structure.store.getUsedCapacity() >= 0 &&
                         structure.pos.getRangeTo(flag) < 5;
                 }
             })

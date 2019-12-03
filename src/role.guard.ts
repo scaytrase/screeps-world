@@ -7,8 +7,6 @@ import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_mor
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils from "./utils";
 
-const _ = require('lodash');
-
 export default class GuardRole extends BaseCreepRole {
     private static getTarget(creep: Creep): Creep | null {
         return creep.room.find(FIND_HOSTILE_CREEPS).sort(Utils.sortByDistance(creep)).shift();

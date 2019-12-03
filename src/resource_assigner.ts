@@ -20,12 +20,12 @@ export default class ResourceAssigner implements Runnable {
         }
 
         for (let creepName in creeps) {
-            const assignedResource: string = creeps[creepName].memory[RESOURCE_ASSIGNMENT];
+            const assignedResource: Id<Source> = creeps[creepName].memory[RESOURCE_ASSIGNMENT];
             if (assignedResource === undefined) {
                 continue;
             }
 
-            let source = Game.getObjectById<Source>(assignedResource);
+            let source = Game.getObjectById(assignedResource);
 
             resourceMap.set(source, resourceMap.get(source) + 1);
         }

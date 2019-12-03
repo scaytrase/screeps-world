@@ -7,12 +7,11 @@ import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_mor
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils from "./utils";
 
-const _ = require('lodash');
-
 const TARGET_STRUCTURES: StructureConstant[] = [
     STRUCTURE_WALL,
     STRUCTURE_RAMPART,
 ];
+
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
@@ -20,7 +19,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 
 const repairFilter = (object: AnyStructure) => TARGET_STRUCTURES.includes(object.structureType) && object.hits < WALL_DESIRED_HITS;
 
-export default class WallKeeperRole extends TargetAwareCreepRole {
+export default class WallKeeperRole extends TargetAwareCreepRole<StructureWall | StructureRampart> {
     doRun(creep: Creep, game: Game): void {
         if (creep.memory['repairing'] && creep['store'][RESOURCE_ENERGY] == 0) {
             creep.memory['repairing'] = false;
@@ -33,7 +32,7 @@ export default class WallKeeperRole extends TargetAwareCreepRole {
         if (creep.memory['repairing']) {
             CreepTrait.repair(creep, this.getCurrentStructureTarget(creep));
         } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.carryCapacity));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.store.getCapacity()));
         }
     }
 
@@ -64,7 +63,7 @@ export default class WallKeeperRole extends TargetAwareCreepRole {
         return WALL_KEEPER_BODY;
     }
 
-    protected getTarget(creep: Creep, game: Game): AnyStructure | null {
-        return creep.room.find(FIND_STRUCTURES, {filter: repairFilter}).sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax).shift();
+    protected getTarget(creep: Creep, game: Game): StructureWall | StructureRampart | null {
+        return creep.room.find<StructureWall | StructureRampart>(FIND_STRUCTURES, {filter: repairFilter}).sort(Utils.sortByHealthPercent()).shift();
     }
 }

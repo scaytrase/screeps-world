@@ -16,14 +16,14 @@ export default class Utils {
         return room.find(FIND_FLAGS, {filter: {name: name}}).shift();
     }
 
-    public static getClosestEnergySource(
+    public static getClosestEnergySource<T extends Structure = AnyStructure>(
         target: RoomObject,
         allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],
         lowerStructureLimit: number = 0,
         additionalFilter: (structure: AnyStructure) => boolean = () => true
-    ): AnyStructure | null {
+    ): T | null {
         return target.room
-            .find(FIND_STRUCTURES, {
+            .find<T>(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return allowedTypes.includes(structure.structureType) &&
                         structure['store'].getUsedCapacity(RESOURCE_ENERGY) > lowerStructureLimit &&

@@ -10,6 +10,14 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 
+const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_STORAGE,
+    STRUCTURE_CONTAINER,
+    STRUCTURE_EXTENSION,
+    STRUCTURE_SPAWN,
+    STRUCTURE_LINK,
+];
+
 const _ = require('lodash');
 
 export default class GraveKeeperRole extends BaseCreepRole {
@@ -32,6 +40,15 @@ export default class GraveKeeperRole extends BaseCreepRole {
     }
 
     private static getTarget(creep: Creep): AnyStructure | null {
+        if (creep.store.getUsedCapacity() === creep.store.getUsedCapacity(RESOURCE_ENERGY)) {
+            return creep.room.find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return ENERGY_STORAGE_STRUCTURES.includes(structure.structureType) &&
+                        structure['store'].getFreeCapacity() > 0;
+                }
+            }).sort(Utils.sortByDistance(creep)).shift();
+        }
+
         return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return STORAGE_STRUCTURES.includes(structure.structureType) &&

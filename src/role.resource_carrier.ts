@@ -7,8 +7,6 @@ import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_mor
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils from "./utils";
 
-const _ = require('lodash');
-
 const SOURCE_TYPES = [
     STRUCTURE_CONTAINER
 ];

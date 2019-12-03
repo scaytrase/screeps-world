@@ -6,7 +6,6 @@ import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 
-const _ = require('lodash');
 const filter = (mineral: Mineral) => mineral.mineralAmount > 0;
 export default class MinerRole extends BaseCreepRole {
     private static getRecipientStructure(creep: Creep): StructureStorage | null {

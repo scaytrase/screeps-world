@@ -5,7 +5,6 @@ import CreepRunner from "./creep_runner";
 import CreepSpawnBound from "./creep_spawn_bound";
 import CreepSpawner from "./creep_spawner";
 import LinkController from "./link_controller";
-import PermanentSafeModeActivator from "./permanent_safe_mode_activator";
 import ResourceAssigner from "./resource_assigner";
 import BuilderRole from "./role.builder";
 import EnergyAggregatorRole from "./role.energy_aggregator";
@@ -48,7 +47,6 @@ module.exports.loop = function () {
     runnables.push(new CreepRunner(roles));
     runnables.push(new CreepSpawnBound(spawn));
     runnables.push(new CreepRenewer(spawn));
-    runnables.push(new PermanentSafeModeActivator(spawn));
     runnables.push(new TowerController(spawn.room));
     runnables.push(new LinkController(spawn));
     runnables.push(new CreepRetirementProgram());
