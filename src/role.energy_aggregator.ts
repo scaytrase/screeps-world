@@ -18,14 +18,18 @@ export default class EnergyAggregatorRole extends TargetAwareCreepRole<Structure
     }
 
     protected getTarget(creep: Creep, game: Game): StructureContainer | null {
-        return Utils.getClosestEnergySource<StructureContainer>(creep.room.storage, [STRUCTURE_CONTAINER]);
+        return Utils.getClosestEnergySource<StructureContainer>(creep, [STRUCTURE_CONTAINER]);
+    }
+
+    protected getRecipient(creep: Creep): StructureStorage | StructureContainer | null {
+        return Utils.getClosestEnergyRecipient<StructureContainer>(creep, [STRUCTURE_LINK, STRUCTURE_STORAGE]);
     }
 
     protected doRun(creep: Creep, game: Game): void {
         if (creep['store'].getFreeCapacity() > 0) {
             CreepTrait.withdrawAllEnergy(creep, this.getCurrentStructureTarget(creep));
         } else {
-            CreepTrait.transferAllEnergy(creep, creep.room.storage);
+            CreepTrait.transferAllEnergy(creep, this.getRecipient(creep));
         }
     }
 
@@ -44,6 +48,7 @@ export default class EnergyAggregatorRole extends TargetAwareCreepRole<Structure
             return undefined;
         }
 
+        // @ts-ignore
         return target['store'].getUsedCapacity(RESOURCE_ENERGY) === 0;
     }
 }

@@ -1,4 +1,4 @@
-import {UPGRADE_LINK} from "./config";
+import {ENERGY_CENTER, UPGRADE_LINK} from "./config";
 import Runnable from "./runnable";
 import Utils from "./utils";
 
@@ -16,7 +16,7 @@ export default class LinkController implements Runnable {
             return;
         }
 
-        const flag = Utils.getFlagByName(UPGRADE_LINK, this.spawn.room);
+        const flag = Utils.getFlagByName(ENERGY_CENTER, this.spawn.room);
 
         if (!flag) {
             return;

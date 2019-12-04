@@ -18,9 +18,7 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 
 export default class HarvesterRole extends BaseCreepRole {
     private static getRecipientStructures(creep: Creep): StructureConstant[] {
-        if (creep.room.energyAvailable < 300) {
-            return [STRUCTURE_LINK, STRUCTURE_SPAWN];
-        } else if (creep.room.energyAvailable < 600) {
+        if (creep.room.energyAvailable < 600) {
             return [STRUCTURE_LINK, STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
         } else {
             return STORAGE_STRUCTURES;

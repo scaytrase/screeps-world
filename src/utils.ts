@@ -34,14 +34,14 @@ export default class Utils {
             .shift();
     }
 
-    public static getClosestEnergyRecipient(
+    public static getClosestEnergyRecipient<T extends Structure = AnyStructure>(
         target: RoomObject,
         allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],
         lowerStructureLimit: number = 0,
         additionalFilter: (structure: AnyStructure) => boolean = () => true
-    ): AnyStructure | null {
+    ): T | null {
         return target.room
-            .find(FIND_STRUCTURES, {
+            .find<T>(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return allowedTypes.includes(structure.structureType) &&
                         structure['store'].getFreeCapacity(RESOURCE_ENERGY) > lowerStructureLimit &&
