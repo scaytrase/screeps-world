@@ -45,11 +45,10 @@ export default class CreepTrait {
     public static transferAllResources(creep: Creep, target: AnyStructure | null): void {
         if (target) {
             const resourceType = _.findKey(creep['store']);
-            console.log(creep.name, resourceType, target.id);
             if (creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
                     visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE},
-                    maxRooms: 1
+                    maxRooms: 2
                 });
             }
         }
@@ -60,7 +59,7 @@ export default class CreepTrait {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
                     visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
-                    maxRooms: 1
+                    maxRooms: 2
                 });
             }
         }
@@ -76,9 +75,9 @@ export default class CreepTrait {
 
     public static attack(creep: Creep, target: Creep | null): void {
         if (target) {
-            if (creep.rangedAttack(target) === ERR_NOT_IN_RANGE) {
+            if (creep.body.map(def => def.type).includes(RANGED_ATTACK) && creep.rangedAttack(target) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}});
-            } else if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+            } else if (creep.body.map(def => def.type).includes(ATTACK) && creep.attack(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}});
             }
         }
@@ -123,7 +122,7 @@ export default class CreepTrait {
             } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {
                     visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
-                    maxRooms: 1
+                    maxRooms: 2
                 });
             }
         }

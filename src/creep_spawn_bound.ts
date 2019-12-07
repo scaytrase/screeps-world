@@ -16,7 +16,8 @@ export default class CreepSpawnBound implements Runnable {
             }
 
             if (creep.room.find(FIND_MY_SPAWNS).length === 0) {
-                creep.moveTo(this.spawn);
+                console.log(`moving ${creep.name} to spawn`);
+                creep.moveTo(this.spawn, {visualizePathStyle: {stroke: '#ff55f4'}, ignoreCreeps: true});
             }
         }
     }

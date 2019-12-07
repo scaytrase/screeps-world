@@ -13,6 +13,7 @@ import GraveKeeperRole from "./role.grave_keeper";
 import GuardRole from "./role.guard";
 import HarvesterRole from "./role.harvester";
 import ProviderLinkKeeperRole from "./role.provider_link_keeper";
+import RangeGuardRole from "./role.range_guard";
 import ReceiverLinkKeeperRole from "./role.receiver_link_keeper";
 import MinerRole from "./role.miner";
 import RepairerRole from "./role.repairer";
@@ -26,6 +27,7 @@ import TowerController from "./tower_controller";
 const roles = [
     new HarvesterRole(),
     new GuardRole(),
+    new RangeGuardRole(),
     new SpawnKeeperRole(),
     new RepairerRole(),
     new EnergyAggregatorRole(),
@@ -48,11 +50,11 @@ module.exports.loop = function () {
     runnables.push(new ResourceAssigner(spawn));
     runnables.push(new CreepSpawner(roles, spawn));
     runnables.push(new CreepRunner(roles));
-    runnables.push(new CreepSpawnBound(spawn));
     runnables.push(new CreepRenewer(spawn));
     runnables.push(new TowerController(spawn.room));
     runnables.push(new ReceiverLinkController(spawn));
     runnables.push(new ProviderLinkController(spawn));
+    runnables.push(new CreepSpawnBound(spawn));
     runnables.push(new CreepRetirementProgram());
 
     for (let runnable of runnables) {
