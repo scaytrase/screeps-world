@@ -1,4 +1,4 @@
-import {REPAIRER_ADVANCED_BODY, REPAIRER_BODY, REPAIRER_HEALTH_LIMIT_RATIO, REPAIRERS_COUNT} from "./config";
+import {REPAIRER_ADVANCED_BODY, REPAIRER_BODY, REPAIRER_HEALTH_LIMIT_RATIO, REPAIRERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import TargetAwareCreepRole from "./role.target_aware_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -20,7 +20,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 
 export default class RepairerRole extends TargetAwareCreepRole<AnyStructure> {
     public getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(REPAIRERS_COUNT, this);
+        return new LimitedSpawnByRoleCountStrategy(REPAIRERS_COUNT_LIMIT, this);
     }
 
     protected doRun(creep: Creep, game: Game): void {

@@ -1,4 +1,4 @@
-import {UPGRADER_BODY, UPGRADERS_COUNT, UPGRADERS_ENERGY_LIMIT} from "./config";
+import {UPGRADER_BODY, UPGRADERS_COUNT_LIMIT, UPGRADERS_ENERGY_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -29,7 +29,7 @@ export default class UpgraderRole extends BaseCreepRole {
     }
 
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(UPGRADERS_COUNT, this);
+        return new LimitedSpawnByRoleCountStrategy(UPGRADERS_COUNT_LIMIT, this);
     }
 
     protected getRoleName(): string {

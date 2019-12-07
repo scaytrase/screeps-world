@@ -1,4 +1,4 @@
-import {SPAWN_KEEPER_BODY, SPAWN_KEEPERS_COUNT} from "./config";
+import {SPAWN_KEEPER_BODY, SPAWN_KEEPERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -18,7 +18,7 @@ const TARGET_STRUCTURES: StructureConstant[] = [
 
 export default class SpawnKeeperRole extends BaseCreepRole {
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(SPAWN_KEEPERS_COUNT, this);
+        return new LimitedSpawnByRoleCountStrategy(SPAWN_KEEPERS_COUNT_LIMIT, this);
     }
 
     run(creep: Creep, game: Game): void {

@@ -1,4 +1,4 @@
-import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT} from "./config";
+import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -66,7 +66,7 @@ export default class GraveKeeperRole extends BaseCreepRole {
     }
 
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(GRAVE_KEEPERS_COUNT, this);
+        return new LimitedSpawnByRoleCountStrategy(GRAVE_KEEPERS_COUNT_LIMIT, this);
     }
 
     protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {

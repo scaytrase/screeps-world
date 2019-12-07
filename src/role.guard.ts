@@ -1,4 +1,4 @@
-import {GUARD_BODY, GUARDS_COUNT} from "./config";
+import {GUARD_BODY, GUARDS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -20,7 +20,7 @@ export default class GuardRole extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_HOSTILE_CREEPS),
-                new LimitedSpawnByRoleCountStrategy(GUARDS_COUNT, this),
+                new LimitedSpawnByRoleCountStrategy(GUARDS_COUNT_LIMIT, this),
             ]
         );
     }

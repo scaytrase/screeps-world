@@ -1,4 +1,4 @@
-import {ENERGY_AGGREGATOR_BODY, ENERGY_AGGREGATORS_COUNT} from "./config";
+import {ENERGY_AGGREGATOR_BODY, ENERGY_AGGREGATORS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import TargetAwareCreepRole from "./role.target_aware_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -12,7 +12,7 @@ const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
 export default class EnergyAggregatorRole extends TargetAwareCreepRole<StructureContainer> {
     public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
-            new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT, this),
+            new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT_LIMIT, this),
             new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE}})
         ]);
     }

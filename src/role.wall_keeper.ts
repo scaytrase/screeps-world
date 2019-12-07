@@ -1,4 +1,4 @@
-import {WALL_DESIRED_HITS, WALL_KEEPER_BODY, WALL_KEEPERS_COUNT} from "./config";
+import {WALL_DESIRED_HITS, WALL_KEEPER_BODY, WALL_KEEPERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import TargetAwareCreepRole from "./role.target_aware_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -40,7 +40,7 @@ export default class WallKeeperRole extends TargetAwareCreepRole<StructureWall |
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: repairFilter}),
-                new LimitedSpawnByRoleCountStrategy(WALL_KEEPERS_COUNT, this),
+                new LimitedSpawnByRoleCountStrategy(WALL_KEEPERS_COUNT_LIMIT, this),
             ]
         );
     }

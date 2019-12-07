@@ -1,3 +1,4 @@
+import {TOWER_RANGE} from "./config";
 import Runnable from "./runnable";
 
 export default class TowerController implements Runnable {
@@ -15,17 +16,32 @@ export default class TowerController implements Runnable {
         });
 
         towers.forEach((tower: StructureTower) => {
-            const hostiles = this.room.find(FIND_HOSTILE_CREEPS, {
+            let hostiles = this.room.find(FIND_HOSTILE_CREEPS, {
                 filter(creep) {
-                    return creep.pos.getRangeTo(tower) < 50;
+                    return creep.pos.getRangeTo(tower) < TOWER_RANGE;
                 }
             });
 
             if (hostiles.length === 0) {
+                this.heal(tower);
                 return;
             }
 
-            tower.attack(hostiles[0]);
+            tower.attack(hostiles.shift());
         });
+    }
+
+    private heal(tower: StructureTower): void {
+        let friends = this.room.find(FIND_MY_CREEPS, {
+            filter(creep: Creep) {
+                return creep.hits < creep.hitsMax;
+            }
+        });
+
+        if (friends.length === 0) {
+            return;
+        }
+
+        tower.heal(friends.shift());
     }
 }

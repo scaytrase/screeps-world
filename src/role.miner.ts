@@ -1,4 +1,4 @@
-import {MINER_BODY, MINERS_COUNT} from "./config";
+import {MINER_BODY, MINERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -28,7 +28,7 @@ export default class MinerRole extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_MINERALS, {filter: filter}),
-                new LimitedSpawnByRoleCountStrategy(MINERS_COUNT, this)
+                new LimitedSpawnByRoleCountStrategy(MINERS_COUNT_LIMIT, this)
             ]
         );
     }

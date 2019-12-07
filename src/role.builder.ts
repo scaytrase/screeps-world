@@ -1,4 +1,4 @@
-import {BUILDER_BODY, BUILDERS_COUNT, BUILDERS_ENERGY_LIMIT} from "./config";
+import {BUILDER_BODY, BUILDERS_COUNT_LIMIT, BUILDERS_ENERGY_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -12,11 +12,15 @@ const ROLE_BUILDER = 'builder';
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
+    STRUCTURE_LINK,
 ];
 
 export default class BuilderRole extends BaseCreepRole {
     private static getTarget(creep: Creep): ConstructionSite | null {
-        return creep.room.find(FIND_CONSTRUCTION_SITES).shift();
+        return creep.room
+            .find(FIND_CONSTRUCTION_SITES)
+            .sort(Utils.sortByDistance(creep.room.find(FIND_MY_SPAWNS).shift()))
+            .shift();
     }
 
     run(creep: Creep, game: Game): void {
@@ -40,7 +44,7 @@ export default class BuilderRole extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_CONSTRUCTION_SITES),
-                new LimitedSpawnByRoleCountStrategy(BUILDERS_COUNT, this),
+                new LimitedSpawnByRoleCountStrategy(BUILDERS_COUNT_LIMIT, this),
             ]
         );
     }

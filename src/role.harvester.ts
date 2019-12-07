@@ -1,4 +1,4 @@
-import {HARVESTER_ADVANCED_BODY, HARVESTER_BODY, HARVESTER_SUPER_ADVANCED_BODY, HARVESTERS_COUNT} from "./config";
+import {HARVESTER_ADVANCED_BODY, HARVESTER_BODY, HARVESTER_SUPER_ADVANCED_BODY, HARVESTERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
 import BaseCreepRole from "./role.base_creep";
@@ -38,7 +38,7 @@ export default class HarvesterRole extends BaseCreepRole {
     }
 
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT, this);
+        return new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT_LIMIT, this);
     }
 
     protected getBody(game: Game) {

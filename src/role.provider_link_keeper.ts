@@ -1,13 +1,13 @@
-import {ENERGY_AGGREGATOR_BODY, ENERGY_CENTER, LINK_KEEPERS_COUNT} from "./config";
+import {ENERGY_AGGREGATOR_BODY, ENERGY_PROVIDER, LINK_KEEPERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import TargetAwareCreepRole from "./role.target_aware_creep";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils from "./utils";
 
-export default class LinkKeeperRole extends TargetAwareCreepRole<StructureLink> {
+export default class ProviderLinkKeeperRole extends TargetAwareCreepRole<StructureLink> {
     getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(LINK_KEEPERS_COUNT, this);
+        return new LimitedSpawnByRoleCountStrategy(LINK_KEEPERS_COUNT_LIMIT, this);
     }
 
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
@@ -21,7 +21,7 @@ export default class LinkKeeperRole extends TargetAwareCreepRole<StructureLink> 
     }
 
     protected getTarget(creep: Creep): StructureLink | null {
-        const flag = Utils.getFlagByName(ENERGY_CENTER, creep.room);
+        const flag = Utils.getFlagByName(ENERGY_PROVIDER, creep.room);
 
         if (!flag) {
             return null;
@@ -30,7 +30,7 @@ export default class LinkKeeperRole extends TargetAwareCreepRole<StructureLink> 
         return creep.room
             .find<StructureLink>(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return structure.structureType === STRUCTURE_LINK
+                    return structure.structureType === STRUCTURE_LINK;
                 }
             })
             .sort(Utils.sortByDistance(flag))
@@ -39,9 +39,9 @@ export default class LinkKeeperRole extends TargetAwareCreepRole<StructureLink> 
 
     protected doRun(creep: Creep): void {
         if (creep['store'].getFreeCapacity() > 0) {
-            CreepTrait.withdrawAllEnergy(creep, this.getCurrentStructureTarget(creep));
+            CreepTrait.withdrawAllEnergy(creep, creep.room.storage);
         } else {
-            CreepTrait.transferAllEnergy(creep, creep.room.storage);
+            CreepTrait.transferAllEnergy(creep, this.getCurrentStructureTarget(creep));
         }
     }
 
@@ -50,6 +50,6 @@ export default class LinkKeeperRole extends TargetAwareCreepRole<StructureLink> 
     }
 
     protected getRoleName(): string {
-        return 'link_keeper';
+        return 'provider_link_keeper';
     }
 }
