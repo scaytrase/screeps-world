@@ -9,11 +9,27 @@ import Utils from "./utils";
 
 export default class GuardRole extends BaseCreepRole {
     private static getTarget(creep: Creep): Creep | null {
-        return creep.room.find(FIND_HOSTILE_CREEPS).sort(Utils.sortByDistance(creep)).shift();
+        return creep.room
+            .find(FIND_HOSTILE_CREEPS, {filter: (hostile: Creep) => Utils.isWithinTraversableBorders(hostile)})
+            .sort(Utils.sortByDistance(creep))
+            .shift();
     }
 
     run(creep: Creep, game: Game): void {
-        CreepTrait.attack(creep, GuardRole.getTarget(creep));
+        const target = GuardRole.getTarget(creep);
+        if (target) {
+            CreepTrait.attack(creep, target);
+        } else {
+            creep.moveTo(
+                creep.room
+                    .find<StructureRampart>(FIND_MY_STRUCTURES, {
+                        filter: (structure) => structure.structureType === STRUCTURE_RAMPART
+                    })
+                    .sort(Utils.sortByDistance(creep))
+                    .shift(),
+                {visualizePathStyle: {stroke: '#ff55f4'}}
+            );
+        }
     }
 
     getSpawnStrategy(): SpawnStrategy {

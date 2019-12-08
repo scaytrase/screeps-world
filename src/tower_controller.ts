@@ -1,5 +1,6 @@
 import {TOWER_RANGE} from "./config";
 import Runnable from "./runnable";
+import Utils from "./utils";
 
 export default class TowerController implements Runnable {
     private room: Room;
@@ -18,7 +19,7 @@ export default class TowerController implements Runnable {
         towers.forEach((tower: StructureTower) => {
             let hostiles = this.room.find(FIND_HOSTILE_CREEPS, {
                 filter(creep) {
-                    return creep.pos.getRangeTo(tower) < TOWER_RANGE;
+                    return creep.pos.getRangeTo(tower) < TOWER_RANGE && Utils.isWithinTraversableBorders(creep);
                 }
             });
 

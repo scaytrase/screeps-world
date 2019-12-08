@@ -1,4 +1,4 @@
-import {BUILDER_BODY, BUILDERS_COUNT_LIMIT, BUILDERS_ENERGY_LIMIT} from "./config";
+import {BUILDER_BODY, BUILDERS_COUNT_LIMIT, BUILDERS_ENERGY_LIMIT, RAMPART_INITIAL_HIST} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -16,7 +16,17 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 ];
 
 export default class BuilderRole extends BaseCreepRole {
+    private static getRampart(creep: Creep): StructureRampart | null {
+        return creep.room
+            .find<StructureRampart>(FIND_MY_STRUCTURES, {
+                filter: (rampart) => rampart.structureType === STRUCTURE_RAMPART && rampart.hits < RAMPART_INITIAL_HIST
+            })
+            .sort(Utils.sortByDistance(creep))
+            .shift();
+    }
+
     private static getTarget(creep: Creep): ConstructionSite | null {
+
         return creep.room
             .find(FIND_CONSTRUCTION_SITES)
             .sort(Utils.sortByDistance(creep.room.find(FIND_MY_SPAWNS).shift()))
@@ -34,7 +44,12 @@ export default class BuilderRole extends BaseCreepRole {
         }
 
         if (creep.memory['building']) {
-            CreepTrait.build(creep, BuilderRole.getTarget(creep));
+            const rampart = BuilderRole.getRampart(creep);
+            if (rampart) {
+                CreepTrait.repair(creep, rampart);
+            } else {
+                CreepTrait.build(creep, BuilderRole.getTarget(creep));
+            }
         } else {
             CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, BUILDERS_ENERGY_LIMIT));
         }

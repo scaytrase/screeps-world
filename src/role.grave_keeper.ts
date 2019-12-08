@@ -58,9 +58,10 @@ export default class GraveKeeperRole extends BaseCreepRole {
     }
 
     run(creep: Creep, game: Game): void {
-        if (creep['store'].getFreeCapacity() > 0 && creep.ticksToLive > 300) {
-            CreepTrait.pickupAllResources(creep, GraveKeeperRole.getSource(creep));
-        } else {
+        const source = GraveKeeperRole.getSource(creep);
+        if (source && creep.store.getFreeCapacity() > 0 && creep.ticksToLive > 300) {
+            CreepTrait.pickupAllResources(creep, source);
+        } else if (creep.store.getUsedCapacity() > 0) {
             CreepTrait.transferAllResources(creep, GraveKeeperRole.getTarget(creep));
         }
     }

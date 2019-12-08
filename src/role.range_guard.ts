@@ -9,7 +9,10 @@ import Utils from "./utils";
 
 export default class RangeGuardRole extends BaseCreepRole {
     private static getTarget(creep: Creep): Creep | null {
-        return creep.room.find(FIND_HOSTILE_CREEPS).sort(Utils.sortByDistance(creep)).shift();
+        return creep.room
+            .find(FIND_HOSTILE_CREEPS, {filter: (hostile: Creep) => Utils.isWithinTraversableBorders(hostile)})
+            .sort(Utils.sortByDistance(creep))
+            .shift();
     }
 
     run(creep: Creep, game: Game): void {

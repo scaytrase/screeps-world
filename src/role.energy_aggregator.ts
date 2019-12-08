@@ -48,7 +48,6 @@ export default class EnergyAggregatorRole extends TargetAwareCreepRole<Structure
             return undefined;
         }
 
-        // @ts-ignore
         return target['store'].getUsedCapacity(RESOURCE_ENERGY) === 0;
     }
 }
