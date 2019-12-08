@@ -1,4 +1,4 @@
-import {ENERGY_AGGREGATOR_ADVANCED_BODY} from "./config";
+import {CARRIER_CREEP_BODY_LVL2} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -23,7 +23,7 @@ export default class ResourceCarrier extends BaseCreepRole {
     }
 
     run(creep: Creep, game: Game): void {
-        if (creep['store'].getFreeCapacity() > 0) {
+        if (creep.store.getFreeCapacity() > 0) {
             CreepTrait.withdrawAllResources(creep, ResourceCarrier.getSourceStructures(creep).shift());
         } else {
             CreepTrait.transferAllResources(creep, ResourceCarrier.getRecipientStructure(creep));
@@ -40,7 +40,7 @@ export default class ResourceCarrier extends BaseCreepRole {
     }
 
     protected getBody(game: Game) {
-        return ENERGY_AGGREGATOR_ADVANCED_BODY;
+        return CARRIER_CREEP_BODY_LVL2;
     }
 
     protected getRoleName(): string {

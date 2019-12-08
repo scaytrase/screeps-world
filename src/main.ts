@@ -1,5 +1,4 @@
 import Cleaner from "./cleaner";
-import CreepRenewer from "./creep_renewer";
 import CreepRetirementProgram from "./creep_retirement_program";
 import CreepRunner from "./creep_runner";
 import CreepSpawnBound from "./creep_spawn_bound";
@@ -12,10 +11,10 @@ import EnergyAggregatorRole from "./role.energy_aggregator";
 import GraveKeeperRole from "./role.grave_keeper";
 import GuardRole from "./role.guard";
 import HarvesterRole from "./role.harvester";
+import MinerRole from "./role.miner";
 import ProviderLinkKeeperRole from "./role.provider_link_keeper";
 import RangeGuardRole from "./role.range_guard";
 import ReceiverLinkKeeperRole from "./role.receiver_link_keeper";
-import MinerRole from "./role.miner";
 import RepairerRole from "./role.repairer";
 import ResourceCarrier from "./role.resource_carrier";
 import SpawnKeeperRole from "./role.spawn_keeper";
@@ -50,7 +49,6 @@ module.exports.loop = function () {
     runnables.push(new ResourceAssigner(spawn));
     runnables.push(new CreepSpawner(roles, spawn));
     runnables.push(new CreepRunner(roles));
-    runnables.push(new CreepRenewer(spawn));
     runnables.push(new TowerController(spawn.room));
     runnables.push(new ReceiverLinkController(spawn));
     runnables.push(new ProviderLinkController(spawn));

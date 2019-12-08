@@ -1,6 +1,6 @@
-import {BUILDER_BODY, BUILDERS_COUNT_LIMIT, BUILDERS_ENERGY_LIMIT, RAMPART_INITIAL_HIST} from "./config";
+import {BUILDER_BODY, BUILDERS_COUNT_LIMIT, RAMPART_INITIAL_HITS} from "./config";
 import CreepTrait from "./creep_traits";
-import BaseCreepRole from "./role.base_creep";
+import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
@@ -15,46 +15,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
 ];
 
-export default class BuilderRole extends BaseCreepRole {
-    private static getRampart(creep: Creep): StructureRampart | null {
-        return creep.room
-            .find<StructureRampart>(FIND_MY_STRUCTURES, {
-                filter: (rampart) => rampart.structureType === STRUCTURE_RAMPART && rampart.hits < RAMPART_INITIAL_HIST
-            })
-            .sort(Utils.sortByDistance(creep))
-            .shift();
-    }
-
-    private static getTarget(creep: Creep): ConstructionSite | null {
-
-        return creep.room
-            .find(FIND_CONSTRUCTION_SITES)
-            .sort(Utils.sortByDistance(creep.room.find(FIND_MY_SPAWNS).shift()))
-            .shift();
-    }
-
-    run(creep: Creep, game: Game): void {
-        if (creep.memory['building'] && creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
-            creep.memory['building'] = false;
-            creep.say('🔄 harvest');
-        }
-        if (!creep.memory['building'] && creep['store'].getFreeCapacity() == 0) {
-            creep.memory['building'] = true;
-            creep.say('🚧 build');
-        }
-
-        if (creep.memory['building']) {
-            const rampart = BuilderRole.getRampart(creep);
-            if (rampart) {
-                CreepTrait.repair(creep, rampart);
-            } else {
-                CreepTrait.build(creep, BuilderRole.getTarget(creep));
-            }
-        } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, BUILDERS_ENERGY_LIMIT));
-        }
-    }
-
+export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite | StructureRampart> {
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
@@ -62,6 +23,50 @@ export default class BuilderRole extends BaseCreepRole {
                 new LimitedSpawnByRoleCountStrategy(BUILDERS_COUNT_LIMIT, this),
             ]
         );
+    }
+
+    protected shouldWork(creep: Creep, game: Game): boolean {
+        return creep.store.getFreeCapacity() == 0;
+    }
+
+    protected shouldRest(creep: Creep, game: Game): boolean {
+        return creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0;
+    }
+
+    protected work(creep: Creep, game: Game): void {
+        CreepTrait.build(creep, this.getCurrentStructureTarget(creep));
+    }
+
+    protected rest(creep: Creep, game: Game): void {
+        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES));
+    }
+
+    protected shouldRenewTarget(creep: Creep, game: Game): boolean {
+        const target = this.getCurrentStructureTarget(creep);
+
+        if (target instanceof ConstructionSite) {
+            return false;
+        }
+
+        return target instanceof StructureRampart && target.hits > RAMPART_INITIAL_HITS;
+    }
+
+    protected getTarget(creep: Creep, game: Game): ConstructionSite | StructureRampart {
+        const rampart = creep.room
+            .find<StructureRampart>(FIND_MY_STRUCTURES, {
+                filter: (rampart) => rampart.structureType === STRUCTURE_RAMPART && rampart.hits < RAMPART_INITIAL_HITS
+            })
+            .sort(Utils.sortByDistance(creep))
+            .shift();
+
+        if (rampart) {
+            return rampart;
+        }
+
+        return creep.room
+            .find(FIND_CONSTRUCTION_SITES)
+            .sort(Utils.sortByDistance(creep.room.find(FIND_MY_SPAWNS).shift()))
+            .shift();
     }
 
     protected getBody(game: Game): BodyPartConstant[] {

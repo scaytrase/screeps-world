@@ -17,7 +17,7 @@ export default class MinerRole extends BaseCreepRole {
     }
 
     run(creep: Creep, game: Game): void {
-        if (creep['store'].getFreeCapacity() > 0) {
+        if (creep.store.getFreeCapacity() > 0) {
             CreepTrait.harvest(creep, MinerRole.getSourceStructure(creep));
         } else {
             CreepTrait.transferAllResources(creep, MinerRole.getRecipientStructure(creep));

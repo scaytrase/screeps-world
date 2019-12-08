@@ -26,9 +26,10 @@ export default class EnergyAggregatorRole extends TargetAwareCreepRole<Structure
     }
 
     protected doRun(creep: Creep, game: Game): void {
-        if (creep['store'].getFreeCapacity() > 0) {
-            CreepTrait.withdrawAllEnergy(creep, this.getCurrentStructureTarget(creep));
-        } else {
+        const target = this.getCurrentStructureTarget(creep);
+        if (target && creep.store.getFreeCapacity() > 0) {
+            CreepTrait.withdrawAllEnergy(creep, target);
+        } else if (creep.store.getUsedCapacity() > 0) {
             CreepTrait.transferAllEnergy(creep, this.getRecipient(creep));
         }
     }

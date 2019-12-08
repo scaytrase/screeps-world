@@ -1,6 +1,6 @@
-import {WALL_DESIRED_HITS, WALL_KEEPER_BODY, WALL_KEEPERS_COUNT_LIMIT} from "./config";
+import {WALL_DESIRED_HITS_HIGH, WALL_DESIRED_HITS_LOW, WALL_KEEPER_BODY, WALL_KEEPERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
-import TargetAwareCreepRole from "./role.target_aware_creep";
+import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
@@ -17,25 +17,9 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 
-const repairFilter = (object: AnyStructure) => TARGET_STRUCTURES.includes(object.structureType) && object.hits < WALL_DESIRED_HITS;
+const repairFilter = (object: AnyStructure) => TARGET_STRUCTURES.includes(object.structureType) && object.hits < WALL_DESIRED_HITS_LOW;
 
-export default class WallKeeperRole extends TargetAwareCreepRole<StructureWall | StructureRampart> {
-    doRun(creep: Creep, game: Game): void {
-        if (creep.memory['repairing'] && creep['store'][RESOURCE_ENERGY] == 0) {
-            creep.memory['repairing'] = false;
-            creep.say('🔄 harvest');
-        } else if (!creep.memory['repairing'] && creep['store'].getFreeCapacity() == 0) {
-            creep.memory['repairing'] = true;
-            creep.say('🚧 repair');
-        }
-
-        if (creep.memory['repairing']) {
-            CreepTrait.repair(creep, this.getCurrentStructureTarget(creep));
-        } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.store.getCapacity()));
-        }
-    }
-
+export default class WallKeeperRole extends WorkRestCycleCreepRole<StructureWall | StructureRampart> {
     public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
@@ -45,6 +29,22 @@ export default class WallKeeperRole extends TargetAwareCreepRole<StructureWall |
         );
     }
 
+    protected shouldWork(creep: Creep, game: Game): boolean {
+        return creep.store.getFreeCapacity() === 0;
+    }
+
+    protected shouldRest(creep: Creep, game: Game): boolean {
+        return creep.store.getUsedCapacity() === 0;
+    }
+
+    protected work(creep: Creep, game: Game): void {
+        CreepTrait.build(creep, this.getCurrentStructureTarget(creep));
+    }
+
+    protected rest(creep: Creep, game: Game): void {
+        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.store.getCapacity()));
+    }
+
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
         const current = this.getCurrentStructureTarget(creep);
 
@@ -52,7 +52,7 @@ export default class WallKeeperRole extends TargetAwareCreepRole<StructureWall |
             return undefined;
         }
 
-        return current.hits > WALL_DESIRED_HITS * 1.5;
+        return current.hits > WALL_DESIRED_HITS_HIGH;
     }
 
     protected getRoleName(): string {

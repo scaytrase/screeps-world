@@ -22,7 +22,7 @@ export default class SpawnKeeperRole extends BaseCreepRole {
     }
 
     run(creep: Creep, game: Game): void {
-        if (creep['store'].getFreeCapacity() > 0) {
+        if (creep.store.getFreeCapacity() > 0) {
             CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES));
         } else {
             CreepTrait.transferAllEnergy(creep, Utils.getClosestEnergyRecipient(creep, TARGET_STRUCTURES));

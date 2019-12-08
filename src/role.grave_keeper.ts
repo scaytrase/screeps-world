@@ -21,19 +21,23 @@ const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
 const _ = require('lodash');
 
 export default class GraveKeeperRole extends BaseCreepRole {
-    private static getSource(creep: Creep): Resource | Tombstone | null {
+    private static getSource(creep: Creep): Resource | Tombstone | Ruin | null {
         return [
             ...(creep.room.find(FIND_DROPPED_RESOURCES, {
                 filter(resource) {
                     return resource.amount > 0
                         && Utils.isWithinTraversableBorders(resource);
                 }
-
             })),
             ...(creep.room.find(FIND_TOMBSTONES, {
                 filter(tombstone) {
-                    return tombstone['store'][_.findKey(tombstone['store'])] > 0
+                    return tombstone.store.getUsedCapacity() > 0
                         && Utils.isWithinTraversableBorders(tombstone);
+                }
+            })),
+            ...(creep.room.find(FIND_RUINS, {
+                filter(ruin) {
+                    return ruin.store.getUsedCapacity() > 0;
                 }
             }))
         ].sort(Utils.sortByDistance(creep)).shift();
@@ -59,7 +63,7 @@ export default class GraveKeeperRole extends BaseCreepRole {
 
     run(creep: Creep, game: Game): void {
         const source = GraveKeeperRole.getSource(creep);
-        if (source && creep.store.getFreeCapacity() > 0 && creep.ticksToLive > 300) {
+        if (source && creep.store.getFreeCapacity() > 0 && creep.ticksToLive > 100) {
             CreepTrait.pickupAllResources(creep, source);
         } else if (creep.store.getUsedCapacity() > 0) {
             CreepTrait.transferAllResources(creep, GraveKeeperRole.getTarget(creep));

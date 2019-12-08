@@ -1,4 +1,4 @@
-import {UPGRADER_BODY, UPGRADERS_COUNT_LIMIT, UPGRADERS_ENERGY_LIMIT} from "./config";
+import {UPGRADER_BODY, UPGRADERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -11,12 +11,14 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
 ];
 
+const _ = require('lodash');
+
 export default class UpgraderRole extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
         if (creep.memory['upgrading'] && creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
             creep.memory['upgrading'] = false;
             creep.say('🔄 harvest');
-        } else if (!creep.memory['upgrading'] && creep['store'].getFreeCapacity() == 0) {
+        } else if (!creep.memory['upgrading'] && creep.store.getFreeCapacity() == 0) {
             creep.memory['upgrading'] = true;
             creep.say('⚡ upgrade');
         }
@@ -24,7 +26,7 @@ export default class UpgraderRole extends BaseCreepRole {
         if (creep.memory['upgrading']) {
             CreepTrait.upgradeController(creep);
         } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, UPGRADERS_ENERGY_LIMIT));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES));
         }
     }
 

@@ -1,4 +1,4 @@
-import {ENERGY_AGGREGATOR_BODY, ENERGY_PROVIDER, LINK_KEEPERS_COUNT_LIMIT} from "./config";
+import {ENERGY_PROVIDER, LINK_KEEPER_BODY, LINK_KEEPERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import TargetAwareCreepRole from "./role.target_aware_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -38,7 +38,7 @@ export default class ProviderLinkKeeperRole extends TargetAwareCreepRole<Structu
     }
 
     protected doRun(creep: Creep): void {
-        if (creep['store'].getFreeCapacity() > 0) {
+        if (creep.store.getFreeCapacity() > 0) {
             CreepTrait.withdrawAllEnergy(creep, creep.room.storage);
         } else {
             CreepTrait.transferAllEnergy(creep, this.getCurrentStructureTarget(creep));
@@ -46,7 +46,7 @@ export default class ProviderLinkKeeperRole extends TargetAwareCreepRole<Structu
     }
 
     protected getBody(game: Game): BodyPartConstant[] {
-        return ENERGY_AGGREGATOR_BODY;
+        return LINK_KEEPER_BODY;
     }
 
     protected getRoleName(): string {

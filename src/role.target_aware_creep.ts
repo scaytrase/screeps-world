@@ -2,7 +2,7 @@ import BaseCreepRole from "./role.base_creep";
 
 const TARGET_FIELD = 'target';
 
-export default abstract class TargetAwareCreepRole<T extends AnyStructure> extends BaseCreepRole {
+export default abstract class TargetAwareCreepRole<T extends Structure | ConstructionSite> extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
         this.renewTarget(creep, game);
 

@@ -30,7 +30,7 @@ export default class ReceiverLinkKeeperRole extends TargetAwareCreepRole<Structu
         return creep.room
             .find<StructureLink>(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return structure.structureType === STRUCTURE_LINK
+                    return structure.structureType === STRUCTURE_LINK;
                 }
             })
             .sort(Utils.sortByDistance(flag))
@@ -38,7 +38,7 @@ export default class ReceiverLinkKeeperRole extends TargetAwareCreepRole<Structu
     }
 
     protected doRun(creep: Creep): void {
-        if (creep['store'].getFreeCapacity() > 0) {
+        if (creep.store.getFreeCapacity() > 0) {
             CreepTrait.withdrawAllEnergy(creep, this.getCurrentStructureTarget(creep));
         } else {
             CreepTrait.transferAllEnergy(creep, creep.room.storage);

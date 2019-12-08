@@ -19,7 +19,7 @@ export default class TowerController implements Runnable {
         towers.forEach((tower: StructureTower) => {
             let hostiles = this.room.find(FIND_HOSTILE_CREEPS, {
                 filter(creep) {
-                    return creep.pos.getRangeTo(tower) < TOWER_RANGE && Utils.isWithinTraversableBorders(creep);
+                    return creep.pos.getRangeTo(tower) < TOWER_RANGE && (creep.owner.username === 'Invader' || Utils.isWithinTraversableBorders(creep));
                 }
             });
 

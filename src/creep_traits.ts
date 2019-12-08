@@ -1,4 +1,4 @@
-import {RENEW_CREEPS, SUICIDE_CREEPS, TTL_UNTIL_RENEW} from "./config";
+import {SUICIDE_CREEPS} from "./config";
 
 const _ = require('lodash');
 
@@ -9,12 +9,6 @@ const COLOR_ATTACK = '#ff0b00';
 const COLOR_SPECIAL_TASKS = '#ff55f4';
 
 export default class CreepTrait {
-    public static renewIfNeeded(creep: Creep): void {
-        if (RENEW_CREEPS && creep.ticksToLive < TTL_UNTIL_RENEW) {
-            CreepTrait.moveToSpawnToRenew(creep);
-        }
-    }
-
     public static suicideOldCreep(creep: Creep, ttl: number): void {
         if (!SUICIDE_CREEPS) {
             return;
@@ -24,14 +18,18 @@ export default class CreepTrait {
             return;
         }
 
-        if (creep['store'].getUsedCapacity() === 0) {
+        if (creep.store.getUsedCapacity() === 0) {
             creep.suicide();
         } else {
-            const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK];
-            CreepTrait.transferAllResources(creep, creep.room.find(FIND_MY_STRUCTURES, {
-                filter: (structure) => types.includes(structure.structureType) && structure['store'].getFreeCapacity() > creep['store'].getUsedCapacity()
-            }).shift());
+            CreepTrait.transferAnyResources(creep);
         }
+    }
+
+    public static transferAnyResources(creep: Creep): void {
+        const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER];
+        CreepTrait.transferAllResources(creep, creep.room.find(FIND_MY_STRUCTURES, {
+            filter: (structure) => types.includes(structure.structureType) && structure['store'].getFreeCapacity() > creep.store.getUsedCapacity()
+        }).shift());
     }
 
     public static transferAllEnergy(creep: Creep, target: AnyStructure | null): void {
@@ -44,7 +42,7 @@ export default class CreepTrait {
 
     public static transferAllResources(creep: Creep, target: AnyStructure | null): void {
         if (target) {
-            const resourceType = _.findKey(creep['store']);
+            const resourceType = _.findKey(creep.store);
             if (creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
                     visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE},
@@ -54,7 +52,7 @@ export default class CreepTrait {
         }
     }
 
-    public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | null): void {
+    public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | Ruin | null): void {
         if (target) {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
@@ -83,7 +81,7 @@ export default class CreepTrait {
         }
     }
 
-    public static withdrawAllEnergy(creep: Creep, source: AnyStructure | null): void {
+    public static withdrawAllEnergy(creep: Creep, source: Structure | Ruin | Tombstone | null): void {
         if (source) {
             if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}});
@@ -91,17 +89,11 @@ export default class CreepTrait {
         }
     }
 
-    public static build(creep: Creep, target: ConstructionSite | null): void {
+    public static build(creep: Creep, target: ConstructionSite | Structure | null): void {
         if (target) {
-            if (creep.build(target) == ERR_NOT_IN_RANGE) {
+            if (target instanceof ConstructionSite && creep.build(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_BUILD}});
-            }
-        }
-    }
-
-    public static repair(creep: Creep, target: AnyStructure | null): void {
-        if (target) {
-            if (creep.repair(target) == ERR_NOT_IN_RANGE) {
+            } else if (target instanceof Structure && creep.repair(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_BUILD}});
             }
         }
@@ -115,9 +107,9 @@ export default class CreepTrait {
         }
     }
 
-    static pickupAllResources(creep: Creep, source: Resource | Tombstone | null) {
+    static pickupAllResources(creep: Creep, source: Resource | Tombstone | Ruin | null) {
         if (source) {
-            if (source instanceof Tombstone) {
+            if (source instanceof Tombstone || source instanceof Ruin) {
                 CreepTrait.withdrawAllResources(creep, source);
             } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {
