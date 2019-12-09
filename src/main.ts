@@ -3,6 +3,7 @@ import CreepRetirementProgram from "./creep_retirement_program";
 import CreepRunner from "./creep_runner";
 import CreepSpawnBound from "./creep_spawn_bound";
 import CreepSpawner from "./creep_spawner";
+import EconomyLogger from "./economy_logger";
 import ProviderLinkController from "./provider_link_controller";
 import ReceiverLinkController from "./receiver_link_controller";
 import ResourceAssigner from "./resource_assigner";
@@ -18,6 +19,7 @@ import ReceiverLinkKeeperRole from "./role.receiver_link_keeper";
 import RepairerRole from "./role.repairer";
 import ResourceCarrier from "./role.resource_carrier";
 import SpawnKeeperRole from "./role.spawn_keeper";
+import TerminalKeeperRole from "./role.terminal_keeper";
 import UpgraderRole from "./role.upgrader";
 import WallKeeperRole from "./role.wall_keeper";
 import Runnable from "./runnable";
@@ -38,6 +40,7 @@ const roles = [
     new ProviderLinkKeeperRole(),
     new MinerRole(),
     new ResourceCarrier(),
+    new TerminalKeeperRole(),
 ];
 
 module.exports.loop = function () {
@@ -54,6 +57,7 @@ module.exports.loop = function () {
     runnables.push(new ProviderLinkController(spawn));
     runnables.push(new CreepSpawnBound(spawn));
     runnables.push(new CreepRetirementProgram());
+    runnables.push(new EconomyLogger());
 
     for (let runnable of runnables) {
         runnable.run(Game, Memory);

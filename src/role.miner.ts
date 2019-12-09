@@ -28,6 +28,7 @@ export default class MinerRole extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_MINERALS, {filter: filter}),
+                new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_STRUCTURES, {filter: (structure) => structure.structureType === STRUCTURE_EXTRACTOR}),
                 new LimitedSpawnByRoleCountStrategy(MINERS_COUNT_LIMIT, this)
             ]
         );

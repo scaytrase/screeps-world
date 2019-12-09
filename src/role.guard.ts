@@ -1,4 +1,4 @@
-import {GUARD_BODY, GUARDS_COUNT_LIMIT} from "./config";
+import {GUARD_BODY, GUARDS_ATTACK_BORDERS, GUARDS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -10,7 +10,7 @@ import Utils from "./utils";
 export default class GuardRole extends BaseCreepRole {
     private static getTarget(creep: Creep): Creep | null {
         return creep.room
-            .find(FIND_HOSTILE_CREEPS, {filter: (hostile: Creep) => Utils.isWithinTraversableBorders(hostile)})
+            .find(FIND_HOSTILE_CREEPS, {filter: (hostile: Creep) => GUARDS_ATTACK_BORDERS || Utils.isWithinTraversableBorders(hostile)})
             .sort(Utils.sortByDistance(creep))
             .shift();
     }

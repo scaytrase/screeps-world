@@ -52,6 +52,17 @@ export default class CreepTrait {
         }
     }
 
+    public static withdrawResource(creep: Creep, target: AnyStructure | Tombstone | Ruin | null, resource: ResourceConstant): void {
+        if (target) {
+            if (creep.withdraw(target, resource) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {
+                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
+                    maxRooms: 2
+                });
+            }
+        }
+    }
+
     public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | Ruin | null): void {
         if (target) {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {

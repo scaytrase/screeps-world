@@ -8,14 +8,24 @@ import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_co
 import Utils from "./utils";
 
 const SOURCE_TYPES = [
-    STRUCTURE_CONTAINER
+    STRUCTURE_CONTAINER,
+    STRUCTURE_STORAGE
 ];
 
-const filter = (structure) => SOURCE_TYPES.includes(structure.structureType) && structure['store'].getUsedCapacity() > structure['store'].getUsedCapacity(RESOURCE_ENERGY);
+const RESOURCES: ResourceConstant[] = [
+    RESOURCE_KEANIUM,
+];
+
+const filter = (structure) => SOURCE_TYPES.includes(structure.structureType)
+    && RESOURCES.map(type => structure['store'].getUsedCapacity(type) > 0).reduce((pr, v) => pr || v, false);
 
 export default class ResourceCarrier extends BaseCreepRole {
-    private static getRecipientStructure(creep: Creep): StructureStorage | null {
-        return creep.room.storage;
+    private static getRecipientStructure(creep: Creep): StructureTerminal | null {
+        return creep.room.terminal;
+    }
+
+    private static getCurrentResource(creep: Creep, store: StructureStorage | StructureContainer ): ResourceConstant {
+        return RESOURCES.filter(type => store.store.getUsedCapacity(type) > 0).shift();
     }
 
     private static getSourceStructures(creep: Creep): StructureContainer[] | null {
@@ -24,7 +34,8 @@ export default class ResourceCarrier extends BaseCreepRole {
 
     run(creep: Creep, game: Game): void {
         if (creep.store.getFreeCapacity() > 0) {
-            CreepTrait.withdrawAllResources(creep, ResourceCarrier.getSourceStructures(creep).shift());
+            const source = ResourceCarrier.getSourceStructures(creep).shift();
+            CreepTrait.withdrawResource(creep, source, ResourceCarrier.getCurrentResource(creep, source));
         } else {
             CreepTrait.transferAllResources(creep, ResourceCarrier.getRecipientStructure(creep));
         }

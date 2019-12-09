@@ -1,3 +1,4 @@
+import {SUICIDE_TTL} from "./config";
 import CreepTrait from "./creep_traits";
 import Runnable from "./runnable";
 
@@ -6,7 +7,7 @@ export default class CreepRetirementProgram implements Runnable {
         for (let creepName in game.creeps) {
             const creep = game.creeps[creepName];
 
-            CreepTrait.suicideOldCreep(creep, 150);
+            CreepTrait.suicideOldCreep(creep, SUICIDE_TTL);
         }
     }
 }
