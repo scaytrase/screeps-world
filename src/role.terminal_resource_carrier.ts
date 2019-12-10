@@ -20,7 +20,7 @@ const filter = (structure) =>
         SOURCE_TYPES.includes(structure.structureType)
         && RESOURCES.map(type => structure.store.getUsedCapacity(type) > 0).reduce((pr, v) => pr || v, false);
 
-export default class ResourceCarrier extends BaseCreepRole {
+export default class TerminalResourceCarrier extends BaseCreepRole {
     private static getRecipientStructure(creep: Creep): StructureTerminal | null {
         return creep.room.terminal;
     }
@@ -34,11 +34,11 @@ export default class ResourceCarrier extends BaseCreepRole {
     }
 
     run(creep: Creep, game: Game): void {
-        const source = ResourceCarrier.getSourceStructures(creep).shift();
+        const source = TerminalResourceCarrier.getSourceStructures(creep).shift();
         if (source && creep.store.getFreeCapacity() > 0) {
-            CreepTrait.withdrawResource(creep, source, ResourceCarrier.getCurrentResource(creep, source));
+            CreepTrait.withdrawResource(creep, source, TerminalResourceCarrier.getCurrentResource(creep, source));
         } else {
-            CreepTrait.transferAllResources(creep, ResourceCarrier.getRecipientStructure(creep));
+            CreepTrait.transferAllResources(creep, TerminalResourceCarrier.getRecipientStructure(creep));
         }
     }
 
@@ -56,6 +56,6 @@ export default class ResourceCarrier extends BaseCreepRole {
     }
 
     protected getRoleName(): string {
-        return 'resource_carrier';
+        return 'terminal_resource_carrier';
     }
 }

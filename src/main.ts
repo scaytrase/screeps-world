@@ -17,7 +17,8 @@ import ProviderLinkKeeperRole from "./role.provider_link_keeper";
 import RangeGuardRole from "./role.range_guard";
 import ReceiverLinkKeeperRole from "./role.receiver_link_keeper";
 import RepairerRole from "./role.repairer";
-import ResourceCarrier from "./role.resource_carrier";
+import ResourceAggregator from "./role.resource_aggregator";
+import TerminalResourceCarrier from "./role.terminal_resource_carrier";
 import SpawnKeeperRole from "./role.spawn_keeper";
 import TerminalKeeperRole from "./role.terminal_keeper";
 import TowerKeeperRole from "./role.tower_keeper";
@@ -41,8 +42,9 @@ const roles = [
     new ReceiverLinkKeeperRole(),
     new ProviderLinkKeeperRole(),
     new MinerRole(),
-    new ResourceCarrier(),
+    new TerminalResourceCarrier(),
     new TerminalKeeperRole(),
+    new ResourceAggregator(),
 ];
 
 module.exports.loop = function () {
