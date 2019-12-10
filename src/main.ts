@@ -20,6 +20,7 @@ import RepairerRole from "./role.repairer";
 import ResourceCarrier from "./role.resource_carrier";
 import SpawnKeeperRole from "./role.spawn_keeper";
 import TerminalKeeperRole from "./role.terminal_keeper";
+import TowerKeeperRole from "./role.tower_keeper";
 import UpgraderRole from "./role.upgrader";
 import WallKeeperRole from "./role.wall_keeper";
 import Runnable from "./runnable";
@@ -27,13 +28,14 @@ import TowerController from "./tower_controller";
 
 const roles = [
     new HarvesterRole(),
+    new SpawnKeeperRole(),
     new GuardRole(),
     new RangeGuardRole(),
-    new SpawnKeeperRole(),
+    new TowerKeeperRole(),
     new RepairerRole(),
+    new UpgraderRole(),
     new EnergyAggregatorRole(),
     new GraveKeeperRole(),
-    new UpgraderRole(),
     new BuilderRole(),
     new WallKeeperRole(),
     new ReceiverLinkKeeperRole(),

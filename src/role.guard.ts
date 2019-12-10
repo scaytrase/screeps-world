@@ -1,5 +1,5 @@
 import {GUARD_BODY, GUARDS_ATTACK_BORDERS, GUARDS_COUNT_LIMIT} from "./config";
-import CreepTrait from "./creep_traits";
+import CreepTrait, {COLOR_ATTACK} from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
@@ -18,17 +18,21 @@ export default class GuardRole extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
         const target = GuardRole.getTarget(creep);
         if (target) {
-            CreepTrait.attack(creep, target);
+            creep.memory['last_target'] = {pos: target.pos};
+            CreepTrait.attack(creep, target, {reusePath: 1});
         } else {
-            creep.moveTo(
-                creep.room
-                    .find<StructureRampart>(FIND_MY_STRUCTURES, {
-                        filter: (structure) => structure.structureType === STRUCTURE_RAMPART
-                    })
-                    .sort(Utils.sortByDistance(creep))
-                    .shift(),
-                {visualizePathStyle: {stroke: '#ff55f4'}}
-            );
+            if (creep.memory['last_target'] !== undefined) {
+                creep.moveTo(
+                    creep.room
+                        .find<StructureRampart>(FIND_MY_STRUCTURES, {
+                            filter: (structure) => structure.structureType === STRUCTURE_RAMPART &&
+                                creep.room.find(FIND_MY_CREEPS).filter(other_creep => other_creep !== creep && other_creep.pos.isEqualTo(structure)).length === 0
+                        })
+                        .sort(Utils.sortByDistance(creep))
+                        .shift(),
+                    {visualizePathStyle: {stroke: COLOR_ATTACK}}
+                );
+            }
         }
     }
 

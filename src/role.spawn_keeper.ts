@@ -10,6 +10,12 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
 ];
+
+const PRIORITY_TARGET_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_SPAWN,
+    STRUCTURE_EXTENSION,
+];
+
 const TARGET_STRUCTURES: StructureConstant[] = [
     STRUCTURE_SPAWN,
     STRUCTURE_EXTENSION,
@@ -29,7 +35,12 @@ export default class SpawnKeeperRole extends BaseCreepRole {
                 CreepTrait.withdrawAllEnergy(creep, energySource);
             }
         } else {
-            CreepTrait.transferAllEnergy(creep, Utils.getClosestEnergyRecipient(creep, TARGET_STRUCTURES));
+            const target = Utils.getClosestEnergyRecipient(creep, PRIORITY_TARGET_STRUCTURES);
+            if (target) {
+                CreepTrait.transferAllEnergy(creep, target);
+            } else {
+                CreepTrait.transferAllEnergy(creep, Utils.getClosestEnergyRecipient(creep, TARGET_STRUCTURES));
+            }
         }
     }
 

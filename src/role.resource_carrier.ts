@@ -16,8 +16,9 @@ const RESOURCES: ResourceConstant[] = [
     RESOURCE_KEANIUM,
 ];
 
-const filter = (structure) => SOURCE_TYPES.includes(structure.structureType)
-    && RESOURCES.map(type => structure['store'].getUsedCapacity(type) > 0).reduce((pr, v) => pr || v, false);
+const filter = (structure) =>
+        SOURCE_TYPES.includes(structure.structureType)
+        && RESOURCES.map(type => structure.store.getUsedCapacity(type) > 0).reduce((pr, v) => pr || v, false);
 
 export default class ResourceCarrier extends BaseCreepRole {
     private static getRecipientStructure(creep: Creep): StructureTerminal | null {
@@ -33,8 +34,8 @@ export default class ResourceCarrier extends BaseCreepRole {
     }
 
     run(creep: Creep, game: Game): void {
-        if (creep.store.getFreeCapacity() > 0) {
-            const source = ResourceCarrier.getSourceStructures(creep).shift();
+        const source = ResourceCarrier.getSourceStructures(creep).shift();
+        if (source && creep.store.getFreeCapacity() > 0) {
             CreepTrait.withdrawResource(creep, source, ResourceCarrier.getCurrentResource(creep, source));
         } else {
             CreepTrait.transferAllResources(creep, ResourceCarrier.getRecipientStructure(creep));

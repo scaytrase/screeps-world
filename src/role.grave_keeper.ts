@@ -1,4 +1,4 @@
-import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT_LIMIT} from "./config";
+import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT_LIMIT, GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -8,6 +8,7 @@ import Utils from "./utils";
 const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
+    STRUCTURE_TERMINAL,
 ];
 
 const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
@@ -16,6 +17,7 @@ const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_EXTENSION,
     STRUCTURE_SPAWN,
     STRUCTURE_LINK,
+    STRUCTURE_TERMINAL,
 ];
 
 const _ = require('lodash');
@@ -26,13 +28,13 @@ export default class GraveKeeperRole extends BaseCreepRole {
             ...(creep.room.find(FIND_DROPPED_RESOURCES, {
                 filter(resource) {
                     return resource.amount > 0
-                        && Utils.isWithinTraversableBorders(resource);
+                        && (GRAVE_KEEPERS_LOOT_BORDERS || Utils.isWithinTraversableBorders(resource));
                 }
             })),
             ...(creep.room.find(FIND_TOMBSTONES, {
                 filter(tombstone) {
                     return tombstone.store.getUsedCapacity() > 0
-                        && Utils.isWithinTraversableBorders(tombstone);
+                        && (GRAVE_KEEPERS_LOOT_BORDERS ||  Utils.isWithinTraversableBorders(tombstone));
                 }
             })),
             ...(creep.room.find(FIND_RUINS, {
@@ -72,14 +74,6 @@ export default class GraveKeeperRole extends BaseCreepRole {
 
     getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(GRAVE_KEEPERS_COUNT_LIMIT, this);
-    }
-
-    protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {
-        return {
-            suicide_from: 300,
-            suicide_at: 100,
-            suicide_destination: spawn.id
-        };
     }
 
     protected getBody(game: Game): BodyPartConstant[] {

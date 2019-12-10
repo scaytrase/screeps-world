@@ -2,11 +2,11 @@ import {SUICIDE_CREEPS} from "./config";
 
 const _ = require('lodash');
 
-const COLOR_HARVEST_RESOURCE = '#ffdf02';
-const COLOR_TRANSFER_RESOURCE = '#00a4ff';
-const COLOR_BUILD = '#8bff00';
-const COLOR_ATTACK = '#ff0b00';
-const COLOR_SPECIAL_TASKS = '#ff55f4';
+export const COLOR_HARVEST_RESOURCE = '#ffdf02';
+export const COLOR_TRANSFER_RESOURCE = '#00a4ff';
+export const COLOR_BUILD = '#8bff00';
+export const COLOR_ATTACK = '#ff0b00';
+export const COLOR_SPECIAL_TASKS = '#ff55f4';
 
 export default class CreepTrait {
     public static suicideOldCreep(creep: Creep, ttl: number): void {
@@ -82,12 +82,12 @@ export default class CreepTrait {
         }
     }
 
-    public static attack(creep: Creep, target: Creep | null): void {
+    public static attack(creep: Creep, target: Creep | null, opts?: MoveToOpts): void {
         if (target) {
             if (creep.body.map(def => def.type).includes(RANGED_ATTACK) && creep.rangedAttack(target) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}, ...opts});
             } else if (creep.body.map(def => def.type).includes(ATTACK) && creep.attack(target) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}, ...opts});
             }
         }
     }

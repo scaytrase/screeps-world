@@ -4,7 +4,7 @@ export enum SORT {
 }
 
 export default class Utils {
-    public static sortByDistance(target: RoomObject, direction: SORT = SORT.ASC): (a: RoomObject, b: RoomObject) => number {
+    public static sortByDistance(target: RoomObject | { pos: RoomPosition }, direction: SORT = SORT.ASC): (a: RoomObject | { pos: RoomPosition }, b: RoomObject | { pos: RoomPosition }) => number {
         return (a, b) => (direction === SORT.ASC ? 1 : -1) * Math.sign(a.pos.getRangeTo(target) - b.pos.getRangeTo(target));
     }
 
