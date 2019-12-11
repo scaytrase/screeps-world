@@ -1,7 +1,11 @@
+import Role from "./role";
+
 export enum SORT {
     ASC = "asc",
     DESC = "desc"
 }
+
+const _ = require('lodash');
 
 export default class Utils {
     public static sortByDistance(target: RoomObject | { pos: RoomPosition }, direction: SORT = SORT.ASC): (a: RoomObject | { pos: RoomPosition }, b: RoomObject | { pos: RoomPosition }) => number {
@@ -57,5 +61,9 @@ export default class Utils {
             && object.pos.y < 48
             && object.pos.x > 1
             && object.pos.x < 48;
+    }
+
+    public static findCreepsByRole(game: Game, role: Role): Creep[] {
+        return _.filter(game.creeps, (creep: Creep) => role.match(creep));
     }
 }

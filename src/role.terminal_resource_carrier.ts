@@ -1,4 +1,4 @@
-import {BASE_CARRIER_CREEP_BODY, CARRIER_CREEP_BODY_LVL2} from "./config";
+import {BASE_CARRIER_CREEP_BODY} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -17,15 +17,15 @@ const RESOURCES: ResourceConstant[] = [
 ];
 
 const filter = (structure) =>
-        SOURCE_TYPES.includes(structure.structureType)
-        && RESOURCES.map(type => structure.store.getUsedCapacity(type) > 0).reduce((pr, v) => pr || v, false);
+    SOURCE_TYPES.includes(structure.structureType)
+    && RESOURCES.map(type => structure.store.getUsedCapacity(type) > 0).reduce((pr, v) => pr || v, false);
 
 export default class TerminalResourceCarrier extends BaseCreepRole {
     private static getRecipientStructure(creep: Creep): StructureTerminal | null {
         return creep.room.terminal;
     }
 
-    private static getCurrentResource(creep: Creep, store: StructureStorage | StructureContainer ): ResourceConstant {
+    private static getCurrentResource(creep: Creep, store: StructureStorage | StructureContainer): ResourceConstant {
         return RESOURCES.filter(type => store.store.getUsedCapacity(type) > 0).shift();
     }
 

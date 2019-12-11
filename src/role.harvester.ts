@@ -2,6 +2,7 @@ import {BASE_WORKER_CREEP_BODY, HARVESTER_BODY, HARVESTERS_COUNT_LIMIT} from "./
 import CreepTrait from "./creep_traits";
 import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
 import BaseCreepRole from "./role.base_creep";
+import EnergyAggregatorRole from "./role.energy_aggregator";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils from "./utils";
@@ -17,8 +18,8 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 ];
 
 export default class HarvesterRole extends BaseCreepRole {
-    private static getRecipientStructures(creep: Creep): StructureConstant[] {
-        if (creep.room.energyAvailable < 600) {
+    private static getRecipientStructures(creep: Creep, game: Game): StructureConstant[] {
+        if (creep.room.energyAvailable < 500 && Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0) {
             return [STRUCTURE_LINK, STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
         } else {
             return STORAGE_STRUCTURES;
@@ -31,7 +32,7 @@ export default class HarvesterRole extends BaseCreepRole {
         if (target.energy > 0 && creep.store.getFreeCapacity() > 0) {
             CreepTrait.harvest(creep, target);
         } else {
-            CreepTrait.transferAllEnergy(creep, Utils.getClosestEnergyRecipient(creep, HarvesterRole.getRecipientStructures(creep)));
+            CreepTrait.transferAllEnergy(creep, Utils.getClosestEnergyRecipient(creep, HarvesterRole.getRecipientStructures(creep, game)));
         }
     }
 

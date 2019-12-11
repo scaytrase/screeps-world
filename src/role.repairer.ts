@@ -10,6 +10,7 @@ const _ = require('lodash');
 const FORBIDDEN_STRUCTURES: StructureConstant[] = [
     STRUCTURE_WALL,
     STRUCTURE_RAMPART,
+    STRUCTURE_ROAD,
 ];
 
 const SOURCE_STRUCTURES: StructureConstant[] = [

@@ -8,15 +8,15 @@ const store_types: StructureConstant[] = [
     STRUCTURE_LINK,
     STRUCTURE_EXTENSION,
     STRUCTURE_CONTAINER,
-    STRUCTURE_TOWER
+    STRUCTURE_TOWER,
+    STRUCTURE_SPAWN,
 ];
 
 export default class EconomyLogger implements Runnable {
     public run(game: Game, memory: Memory): void {
         const spawn: StructureSpawn = Object.values(game.spawns).shift();
-        const store: StructureStorage = spawn.room.storage;
 
-        const energyStores: ENERGY_STORAGE[] = spawn.room.find<ENERGY_STORAGE>(FIND_MY_STRUCTURES, {filter: (structure) => store_types.includes(structure.structureType)});
+        const energyStores: ENERGY_STORAGE[] = spawn.room.find<ENERGY_STORAGE>(FIND_STRUCTURES, {filter: (structure) => store_types.includes(structure.structureType)});
 
         const available: number = energyStores
             .map(storage => storage.store)
@@ -30,11 +30,21 @@ export default class EconomyLogger implements Runnable {
 
         console.log(
             `
-             Economy level: ${EconomyUtils.getCurrentEconomyLevel(game, memory)}
-             Spawn energy level: ${spawn.room.energyAvailable} of ${spawn.room.energyCapacityAvailable} (${Math.round(100 * spawn.room.energyAvailable / spawn.room.energyCapacityAvailable)}%)
-             Storage energy level: ${store.store.getUsedCapacity(RESOURCE_ENERGY)} of ${store.store.getCapacity(RESOURCE_ENERGY)} (${Math.round(100 * store.store.getUsedCapacity(RESOURCE_ENERGY) / store.store.getCapacity(RESOURCE_ENERGY))}%)
-             Total energy resources: ${available} of ${max} (${Math.round(100 * available / max)}%) 
+             💰 Economy level: ${EconomyUtils.getCurrentEconomyLevel(game, memory)}
+             ❤️ Spawn energy level: ${spawn.room.energyAvailable} of ${spawn.room.energyCapacityAvailable} (${Math.round(100 * spawn.room.energyAvailable / spawn.room.energyCapacityAvailable)}%)
+             ${this.getStorageMessage(spawn.room)}
+             🔋 Total energy resources: ${available} of ${max} (${Math.round(100 * available / max)}%) 
             `
         );
+    }
+
+    private getStorageMessage(room: Room): String {
+        if (!room.storage) {
+            return `🚫 No store`;
+        }
+
+        const store = room.storage.store;
+
+        return `Storage energy level: ${store.getUsedCapacity(RESOURCE_ENERGY)} of ${store.getCapacity(RESOURCE_ENERGY)} (${Math.round(100 * store.getUsedCapacity(RESOURCE_ENERGY) / store.getCapacity(RESOURCE_ENERGY))}%)`;
     }
 }

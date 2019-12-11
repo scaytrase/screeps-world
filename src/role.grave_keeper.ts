@@ -34,7 +34,7 @@ export default class GraveKeeperRole extends BaseCreepRole {
             ...(creep.room.find(FIND_TOMBSTONES, {
                 filter(tombstone) {
                     return tombstone.store.getUsedCapacity() > 0
-                        && (GRAVE_KEEPERS_LOOT_BORDERS ||  Utils.isWithinTraversableBorders(tombstone));
+                        && (GRAVE_KEEPERS_LOOT_BORDERS || Utils.isWithinTraversableBorders(tombstone));
                 }
             })),
             ...(creep.room.find(FIND_RUINS, {

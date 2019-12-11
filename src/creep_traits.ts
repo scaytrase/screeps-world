@@ -28,7 +28,7 @@ export default class CreepTrait {
     public static transferAnyResources(creep: Creep): void {
         const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER];
         CreepTrait.transferAllResources(creep, creep.room.find(FIND_MY_STRUCTURES, {
-            filter: (structure) => types.includes(structure.structureType) && structure['store'].getFreeCapacity() > creep.store.getUsedCapacity()
+            filter: (structure: StructureStorage | StructureContainer) => types.includes(structure.structureType) && structure.store.getFreeCapacity() > creep.store.getUsedCapacity()
         }).shift());
     }
 

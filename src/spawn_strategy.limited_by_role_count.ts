@@ -1,7 +1,6 @@
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
-
-const _ = require('lodash');
+import Utils from "./utils";
 
 export default class LimitedSpawnByRoleCountStrategy implements SpawnStrategy {
     private readonly limit: Number;
@@ -13,6 +12,6 @@ export default class LimitedSpawnByRoleCountStrategy implements SpawnStrategy {
     }
 
     shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
-        return _.filter(game.creeps, (creep: Creep) => this.role.match(creep)).length < this.limit;
+        return Utils.findCreepsByRole(game, this.role).length < this.limit;
     }
 }
