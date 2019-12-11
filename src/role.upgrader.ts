@@ -9,6 +9,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
+    STRUCTURE_SPAWN,
 ];
 
 const _ = require('lodash');
@@ -26,7 +27,7 @@ export default class UpgraderRole extends BaseCreepRole {
         if (creep.memory['upgrading']) {
             CreepTrait.upgradeController(creep);
         } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 100));
         }
     }
 

@@ -13,6 +13,7 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
     STRUCTURE_LINK,
+    STRUCTURE_SPAWN
 ];
 
 export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite | StructureRampart> {
@@ -38,7 +39,7 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected rest(creep: Creep, game: Game): void {
-        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES));
+        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 250));
     }
 
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {

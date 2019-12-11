@@ -1,4 +1,4 @@
-import {CARRIER_CREEP_BODY_LVL3, TERMINAL_ENERGY_REQUIREMENT} from "./config";
+import {BASE_CARRIER_CREEP_BODY, TERMINAL_ENERGY_REQUIREMENT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -18,10 +18,10 @@ const TARGET_STRUCTURES: StructureConstant[] = [
 export default class TerminalKeeperRole extends BaseCreepRole {
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
-            new LimitedSpawnByRoleCountStrategy(1, this),
+            new LimitedSpawnByRoleCountStrategy(0, this),
             new NotEmptyCallableResult((game, spawn) => {
                 const target: StructureTerminal | null = Utils.getClosestEnergyRecipient(spawn, TARGET_STRUCTURES);
-                return target.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT ? target : null;
+                return target && target.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT ? target : null;
             })
         ]);
     }
@@ -42,6 +42,6 @@ export default class TerminalKeeperRole extends BaseCreepRole {
     }
 
     protected getBody(game: Game): BodyPartConstant[] {
-        return CARRIER_CREEP_BODY_LVL3;
+        return BASE_CARRIER_CREEP_BODY;
     }
 }

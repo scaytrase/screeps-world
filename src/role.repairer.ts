@@ -53,7 +53,7 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
     }
 
     protected rest(creep: Creep, game: Game): void {
-        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, creep.store.getCapacity()));
+        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 250));
     }
 
     protected shouldRest(creep: Creep, game: Game): boolean {

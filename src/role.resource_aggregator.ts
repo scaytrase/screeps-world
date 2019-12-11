@@ -1,4 +1,4 @@
-import {CARRIER_CREEP_BODY_LVL2} from "./config";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_CREEP_BODY_LVL2} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -42,13 +42,13 @@ export default class ResourceAggregator extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: filter}),
-                new LimitedSpawnByRoleCountStrategy(1, this)
+                new LimitedSpawnByRoleCountStrategy(0, this)
             ]
         );
     }
 
     protected getBody(game: Game) {
-        return CARRIER_CREEP_BODY_LVL2;
+        return BASE_CARRIER_CREEP_BODY;
     }
 
     protected getRoleName(): string {
