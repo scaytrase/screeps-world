@@ -31,7 +31,7 @@ export default class SpawnKeeperRole extends BaseCreepRole {
         if (creep.store.getFreeCapacity() > 0) {
             const energySource = Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES);
 
-            if (energySource.pos.getRangeTo(creep.pos) < 15) {
+            if (energySource && energySource.pos.getRangeTo(creep.pos) < 15) {
                 CreepTrait.withdrawAllEnergy(creep, energySource);
             }
         } else {

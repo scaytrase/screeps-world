@@ -12,7 +12,7 @@ export default abstract class BaseCreepRole implements Role {
 
     spawn(spawn: StructureSpawn, game: Game): void {
         spawn.spawnCreep(
-            this.getBody(game),
+            this.getBody(game, spawn),
             this.getName(game),
             {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn, game)}}
         );
@@ -24,7 +24,7 @@ export default abstract class BaseCreepRole implements Role {
 
     protected abstract getRoleName(): string;
 
-    protected abstract getBody(game: Game): BodyPartConstant[];
+    protected abstract getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[];
 
     private getName(game: Game): string {
         let i = 0;

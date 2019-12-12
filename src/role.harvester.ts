@@ -44,9 +44,9 @@ export default class HarvesterRole extends BaseCreepRole {
         return new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT_LIMIT, this);
     }
 
-    protected getBody(game: Game) {
+    protected getBody(game: Game, spawn: StructureSpawn) {
         const currentCreepCount = this.getCurrentCreepCount(game);
-        if (currentCreepCount < 2) {
+        if (spawn.room.energyAvailable < 300 || currentCreepCount < 2) {
             return BASE_WORKER_CREEP_BODY;
         }
 
