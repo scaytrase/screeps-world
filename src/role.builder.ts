@@ -1,4 +1,4 @@
-import {BUILDER_BODY, BUILDERS_COUNT_LIMIT, RAMPART_INITIAL_HITS} from "./config";
+import {BASE_WORKER_CREEP_BODY, BUILDER_BODY, BUILDERS_COUNT_LIMIT, RAMPART_INITIAL_HITS} from "./config";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -70,7 +70,12 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
             .shift();
     }
 
-    protected getBody(game: Game): BodyPartConstant[] {
+    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
+        const currentCreepCount = Utils.findCreepsByRole(game, this).length;
+        if (spawn.room.energyAvailable < 300 && currentCreepCount === 0) {
+            return BASE_WORKER_CREEP_BODY;
+        }
+
         return BUILDER_BODY;
     }
 

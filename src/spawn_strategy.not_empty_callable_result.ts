@@ -8,6 +8,6 @@ export default class NotEmptyCallableResult implements SpawnStrategy {
     }
 
     shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
-        return this.callable(game, spawn) !== null;
+        return !!this.callable(game, spawn);
     }
 }
