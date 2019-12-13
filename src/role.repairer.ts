@@ -39,9 +39,9 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
         }).sort(Utils.sortByHealthPercent()).shift();
     }
 
-    protected getBody(game: Game): BodyPartConstant[] {
+    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
         const currentCreepCount = this.getCurrentCreepCount(game);
-        if (currentCreepCount === 1) {
+        if (currentCreepCount === 0 && spawn.room.energyAvailable < 300) {
             return BASE_WORKER_CREEP_BODY;
         }
 
