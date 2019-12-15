@@ -1,4 +1,4 @@
-import {BASE_CARRIER_CREEP_BODY} from "./config";
+import {RESOURCE_AGGREGATOR_BODY, RESOURCE_AGGREGATORS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -7,38 +7,28 @@ import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_mor
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils, {SORT} from "./utils";
 
-const SOURCE_TYPES = [
-    STRUCTURE_CONTAINER,
-];
-
-const FORBIDDEN_RESOURCES: string[] = [
-    RESOURCE_KEANIUM,
-    RESOURCE_ENERGY,
-];
-
-const filter = (structure: StructureContainer | StructureSpawn) =>
-    structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_SPAWN
-    && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+const filter = (structure: StructureContainer) =>
+    structure.structureType === STRUCTURE_CONTAINER
+    && structure.store.getUsedCapacity() > 0
+    && structure.store.getUsedCapacity(RESOURCE_ENERGY) !== structure.store.getUsedCapacity(RESOURCE_ENERGY);
 
 export default class ResourceAggregator extends BaseCreepRole {
-    private static getTargetStructure(creep: Creep): StructureContainer | null {
-        const spawn = creep.room.find(FIND_MY_SPAWNS).shift();
-
-        return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: filter}).sort(Utils.sortByDistance(spawn)).shift();
+    private static getRecipient(creep: Creep): StructureStorage | null {
+        return creep.room.storage;
     }
 
-    private static getSourceStructures(creep: Creep): StructureContainer | null {
+    private static getSource(creep: Creep): StructureContainer | null {
         const spawn = creep.room.find(FIND_MY_SPAWNS).shift();
 
         return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: filter}).sort(Utils.sortByDistance(spawn, SORT.DESC)).shift();
     }
 
     run(creep: Creep, game: Game): void {
-        const source = ResourceAggregator.getSourceStructures(creep);
+        const source = ResourceAggregator.getSource(creep);
         if (source && creep.store.getFreeCapacity() > 0) {
             CreepTrait.withdrawAllResources(creep, source);
         } else {
-            CreepTrait.transferAllResources(creep, ResourceAggregator.getTargetStructure(creep));
+            CreepTrait.transferAllResources(creep, ResourceAggregator.getRecipient(creep));
         }
     }
 
@@ -46,13 +36,14 @@ export default class ResourceAggregator extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: filter}),
-                new LimitedSpawnByRoleCountStrategy(0, this)
+                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE}}),
+                new LimitedSpawnByRoleCountStrategy(RESOURCE_AGGREGATORS_COUNT_LIMIT, this)
             ]
         );
     }
 
     protected getBody(game: Game) {
-        return BASE_CARRIER_CREEP_BODY;
+        return RESOURCE_AGGREGATOR_BODY;
     }
 
     protected getRoleName(): string {

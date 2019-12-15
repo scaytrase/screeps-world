@@ -1,4 +1,4 @@
-import {RESOURCE_ASSIGN_ALGO_VERSION, RESOURCE_ASSIGN_NORMALIZE_DISTANCE} from "./config";
+import {RESOURCE_ASSIGN_ALGO_VERSION} from "./config";
 import Runnable from "./runnable";
 
 const _ = require('lodash');
@@ -7,10 +7,10 @@ export const RESOURCE_ASSIGNMENT = 'target';
 const ALGO_VER = 'assign_algo';
 
 export default class ResourceAssigner implements Runnable {
-    private readonly spawn: StructureSpawn;
+    private readonly room: Room;
 
-    constructor(spawn: StructureSpawn) {
-        this.spawn = spawn;
+    constructor(room: Room) {
+        this.room = room;
     }
 
     private static createResourceMap(sources: Source[], creeps: { [p: string]: Creep }): Map<Source, number> {
@@ -33,7 +33,7 @@ export default class ResourceAssigner implements Runnable {
     }
 
     public run(game: Game, memory: Memory): void {
-        const sources = this.spawn.room.find(FIND_SOURCES);
+        const sources = this.room.find(FIND_SOURCES);
         _.forEach(
             game.creeps,
             (creep: Creep) => this.assignResource(creep, sources, game.creeps)
@@ -54,12 +54,6 @@ export default class ResourceAssigner implements Runnable {
         }
 
         let resourceMap = ResourceAssigner.createResourceMap(sources, creeps);
-
-        if (RESOURCE_ASSIGN_NORMALIZE_DISTANCE) {
-            for (let resource of resourceMap.keys()) {
-                resourceMap.set(resource, resourceMap.get(resource) / resource.pos.getRangeTo(this.spawn));
-            }
-        }
 
         let minResource: Source = resourceMap.keys().next().value;
         for (let resource of resourceMap.keys()) {
