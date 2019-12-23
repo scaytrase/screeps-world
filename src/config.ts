@@ -66,5 +66,8 @@ export const RESOURCE_ASSIGN_ALGO_VERSION = 15;
 export const TOWER_RANGE = 50;
 export const TOWER_ATTACK_BORDERS = false;
 export const GUARDS_ATTACK_BORDERS = false;
+
+
 export const TERMINAL_ENERGY_REQUIREMENT = 5000;
+export const TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT = 1;
 

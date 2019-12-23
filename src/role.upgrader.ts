@@ -1,4 +1,4 @@
-import {UPGRADER_BODY, UPGRADERS_COUNT_LIMIT} from "./config";
+import {BASE_WORKER_CREEP_BODY, UPGRADER_BODY, UPGRADERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -27,7 +27,7 @@ export default class UpgraderRole extends BaseCreepRole {
         if (creep.memory['upgrading']) {
             CreepTrait.upgradeController(creep);
         } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 100));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, BASE_WORKER_CREEP_BODY.length * 50));
         }
     }
 

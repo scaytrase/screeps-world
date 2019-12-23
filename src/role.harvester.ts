@@ -20,7 +20,7 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 export default class HarvesterRole extends BaseCreepRole {
     private static getRecipientStructures(creep: Creep, game: Game): StructureConstant[] {
         if (creep.room.energyAvailable < 500 && Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0) {
-            return [STRUCTURE_LINK, STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
+            return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
         } else {
             return STORAGE_STRUCTURES;
         }
@@ -46,7 +46,8 @@ export default class HarvesterRole extends BaseCreepRole {
 
     protected getBody(game: Game, spawn: StructureSpawn) {
         const currentCreepCount = Utils.findCreepsByRole(game, this).length;
-        if (spawn.room.energyAvailable < 300 || currentCreepCount < 2) {
+
+        if ((spawn.room.energyAvailable < HARVESTER_BODY.length * 50 || currentCreepCount < 2) && Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0) {
             return BASE_WORKER_CREEP_BODY;
         }
 

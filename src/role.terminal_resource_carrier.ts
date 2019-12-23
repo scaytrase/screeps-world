@@ -1,4 +1,4 @@
-import {BASE_CARRIER_CREEP_BODY} from "./config";
+import {BASE_CARRIER_CREEP_BODY, TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -46,7 +46,7 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: filter}),
-                new LimitedSpawnByRoleCountStrategy(0, this)
+                new LimitedSpawnByRoleCountStrategy(TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT, this)
             ]
         );
     }
