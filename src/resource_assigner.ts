@@ -1,4 +1,4 @@
-import {RESOURCE_ASSIGN_ALGO_VERSION} from "./config";
+import {RESOURCE_ASSIGN_ALGO_VERSION, SUICIDE_TTL} from "./config";
 import Runnable from "./runnable";
 
 const _ = require('lodash');
@@ -20,6 +20,10 @@ export default class ResourceAssigner implements Runnable {
         }
 
         for (let creepName in creeps) {
+            if (creeps[creepName].ticksToLive < SUICIDE_TTL) {
+                continue;
+            }
+
             const assignedResource: Id<Source> = creeps[creepName].memory[RESOURCE_ASSIGNMENT];
             if (assignedResource === undefined) {
                 continue;
@@ -50,6 +54,10 @@ export default class ResourceAssigner implements Runnable {
         }
 
         if (creep.memory[RESOURCE_ASSIGNMENT] !== undefined && creep.memory[ALGO_VER] === RESOURCE_ASSIGN_ALGO_VERSION) {
+            return;
+        }
+
+        if (creep.ticksToLive < SUICIDE_TTL) {
             return;
         }
 

@@ -10,12 +10,22 @@ export default abstract class BaseCreepRole implements Role {
 
     public abstract run(creep: Creep, game: Game): void;
 
-    spawn(spawn: StructureSpawn, game: Game): void {
-        spawn.spawnCreep(
+    public spawn(spawn: StructureSpawn, game: Game): ScreepsReturnCode {
+        const cost = this.getBody(game, spawn).length * 50;
+        const energy = spawn.room.energyAvailable;
+        if (energy < cost) {
+            console.log(`[WARN] Not enough energy to spawn ${this.constructor.name} body (${energy} < ${cost})`);
+        }
+
+        return spawn.spawnCreep(
             this.getBody(game, spawn),
             this.getName(game),
             {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn, game)}}
         );
+    }
+
+    public isPrioritySpawn(): boolean {
+        return false;
     }
 
     protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {

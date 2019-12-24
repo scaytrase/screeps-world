@@ -1,10 +1,19 @@
-import {BASE_WORKER_CREEP_BODY, HARVESTER_BODY, HARVESTERS_COUNT_LIMIT} from "./config";
+import {
+    BASE_WORKER_CREEP_BODY,
+    HARVESTER_BODY,
+    HARVESTERS_COUNT_LIMIT,
+    HARVESTERS_EMERGENCY_COUNT_LIMIT
+} from "./config";
 import CreepTrait from "./creep_traits";
+import Economy from "./economy";
 import {RESOURCE_ASSIGNMENT} from "./resource_assigner";
 import BaseCreepRole from "./role.base_creep";
-import EnergyAggregatorRole from "./role.energy_aggregator";
+import StorageLinkKeeperRole from "./role.storage_link_keeper";
 import SpawnStrategy from "./spawn_strategy";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
+import EmergencySpawnStrategy from "./spawn_strategy.emergency";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import OrChainSpawnStrategy from "./spawn_strategy.or_chain";
 import Utils from "./utils";
 
 const _ = require('lodash');
@@ -19,14 +28,20 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 
 export default class HarvesterRole extends BaseCreepRole {
     private static getRecipientStructures(creep: Creep, game: Game): StructureConstant[] {
-        if (creep.room.energyAvailable < 500 && Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0) {
+        if (Economy.isHarvesterEmergency(creep.room, game) && Utils.findCreepsByRole(game, new StorageLinkKeeperRole()).length === 0) {
             return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
+        } else if (Economy.isHarvesterEmergency(creep.room, game)) {
+            return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_LINK];
         } else {
             return STORAGE_STRUCTURES;
         }
     }
 
-    run(creep: Creep, game: Game): void {
+    public isPrioritySpawn(): boolean {
+        return true;
+    }
+
+    public run(creep: Creep, game: Game): void {
         const target = Game.getObjectById<Source>(creep.memory[RESOURCE_ASSIGNMENT]);
 
         if (target.energy > 0 && creep.store.getFreeCapacity() > 0) {
@@ -36,18 +51,20 @@ export default class HarvesterRole extends BaseCreepRole {
         }
     }
 
-    getCurrentCreepCount(game: Game): Number {
-        return _.filter(game.creeps, (creep: Creep) => this.match(creep)).length;
-    }
-
-    getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT_LIMIT, this);
+    public getSpawnStrategy(): SpawnStrategy {
+        return new OrChainSpawnStrategy([
+            new LimitedSpawnByRoleCountStrategy(HARVESTERS_COUNT_LIMIT, this),
+            new AndChainSpawnStrategy([
+                new EmergencySpawnStrategy((spawn, game) => Economy.isHarvesterEmergency(spawn.room, game)),
+                new LimitedSpawnByRoleCountStrategy(HARVESTERS_EMERGENCY_COUNT_LIMIT, this),
+            ])
+        ]);
     }
 
     protected getBody(game: Game, spawn: StructureSpawn) {
         const currentCreepCount = Utils.findCreepsByRole(game, this).length;
 
-        if ((spawn.room.energyAvailable < HARVESTER_BODY.length * 50 || currentCreepCount < 2) && Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0) {
+        if (spawn.room.energyAvailable < HARVESTER_BODY.length * 50 || currentCreepCount < 2) {
             return BASE_WORKER_CREEP_BODY;
         }
 

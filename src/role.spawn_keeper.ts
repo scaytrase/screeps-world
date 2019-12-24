@@ -1,4 +1,10 @@
-import {BASE_WORKER_CREEP_BODY, HARVESTER_BODY, SPAWN_KEEPER_BODY, SPAWN_KEEPERS_COUNT_LIMIT} from "./config";
+import {
+    BASE_CARRIER_CREEP_BODY,
+    BASE_WORKER_CREEP_BODY,
+    HARVESTER_BODY,
+    SPAWN_KEEPER_BODY,
+    SPAWN_KEEPERS_COUNT_LIMIT
+} from "./config";
 import CreepTrait from "./creep_traits";
 import EnergyAggregatorRole from "./role.energy_aggregator";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
@@ -24,8 +30,12 @@ const TARGET_STRUCTURES: StructureConstant[] = [
 ];
 
 export default class SpawnKeeperRole extends WorkRestCycleCreepRole<StructureSpawn | StructureExtension | StructureTower> {
-    getSpawnStrategy(): SpawnStrategy {
+    public getSpawnStrategy(): SpawnStrategy {
         return new LimitedSpawnByRoleCountStrategy(SPAWN_KEEPERS_COUNT_LIMIT, this);
+    }
+
+    public isPrioritySpawn(): boolean {
+        return true;
     }
 
     protected getRoleName(): string {
@@ -33,8 +43,8 @@ export default class SpawnKeeperRole extends WorkRestCycleCreepRole<StructureSpa
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (spawn.room.energyAvailable < 500 && Utils.findCreepsByRole(game, this).length === 0) {
-            return BASE_WORKER_CREEP_BODY;
+        if (spawn.room.energyAvailable < SPAWN_KEEPER_BODY.length * 50 && Utils.findCreepsByRole(game, this).length === 0) {
+            return BASE_CARRIER_CREEP_BODY;
         }
 
         return SPAWN_KEEPER_BODY;

@@ -26,6 +26,10 @@ export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<Structu
         return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: recipientFilter}).sort(Utils.sortByDistance(spawn)).shift();
     }
 
+    public isPrioritySpawn(): boolean {
+        return true;
+    }
+
     public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
             new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT_LIMIT, this),

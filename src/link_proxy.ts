@@ -22,13 +22,29 @@ export default class LinkProxy {
         return this.amount;
     }
 
+    public isDemanding(): boolean {
+        return this.type === LinkType.DEMAND && this.getAmount() > 1;
+    }
+
+    public isSourcing(): boolean {
+        return this.type === LinkType.SOURCE && this.getAmount() > 1;
+    }
+
     public withdraw(link: LinkProxy, amount: number): void {
+        if (amount === 0) {
+            return;
+        }
+
         link.link.transferEnergy(this.link, amount);
         this.amount += amount;
         link.amount -= amount;
     }
 
     public transfer(link: LinkProxy, amount: number): void {
+        if (amount === 0) {
+            return;
+        }
+
         this.link.transferEnergy(link.link, amount);
         this.amount -= amount;
         link.amount += amount;
@@ -57,7 +73,7 @@ export default class LinkProxy {
 
         const sources: Source[] = this.link.room.find(FIND_SOURCES);
         for (let source of sources) {
-            if (this.link.pos.getRangeTo(source) < 2) {
+            if (this.link.pos.getRangeTo(source) < 3) {
                 return LinkType.SOURCE;
             }
         }

@@ -1,3 +1,4 @@
+import {SUICIDE_TTL} from "./config";
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import Utils from "./utils";
@@ -12,6 +13,6 @@ export default class LimitedSpawnByRoleCountStrategy implements SpawnStrategy {
     }
 
     shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
-        return Utils.findCreepsByRole(game, this.role).length < this.limit;
+        return Utils.findCreepsByRole(game, this.role).filter(creep => creep.ticksToLive > SUICIDE_TTL).length < this.limit;
     }
 }

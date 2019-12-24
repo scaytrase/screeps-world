@@ -28,12 +28,12 @@ import TowerController from "./tower_controller";
 const roles = [
     new HarvesterRole(),
     new SpawnKeeperRole(),
+    new EnergyAggregatorRole(),
+    new UpgraderRole(),
     new GuardRole(),
     new RangeGuardRole(),
     new TowerKeeperRole(),
     new RepairerRole(),
-    new UpgraderRole(),
-    new EnergyAggregatorRole(),
     new GraveKeeperRole(),
     new BuilderRole(),
     new WallKeeperRole(),
@@ -52,6 +52,7 @@ module.exports.loop = function () {
     for (const spawn of spawns) {
         let runnables: Array<Runnable> = [];
 
+        runnables.push(new EconomyLogger());
         runnables.push(new Cleaner());
         runnables.push(new ResourceAssigner(spawn.room));
         runnables.push(new CreepSpawner(roles, spawn));
@@ -59,7 +60,6 @@ module.exports.loop = function () {
         runnables.push(new TowerController(spawn.room));
         runnables.push(new CreepSpawnBound(spawn));
         runnables.push(new CreepRetirementProgram());
-        runnables.push(new EconomyLogger());
         runnables.push(new LinkManager(spawn.room));
 
         for (let runnable of runnables) {

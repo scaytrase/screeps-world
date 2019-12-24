@@ -28,23 +28,29 @@ export default class LinkManager implements Runnable {
 
         for (let demandLink of this.getDemandLinks(links)) {
             for (let sourceLink of this.getSourceLinks(links)) {
-                demandLink.withdraw(sourceLink, Math.min(sourceLink.getAmount(), demandLink.getAmount()));
+                const amount = Math.min(sourceLink.getAmount(), demandLink.getAmount());
 
-                if (demandLink.getAmount() === 0) {
+                console.log(`[DEBUG] providing ${amount} to ${demandLink.link.id} from ${sourceLink.link.id}`);
+
+                demandLink.withdraw(sourceLink, amount);
+
+                if (!demandLink.isDemanding()) {
                     break;
                 }
             }
 
-            if (demandLink.getAmount() === 0) {
+            if (!demandLink.isDemanding()) {
                 continue;
             }
+
+            console.log(`[DEBUG] demanding ${demandLink.getAmount()} from storage to ${demandLink.link.id}`);
 
             for (let storageLink of this.getStorageLinks(links)) {
                 this.fillStorageLink(storageLink, game);
 
                 demandLink.withdraw(storageLink, Math.min(storageLink.getAmount(), demandLink.getAmount()));
 
-                if (demandLink.getAmount() === 0) {
+                if (!demandLink.isDemanding()) {
                     break;
                 }
             }
@@ -55,9 +61,29 @@ export default class LinkManager implements Runnable {
             for (let storageLink of this.getStorageLinks(links)) {
                 this.emptyStorageLink(storageLink, game);
 
-                storageLink.withdraw(storageLink, Math.min(storageLink.getAmount(), sourceLink.getAmount()));
+                const amount = sourceLink.getAmount();
+
+                if (sourceLink.link.cooldown > 0) {
+                    console.log(`[DEBUG] providing ${amount} to storage from ${sourceLink.link.id} after cooldown ${sourceLink.link.cooldown}`);
+                } else {
+                    console.log(`[DEBUG] providing ${amount} to storage from ${sourceLink.link.id}`);
+                    storageLink.withdraw(sourceLink, amount);
+                }
             }
         }
+
+        for (let storageLink of this.getStorageLinks(links)) {
+            this.resetKeeper(storageLink, game);
+        }
+    }
+
+    private resetKeeper(link: LinkProxy, game: Game) {
+        const keeper = LinkManager.getKeeper(link, game);
+        if (!keeper) {
+            return;
+        }
+
+        CreepTrait.transferAllEnergy(keeper, keeper.room.storage);
     }
 
     private fillStorageLink(link: LinkProxy, game: Game) {
@@ -86,15 +112,15 @@ export default class LinkManager implements Runnable {
         }
     }
 
-    private getDemandLinks(links: LinkProxy[]) {
-        return links.filter(link => link.type === LinkType.DEMAND && link.getAmount() !== 0);
+    private getDemandLinks(links: LinkProxy[]): LinkProxy[] {
+        return links.filter(link => link.isDemanding());
     }
 
-    private getSourceLinks(links: LinkProxy[]) {
-        return links.filter(link => link.type === LinkType.SOURCE && link.getAmount() !== 0);
+    private getSourceLinks(links: LinkProxy[]): LinkProxy[] {
+        return links.filter(link => link.isSourcing());
     }
 
-    private getStorageLinks(links: LinkProxy[]) {
+    private getStorageLinks(links: LinkProxy[]): LinkProxy[] {
         return links.filter(link => link.type === LinkType.STORAGE);
     }
 }
