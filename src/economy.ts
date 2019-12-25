@@ -23,7 +23,7 @@ export default class Economy {
 
     public static isHarvesterEmergency(room: Room, game: Game): boolean {
         return room.energyAvailable < 500
-            || Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0
+            // || Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0
             || Utils.findCreepsByRole(game, new SpawnKeeperRole()).length === 0;
     }
 }

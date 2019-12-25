@@ -29,9 +29,9 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 export default class HarvesterRole extends BaseCreepRole {
     private static getRecipientStructures(creep: Creep, game: Game): StructureConstant[] {
         if (Economy.isHarvesterEmergency(creep.room, game) && Utils.findCreepsByRole(game, new StorageLinkKeeperRole()).length === 0) {
-            return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
+            return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER];
         } else if (Economy.isHarvesterEmergency(creep.room, game)) {
-            return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_LINK];
+            return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER, STRUCTURE_LINK];
         } else {
             return STORAGE_STRUCTURES;
         }

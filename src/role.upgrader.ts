@@ -7,6 +7,7 @@ import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import EmergencySpawnStrategy from "./spawn_strategy.emergency";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import NotSpawnStrategy from "./spawn_strategy.not";
+import OrChainSpawnStrategy from "./spawn_strategy.or_chain";
 import Utils from "./utils";
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
@@ -42,7 +43,7 @@ export default class UpgraderRole extends BaseCreepRole {
     public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
             new LimitedSpawnByRoleCountStrategy(UPGRADERS_COUNT_LIMIT, this),
-            new AndChainSpawnStrategy([
+            new OrChainSpawnStrategy([
                 new NotSpawnStrategy(
                     new EmergencySpawnStrategy((spawn, game) => Economy.isHarvesterEmergency(spawn.room, game))
                 ),

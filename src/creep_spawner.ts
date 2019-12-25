@@ -11,7 +11,7 @@ export default class CreepSpawner implements Runnable {
     }
 
     run(game: Game, memory: Memory): void {
-        if (this.spawn.spawning && this.spawn.spawning.remainingTime > 0) {
+        if (false && this.spawn.spawning && this.spawn.spawning.remainingTime > 0) {
             const spawning = this.spawn.spawning;
             console.log(`[INFO] Spawning ${spawning.name} (${spawning.remainingTime}/${spawning.needTime})`);
 
