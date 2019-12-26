@@ -11,7 +11,7 @@ export default class EconomyLogger implements Runnable {
     }
 
     private static getEconomyMessage(spawn: StructureSpawn, game: Game, memory: Memory): String {
-        return `💰 Economy level: ${Economy.getCurrentEconomyLevel(spawn.room, game, memory)}`;
+        return `💰 Economy level: ${Economy.getCurrentEconomyLevel(spawn.room, game)}`;
     }
 
     private static getTotalMessage(spawn: StructureSpawn): String {

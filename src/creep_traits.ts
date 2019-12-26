@@ -1,4 +1,5 @@
 import {SUICIDE_CREEPS} from "./config";
+import Utils from "./utils";
 
 const _ = require('lodash');
 
@@ -26,10 +27,14 @@ export default class CreepTrait {
     }
 
     public static transferAnyResources(creep: Creep): void {
-        const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER];
-        CreepTrait.transferAllResources(creep, creep.room.find(FIND_MY_STRUCTURES, {
-            filter: (structure: StructureStorage | StructureContainer) => types.includes(structure.structureType) && structure.store.getFreeCapacity() > creep.store.getUsedCapacity()
-        }).shift());
+        const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK];
+        CreepTrait.transferAllResources(creep,
+            creep.room
+                .find(FIND_MY_STRUCTURES, {
+                    filter: (structure: StructureStorage | StructureContainer) => types.includes(structure.structureType) && structure.store.getFreeCapacity() > creep.store.getUsedCapacity()
+                })
+                .sort(Utils.sortByDistance(creep))
+                .shift());
     }
 
     public static transferAllEnergy(creep: Creep, target: AnyStructure | null): void {

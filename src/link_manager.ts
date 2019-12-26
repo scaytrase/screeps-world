@@ -31,11 +31,13 @@ export default class LinkManager implements Runnable {
                 const amount = Math.min(sourceLink.getAmount(), demandLink.getAmount());
 
                 console.log(`[DEBUG] providing ${amount} to ${demandLink.link.id} from ${sourceLink.link.id}`);
-
-                demandLink.withdraw(sourceLink, amount);
-
-                if (!demandLink.isDemanding()) {
-                    break;
+                if (sourceLink.link.cooldown > 0) {
+                    console.log(`[DEBUG] link ${sourceLink.link.id} is cooling down for ${sourceLink.link.cooldown}`);
+                } else {
+                    demandLink.withdraw(sourceLink, amount);
+                    if (!demandLink.isDemanding()) {
+                        break;
+                    }
                 }
             }
 
@@ -43,15 +45,20 @@ export default class LinkManager implements Runnable {
                 continue;
             }
 
-            console.log(`[DEBUG] demanding ${demandLink.getAmount()} from storage to ${demandLink.link.id}`);
 
             for (let storageLink of this.getStorageLinks(links)) {
-                this.fillStorageLink(storageLink, game);
+                const amount = Math.min(storageLink.getAmount(), demandLink.getAmount());
 
-                demandLink.withdraw(storageLink, Math.min(storageLink.getAmount(), demandLink.getAmount()));
+                console.log(`[DEBUG] demanding ${demandLink.getAmount()} to ${demandLink.link.id} from storage ${storageLink.link.id}`);
+                if (storageLink.link.cooldown > 0) {
+                    console.log(`[DEBUG] storage ${storageLink.link.id} is cooling down for ${storageLink.link.cooldown}`);
+                } else {
+                    this.fillStorageLink(storageLink, game);
+                    demandLink.withdraw(storageLink, amount);
 
-                if (!demandLink.isDemanding()) {
-                    break;
+                    if (!demandLink.isDemanding()) {
+                        break;
+                    }
                 }
             }
         }
@@ -59,14 +66,13 @@ export default class LinkManager implements Runnable {
 
         for (let sourceLink of this.getSourceLinks(links)) {
             for (let storageLink of this.getStorageLinks(links)) {
-                this.emptyStorageLink(storageLink, game);
-
                 const amount = sourceLink.getAmount();
 
                 if (sourceLink.link.cooldown > 0) {
                     console.log(`[DEBUG] providing ${amount} to storage from ${sourceLink.link.id} after cooldown ${sourceLink.link.cooldown}`);
                 } else {
                     console.log(`[DEBUG] providing ${amount} to storage from ${sourceLink.link.id}`);
+                    this.emptyStorageLink(storageLink, game);
                     storageLink.withdraw(sourceLink, amount);
                 }
             }

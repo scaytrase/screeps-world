@@ -50,7 +50,7 @@ export const SPAWN_KEEPER_BODY = CARRIER_CREEP_BODY_LVL3;
 export const TOWER_KEEPERS_COUNT_LIMIT = 0;
 export const TOWER_KEEPER_BODY = BASE_CARRIER_CREEP_BODY;
 
-export const RESOURCE_AGGREGATORS_COUNT_LIMIT = 0;
+export const RESOURCE_AGGREGATORS_COUNT_LIMIT = 1;
 export const RESOURCE_AGGREGATOR_BODY = CARRIER_CREEP_BODY_LVL3;
 
 export const GRAVE_KEEPERS_COUNT_LIMIT = 2; // @todo 0 for low economy
@@ -68,7 +68,8 @@ export const TOWER_RANGE = 50;
 export const TOWER_ATTACK_BORDERS = false;
 export const GUARDS_ATTACK_BORDERS = false;
 
+export const DEBUG = false;
 
-export const TERMINAL_ENERGY_REQUIREMENT = 5000;
+export const TERMINAL_ENERGY_REQUIREMENT = 50000;
 export const TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT = 1;
 

@@ -9,7 +9,7 @@ export enum ECONOMY_LEVEL {
 }
 
 export default class Economy {
-    public static getCurrentEconomyLevel(room: Room, game: Game, memory: Memory): ECONOMY_LEVEL {
+    public static getCurrentEconomyLevel(room: Room, game: Game): ECONOMY_LEVEL {
         if (Economy.anyEmergency(room, game)) {
             return ECONOMY_LEVEL.LOW;
         }

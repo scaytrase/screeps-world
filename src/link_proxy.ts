@@ -23,31 +23,33 @@ export default class LinkProxy {
     }
 
     public isDemanding(): boolean {
-        return this.type === LinkType.DEMAND && this.getAmount() > 1;
+        return this.type === LinkType.DEMAND && this.getAmount() > 200;
     }
 
     public isSourcing(): boolean {
-        return this.type === LinkType.SOURCE && this.getAmount() > 1;
+        return this.type === LinkType.SOURCE && this.getAmount() > 200;
     }
 
     public withdraw(link: LinkProxy, amount: number): void {
-        if (amount === 0) {
+        if (amount < 400) {
             return;
         }
 
-        link.link.transferEnergy(this.link, amount);
-        this.amount += amount;
-        link.amount -= amount;
+        if (OK === link.link.transferEnergy(this.link, amount)) {
+            this.amount += amount;
+            link.amount -= amount;
+        }
     }
 
     public transfer(link: LinkProxy, amount: number): void {
-        if (amount === 0) {
+        if (amount < 400) {
             return;
         }
 
-        this.link.transferEnergy(link.link, amount);
-        this.amount -= amount;
-        link.amount += amount;
+        if (OK === this.link.transferEnergy(link.link, amount)) {
+            this.amount -= amount;
+            link.amount += amount;
+        }
     }
 
     private getInitialAmount(): number {

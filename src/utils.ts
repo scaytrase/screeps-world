@@ -66,4 +66,16 @@ export default class Utils {
     public static findCreepsByRole(game: Game, role: Role): Creep[] {
         return _.filter(game.creeps, (creep: Creep) => role.match(creep));
     }
+
+    public static getBodyCost(bodyParts: BodyPartConstant[]): number {
+        return bodyParts.map(part => BODYPART_COST[part]).reduce((p, v) => p + v, 0);
+    }
+
+    public static isCapableToSpawnBodyNow(spawn: StructureSpawn, bodyParts: BodyPartConstant[]): boolean {
+        return spawn.room.energyAvailable > Utils.getBodyCost(bodyParts);
+    }
+
+    public static isCapableToSpawnBody(spawn: StructureSpawn, bodyParts: BodyPartConstant[]): boolean {
+        return spawn.room.energyCapacityAvailable > Utils.getBodyCost(bodyParts);
+    }
 }

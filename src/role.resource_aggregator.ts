@@ -10,7 +10,7 @@ import Utils, {SORT} from "./utils";
 const filter = (structure: StructureContainer) =>
     structure.structureType === STRUCTURE_CONTAINER
     && structure.store.getUsedCapacity() > 0
-    && structure.store.getUsedCapacity(RESOURCE_ENERGY) !== structure.store.getUsedCapacity(RESOURCE_ENERGY);
+    && structure.store.getUsedCapacity(RESOURCE_ENERGY) !== structure.store.getUsedCapacity();
 
 export default class ResourceAggregator extends BaseCreepRole {
     private static getRecipient(creep: Creep): StructureStorage | null {
