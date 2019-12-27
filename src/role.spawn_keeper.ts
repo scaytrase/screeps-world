@@ -1,12 +1,5 @@
-import {
-    BASE_CARRIER_CREEP_BODY,
-    BASE_WORKER_CREEP_BODY,
-    HARVESTER_BODY,
-    SPAWN_KEEPER_BODY,
-    SPAWN_KEEPERS_COUNT_LIMIT
-} from "./config";
+import {BASE_CARRIER_CREEP_BODY, SPAWN_KEEPER_BODY, SPAWN_KEEPERS_COUNT_LIMIT} from "./config";
 import CreepTrait from "./creep_traits";
-import EnergyAggregatorRole from "./role.energy_aggregator";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";

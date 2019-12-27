@@ -50,8 +50,7 @@ export default class CreepTrait {
             const resourceType = _.findKey(creep.store);
             if (creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
-                    visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE},
-                    maxRooms: 2
+                    visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE}
                 });
             }
         }
@@ -61,8 +60,7 @@ export default class CreepTrait {
         if (target) {
             if (creep.withdraw(target, resource) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
-                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
-                    maxRooms: 2
+                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}
                 });
             }
         }
@@ -72,8 +70,7 @@ export default class CreepTrait {
         if (target) {
             if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
-                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
-                    maxRooms: 2
+                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}
                 });
             }
         }
@@ -115,10 +112,10 @@ export default class CreepTrait {
         }
     }
 
-    public static upgradeController(creep: Creep): void {
-        if (creep.room.controller) {
-            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: COLOR_BUILD}});
+    public static upgradeController(creep: Creep, controller: StructureController = creep.room.controller): void {
+        if (controller) {
+            if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(controller, {visualizePathStyle: {stroke: COLOR_BUILD}});
             }
         }
     }
@@ -129,8 +126,7 @@ export default class CreepTrait {
                 CreepTrait.withdrawAllResources(creep, source);
             } else if (source instanceof Resource && creep.pickup(source) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {
-                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE},
-                    maxRooms: 2
+                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}
                 });
             }
         }

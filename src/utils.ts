@@ -20,6 +20,10 @@ export default class Utils {
         return room.find(FIND_FLAGS, {filter: {name: name}}).shift();
     }
 
+    public static getClosestEnergyMine(target: RoomObject): Source {
+        return target.room.find(FIND_SOURCES_ACTIVE).sort(Utils.sortByDistance(target)).shift();
+    }
+
     public static getClosestEnergySource<T extends Structure = AnyStructure>(
         target: RoomObject,
         allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],
@@ -77,5 +81,14 @@ export default class Utils {
 
     public static isCapableToSpawnBody(spawn: StructureSpawn, bodyParts: BodyPartConstant[]): boolean {
         return spawn.room.energyCapacityAvailable > Utils.getBodyCost(bodyParts);
+    }
+
+    public static* getFlagsByColors(game: Game, primary: ColorConstant, secondary?: ColorConstant): Generator<Flag> {
+        for (let flagName in Game.flags) {
+            const flag = Game.flags[flagName];
+            if (flag.color === primary && (!secondary || flag.secondaryColor === secondary)) {
+                yield flag;
+            }
+        }
     }
 }

@@ -28,8 +28,14 @@ export default abstract class BaseCreepRole implements Role {
         return false;
     }
 
+    protected isSpawnBound(): boolean {
+        return true;
+    }
+
     protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {
-        return {};
+        return {
+            spawn: this.isSpawnBound() ? spawn.id : undefined
+        };
     }
 
     protected abstract getRoleName(): string;

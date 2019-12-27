@@ -7,6 +7,10 @@ export default class CreepRetirementProgram implements Runnable {
         for (let creepName in game.creeps) {
             const creep = game.creeps[creepName];
 
+            if (creep.body.filter(part => part.type === CLAIM).length > 0) {
+                continue;
+            }
+
             CreepTrait.suicideOldCreep(creep, SUICIDE_TTL);
         }
     }

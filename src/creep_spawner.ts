@@ -1,4 +1,4 @@
-import Logger from "./Logger";
+import Logger from "./logger";
 import Role from "./role";
 import Runnable from "./runnable";
 

@@ -1,4 +1,3 @@
-import EnergyAggregatorRole from "./role.energy_aggregator";
 import SpawnKeeperRole from "./role.spawn_keeper";
 import Utils from "./utils";
 
