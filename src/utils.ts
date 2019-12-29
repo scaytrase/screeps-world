@@ -67,8 +67,11 @@ export default class Utils {
             && object.pos.x < 48;
     }
 
-    public static findCreepsByRole(game: Game, role: Role): Creep[] {
-        return _.filter(game.creeps, (creep: Creep) => role.match(creep));
+    public static findCreepsByRole(game: Game, role: Role, room: Room): Creep[] {
+        return _.filter(
+            game.creeps,
+            (creep: Creep) => (role.match(creep) && (creep.room.name === room.name))
+        );
     }
 
     public static getBodyCost(bodyParts: BodyPartConstant[]): number {
@@ -90,5 +93,31 @@ export default class Utils {
                 yield flag;
             }
         }
+    }
+
+    public static getWalkablePositionsAround(target: RoomObject): number {
+        return target.room.lookAtArea(target.pos.y - 1, target.pos.x - 1, target.pos.y + 1, target.pos.x + 1, true).filter(
+            result => result.terrain === "plain"
+        ).length;
+    }
+
+    public static getBiggerPossibleBody(bodies: BodyPartConstant[][], fallback: BodyPartConstant[], spawn: StructureSpawn): BodyPartConstant[] {
+        for (const body of bodies) {
+            if (Utils.isCapableToSpawnBody(spawn, body)) {
+                return body;
+            }
+        }
+
+        return fallback;
+    }
+
+    public static getBiggerPossibleBodyNow(bodies: BodyPartConstant[][], fallback: BodyPartConstant[], spawn: StructureSpawn): BodyPartConstant[] {
+        for (const body of bodies) {
+            if (Utils.isCapableToSpawnBodyNow(spawn, body)) {
+                return body;
+            }
+        }
+
+        return fallback;
     }
 }

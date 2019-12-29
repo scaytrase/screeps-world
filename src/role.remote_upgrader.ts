@@ -7,7 +7,7 @@ import Utils from "./utils";
 
 export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<StructureController> {
     public getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(1, this);
+        return new LimitedSpawnByRoleCountStrategy(0, this);
     }
 
     protected isSpawnBound(): boolean {

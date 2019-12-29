@@ -45,7 +45,19 @@ export default class ResourceAssigner implements Runnable {
     }
 
     private assignResource(creep: Creep, sources: Source[], creeps: { [creepName: string]: Creep }): void {
+        if (creep.room.name !== this.room.name) {
+            return;
+        }
+
         if (creep.memory['role'] !== 'harvester') {
+            return;
+        }
+
+        if (creep.memory['spawn'] && Game.getObjectById<StructureSpawn>(creep.memory['spawn']).room.name !== this.room.name) {
+            return;
+        }
+
+        if (creep.ticksToLive < SUICIDE_TTL) {
             return;
         }
 
@@ -57,9 +69,7 @@ export default class ResourceAssigner implements Runnable {
             return;
         }
 
-        if (creep.ticksToLive < SUICIDE_TTL) {
-            return;
-        }
+        console.log(`Assigning creep ${creep.name} in room ${this.room.name}`);
 
         let resourceMap = ResourceAssigner.createResourceMap(sources, creeps);
 

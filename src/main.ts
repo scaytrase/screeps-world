@@ -32,15 +32,15 @@ import Utils from "./utils";
 
 const roles: Role[] = [
     new HarvesterRole(),
+    new UpgraderRole(),
+    new BuilderRole(),
+    new RepairerRole(),
     new SpawnKeeperRole(),
     new EnergyAggregatorRole(),
-    new UpgraderRole(),
     new GuardRole(),
     new RangeGuardRole(),
     new TowerKeeperRole(),
-    new RepairerRole(),
     new GraveKeeperRole(),
-    new BuilderRole(),
     new WallKeeperRole(),
     new MinerRole(),
     new TerminalResourceCarrierRole(),
@@ -70,7 +70,7 @@ module.exports.loop = function () {
         runnables.push(new CreepSpawner(roles, spawn));
         runnables.push(new CreepRunner(roles));
         runnables.push(new TowerController(spawn.room));
-        runnables.push(new CreepSpawnBound(spawn));
+        runnables.push(new CreepSpawnBound());
         runnables.push(new CreepRetirementProgram());
         runnables.push(new LinkManager(spawn.room));
 

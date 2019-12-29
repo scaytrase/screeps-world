@@ -32,12 +32,12 @@ export default class UpgraderRole extends BaseCreepRole {
         if (creep.memory['upgrading']) {
             CreepTrait.upgradeController(creep);
         } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, BASE_WORKER_CREEP_BODY.length * 50));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 100));
         }
     }
 
-    public isPrioritySpawn(): boolean {
-        return true;
+    public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {
+        return Utils.findCreepsByRole(game, this, spawn.room).length === 0;
     }
 
     public getSpawnStrategy(): SpawnStrategy {
@@ -57,11 +57,11 @@ export default class UpgraderRole extends BaseCreepRole {
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        const currentCreepCount = Utils.findCreepsByRole(game, this).length;
-
-        if (spawn.room.energyAvailable < UPGRADER_BODY.length * 50 || currentCreepCount < 2) {
+        if (!Utils.isCapableToSpawnBodyNow(spawn, UPGRADER_BODY) && this.isPrioritySpawn(spawn, game)) {
             return BASE_WORKER_CREEP_BODY;
         }
+
+        console.log('Spawning fat upgrader');
 
         return UPGRADER_BODY;
     }

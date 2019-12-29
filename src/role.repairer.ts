@@ -1,4 +1,10 @@
-import {BASE_WORKER_CREEP_BODY, REPAIRER_BODY, REPAIRER_HEALTH_LIMIT_RATIO, REPAIRERS_COUNT_LIMIT} from "./config";
+import {
+    BASE_WORKER_CREEP_BODY,
+    BUILDER_BODY,
+    REPAIRER_BODY,
+    REPAIRER_HEALTH_LIMIT_RATIO,
+    REPAIRERS_COUNT_LIMIT
+} from "./config";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -40,8 +46,7 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        const currentCreepCount = this.getCurrentCreepCount(game);
-        if (currentCreepCount === 0 && spawn.room.energyAvailable < 300) {
+        if (!Utils.isCapableToSpawnBodyNow(spawn, REPAIRER_BODY) && Utils.findCreepsByRole(game, this, spawn.room).length === 0) {
             return BASE_WORKER_CREEP_BODY;
         }
 

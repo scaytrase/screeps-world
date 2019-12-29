@@ -1,4 +1,10 @@
-import {BASE_WORKER_CREEP_BODY, BUILDER_BODY, BUILDERS_COUNT_LIMIT, RAMPART_INITIAL_HITS} from "./config";
+import {
+    BASE_WORKER_CREEP_BODY,
+    BUILDER_BODY,
+    BUILDERS_COUNT_LIMIT,
+    RAMPART_INITIAL_HITS,
+    SPAWN_KEEPER_BODY
+} from "./config";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -39,7 +45,8 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected rest(creep: Creep, game: Game): void {
-        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 250));
+        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, [STRUCTURE_CONTAINER, STRUCTURE_STORAGE]));
+        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, Utils.getBodyCost(BASE_WORKER_CREEP_BODY) + 50));
     }
 
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
@@ -71,8 +78,7 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        const currentCreepCount = Utils.findCreepsByRole(game, this).length;
-        if (spawn.room.energyAvailable < 300 && currentCreepCount === 0) {
+        if (!Utils.isCapableToSpawnBodyNow(spawn, BUILDER_BODY) && Utils.findCreepsByRole(game, this, spawn.room).length === 0) {
             return BASE_WORKER_CREEP_BODY;
         }
 

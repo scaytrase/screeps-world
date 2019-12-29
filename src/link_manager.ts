@@ -12,7 +12,7 @@ export default class LinkManager implements Runnable {
     }
 
     private static getKeeper(link: LinkProxy, game: Game): Creep | undefined {
-        const keepers = Utils.findCreepsByRole(game, new StorageLinkKeeperRole());
+        const keepers = Utils.findCreepsByRole(game, new StorageLinkKeeperRole(), link.link.room);
 
         for (let keeper of keepers) {
             if (keeper.memory['target'] === link.link.id) {

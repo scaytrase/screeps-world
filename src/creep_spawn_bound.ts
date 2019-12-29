@@ -18,10 +18,14 @@ export default class CreepSpawnBound implements Runnable {
             }
 
             if (creep.memory['spawn']) {
-                creep.moveTo(Game.getObjectById<StructureSpawn>(creep.memory['spawn']), {
-                    visualizePathStyle: {stroke: '#ff55f4'},
-                    ignoreCreeps: true
-                });
+                const spawn = Game.getObjectById<StructureSpawn>(creep.memory['spawn']);
+                if (spawn.room !== creep.room) {
+                    creep.moveTo(
+                        spawn, {
+                            visualizePathStyle: {stroke: '#ff55f4'},
+                            ignoreCreeps: true
+                        });
+                }
             }
         }
     }

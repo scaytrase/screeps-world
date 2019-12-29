@@ -1,5 +1,6 @@
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
+import Utils from "./utils";
 
 export default abstract class BaseCreepRole implements Role {
     public abstract getSpawnStrategy(): SpawnStrategy;
@@ -11,10 +12,10 @@ export default abstract class BaseCreepRole implements Role {
     public abstract run(creep: Creep, game: Game): void;
 
     public spawn(spawn: StructureSpawn, game: Game): ScreepsReturnCode {
-        const cost = this.getBody(game, spawn).length * 50;
+        const cost = Utils.getBodyCost(this.getBody(game, spawn));
         const energy = spawn.room.energyAvailable;
-        if (energy < cost) {
-            console.log(`[WARN] Not enough energy to spawn ${this.constructor.name} body (${energy} < ${cost})`);
+        if (!Utils.isCapableToSpawnBodyNow(spawn, this.getBody(game, spawn))) {
+            console.log(`[WARN] [${spawn.room.name}] Not enough energy to spawn ${this.constructor.name} body (${energy} < ${cost})`);
         }
 
         return spawn.spawnCreep(
@@ -24,7 +25,7 @@ export default abstract class BaseCreepRole implements Role {
         );
     }
 
-    public isPrioritySpawn(): boolean {
+    public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {
         return false;
     }
 

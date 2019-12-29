@@ -11,6 +11,7 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
     STRUCTURE_TERMINAL,
+    STRUCTURE_SPAWN,
 ];
 
 const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
@@ -54,7 +55,7 @@ export default class GraveKeeperRole extends BaseCreepRole {
             return creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return ENERGY_STORAGE_STRUCTURES.includes(structure.structureType) &&
-                        structure['store'].getFreeCapacity() > creep.store.getUsedCapacity();
+                        structure['store'].getFreeCapacity() > 0;
                 }
             }).sort(Utils.sortByDistance(creep)).shift();
         }

@@ -9,5 +9,5 @@ export default interface Role {
 
     getSpawnStrategy(): SpawnStrategy;
 
-    isPrioritySpawn(): boolean;
+    isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean;
 }

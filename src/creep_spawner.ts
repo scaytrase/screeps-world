@@ -18,7 +18,7 @@ export default class CreepSpawner implements Runnable {
             if (shouldSpawn) {
                 result = role.spawn(this.spawn, game);
 
-                if (role.isPrioritySpawn() && result !== OK) {
+                if (role.isPrioritySpawn(this.spawn, game) && result !== OK) {
                     Logger.info(`Priority role ${role.constructor.name} spawn failed with ${result}`);
 
                     return;

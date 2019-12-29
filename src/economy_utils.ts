@@ -9,9 +9,9 @@ const store_types: StructureConstant[] = [
 type ENERGY_STORAGE = StructureStorage | StructureLink | StructureExtension | StructureContainer;
 
 export default class EconomyUtils {
-    public static usableSpawnEnergyMax(spawn: StructureSpawn) {
-        const energyStores: ENERGY_STORAGE[] = spawn.room.find<ENERGY_STORAGE>(FIND_STRUCTURES, {
-            filter: (structure) => store_types.includes(structure.structureType) && structure.pos.getRangeTo(spawn) < 15
+    public static usableSpawnEnergyMax(room: Room) {
+        const energyStores: ENERGY_STORAGE[] = room.find<ENERGY_STORAGE>(FIND_STRUCTURES, {
+            filter: (structure) => store_types.includes(structure.structureType)
         });
 
         return energyStores
@@ -21,9 +21,9 @@ export default class EconomyUtils {
 
     }
 
-    public static usableSpawnEnergyAvailable(spawn: StructureSpawn) {
-        const energyStores: ENERGY_STORAGE[] = spawn.room.find<ENERGY_STORAGE>(FIND_STRUCTURES, {
-            filter: (structure) => store_types.includes(structure.structureType) && structure.pos.getRangeTo(spawn) < 15
+    public static usableSpawnEnergyAvailable(room: Room) {
+        const energyStores: ENERGY_STORAGE[] = room.find<ENERGY_STORAGE>(FIND_STRUCTURES, {
+            filter: (structure) => store_types.includes(structure.structureType)
         });
 
         return energyStores

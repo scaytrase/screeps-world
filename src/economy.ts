@@ -1,3 +1,4 @@
+import EconomyUtils from "./economy_utils";
 import SpawnKeeperRole from "./role.spawn_keeper";
 import Utils from "./utils";
 
@@ -22,7 +23,9 @@ export default class Economy {
 
     public static isHarvesterEmergency(room: Room, game: Game): boolean {
         return room.energyAvailable < 500
-            // || Utils.findCreepsByRole(game, new EnergyAggregatorRole()).length === 0
-            || Utils.findCreepsByRole(game, new SpawnKeeperRole()).length === 0;
+            && (
+                EconomyUtils.usableSpawnEnergyAvailable(room) < 1000 ||
+                Utils.findCreepsByRole(game, new SpawnKeeperRole(), room).length === 0
+            );
     }
 }

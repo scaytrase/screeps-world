@@ -11,7 +11,7 @@ export default class StorageLinkKeeperRole extends BaseCreepRole {
 
         return {
             shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
-                return Utils.findCreepsByRole(game, role).length < LinkManagerUtils.getStorageLinks(spawn.room, game).length;
+                return Utils.findCreepsByRole(game, role, spawn.room).length < LinkManagerUtils.getStorageLinks(spawn.room, game).length;
             }
         };
     }
@@ -43,7 +43,7 @@ export default class StorageLinkKeeperRole extends BaseCreepRole {
     }
 
     private assignCreepToLink(room: Room, game: Game): Id<StructureLink> {
-        const creeps = Utils.findCreepsByRole(game, this);
+        const creeps = Utils.findCreepsByRole(game, this, room);
         const links = LinkManagerUtils.getStorageLinks(room, game);
 
         for (let link of links) {
