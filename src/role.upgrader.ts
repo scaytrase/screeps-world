@@ -1,4 +1,4 @@
-import {BASE_WORKER_CREEP_BODY, UPGRADER_BODY, UPGRADERS_COUNT_LIMIT} from "./config";
+import {BASE_WORKER_CREEP_BODY, UPGRADERS_COUNT_LIMIT, WORKER_BODIES} from "./config";
 import CreepTrait from "./creep_traits";
 import Economy from "./economy";
 import BaseCreepRole from "./role.base_creep";
@@ -57,12 +57,14 @@ export default class UpgraderRole extends BaseCreepRole {
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (!Utils.isCapableToSpawnBodyNow(spawn, UPGRADER_BODY) && this.isPrioritySpawn(spawn, game)) {
+        if (spawn.room.controller.level === 8) {
             return BASE_WORKER_CREEP_BODY;
         }
 
-        console.log('Spawning fat upgrader');
+        if (Utils.findCreepsByRole(game, this, spawn.room).length === 0) {
+            return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
+        }
 
-        return UPGRADER_BODY;
+        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 }
