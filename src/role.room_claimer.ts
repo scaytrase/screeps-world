@@ -12,7 +12,11 @@ export default class RoomClaimerRole extends BaseCreepRole {
 
     public getSpawnStrategy(): SpawnStrategy {
         if (this.flag.room && (this.flag.room.controller.upgradeBlocked || this.flag.room.controller.my)) {
-            return new LimitedSpawnByRoleCountStrategy(0, this);
+            return {
+                shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
+                    return false;
+                }
+            };
         }
         return new LimitedSpawnByRoleCountStrategy(1, this);
     }
@@ -24,11 +28,10 @@ export default class RoomClaimerRole extends BaseCreepRole {
             if (!creep.pos.isNearTo(controller)) {
                 creep.moveTo(controller);
             } else {
-                console.log(creep.attackController(controller));
-                console.log(creep.claimController(controller));
+                creep.claimController(controller);
             }
         } else {
-            console.log(creep.moveTo(this.flag));
+            creep.moveTo(this.flag);
         }
     }
 

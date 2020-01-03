@@ -1,3 +1,8 @@
+export const MAX_WORK_PER_RESOURCE = 7;
+export const MAX_WORK_PER_CONTROLLER = 6;
+
+export const UPGRADERS_COUNT_LIMIT = 2; // @todo 1 for low economy
+
 export const BASE_WORKER_CREEP_BODY = [WORK, CARRY, MOVE];
 export const WORKER_CREEP_BODY_LVL2 = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
 export const WORKER_CREEP_BODY_LVL3 = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
@@ -28,14 +33,7 @@ export const CARRIER_BODIES = [
     BASE_CARRIER_CREEP_BODY,
 ];
 
-export const HARVESTERS_COUNT_LIMIT = 1;
-export const HARVESTER_BODY = WORKER_CREEP_BODY_LVL3;
-
 export const ENERGY_AGGREGATORS_COUNT_LIMIT = 1; // @todo 0 for low economy
-export const ENERGY_AGGREGATOR_BODY = CARRIER_CREEP_BODY_LVL3;
-
-export const MINERS_COUNT_LIMIT = 2; // @todo 0 for low economy or no mine
-export const MINER_BODY = WORKER_CREEP_BODY_LVL3;
 
 export const GUARDS_COUNT_LIMIT = 1;
 export const GUARD_BODY = [TOUGH, TOUGH, MOVE, MOVE, ATTACK];
@@ -44,15 +42,13 @@ export const GUARD_BODY = [TOUGH, TOUGH, MOVE, MOVE, ATTACK];
 export const RANGE_GUARDS_COUNT_LIMIT = 0;
 export const RANGE_GUARD_BODY = [TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK];
 
-export const BUILDERS_COUNT_LIMIT = 3; // @todo 1 or 0 for low economy
-export const BUILDER_BODY = WORKER_CREEP_BODY_LVL3;
-
-export const UPGRADERS_COUNT_LIMIT = 3; // @todo 1 for low economy
-export const UPGRADER_BODY = WORKER_CREEP_BODY_LVL3;
+export const BUILDERS_COUNT_LIMIT = 2; // @todo 1 or 0 for low economy
 
 export const REPAIRERS_COUNT_LIMIT = 2; // @todo 1 or 0 for low economy
 export const REPAIRER_BODY = WORKER_CREEP_BODY_LVL3;
-export const REPAIRER_HEALTH_LIMIT_RATIO = 0.7; // @todo 0.3 for low economy
+export const REPAIRER_HEALTH_UPPER_RATIO = 0.75; // @todo 0.5 for low economy
+export const REPAIRER_HEALTH_LOWER_RATIO = 0.25; // @todo 0.3 for low economy
+export const REPAIRER_HEALTH_EMERGENCY_RATIO = 0.10;
 
 export const WALL_KEEPERS_COUNT_LIMIT = 0;
 export const RAMPART_INITIAL_HITS = 5000;
@@ -60,8 +56,7 @@ export const WALL_DESIRED_HITS_LOW = 50000;
 export const WALL_DESIRED_HITS_HIGH = 70000;
 export const WALL_KEEPER_BODY = BASE_WORKER_CREEP_BODY;
 
-export const SPAWN_KEEPERS_COUNT_LIMIT = 1; // @todo 1 for low economy, 2 for high economy
-export const SPAWN_KEEPER_BODY = CARRIER_CREEP_BODY_LVL3;
+export const SPAWN_KEEPERS_COUNT_LIMIT = 2; // @todo 1 for low economy, 2 for high economy
 
 export const TOWER_KEEPERS_COUNT_LIMIT = 0;
 export const TOWER_KEEPER_BODY = BASE_CARRIER_CREEP_BODY;
@@ -69,7 +64,7 @@ export const TOWER_KEEPER_BODY = BASE_CARRIER_CREEP_BODY;
 export const RESOURCE_AGGREGATORS_COUNT_LIMIT = 1;
 export const RESOURCE_AGGREGATOR_BODY = CARRIER_CREEP_BODY_LVL3;
 
-export const GRAVE_KEEPERS_COUNT_LIMIT = 2; // @todo 0 for low economy
+export const GRAVE_KEEPERS_COUNT_LIMIT = 1; // @todo 0 for low economy
 export const GRAVE_KEEPER_BODY = CARRIER_CREEP_BODY_LVL3;
 export const GRAVE_KEEPERS_LOOT_BORDERS = true;
 
@@ -84,7 +79,7 @@ export const TOWER_RANGE = 50;
 export const TOWER_ATTACK_BORDERS = false;
 export const GUARDS_ATTACK_BORDERS = false;
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 export const TERMINAL_ENERGY_REQUIREMENT = 50000;
 export const TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT = 1;

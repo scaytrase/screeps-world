@@ -1,4 +1,4 @@
-import {GRAVE_KEEPER_BODY, GRAVE_KEEPERS_COUNT_LIMIT, GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES, GRAVE_KEEPERS_COUNT_LIMIT, GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -22,8 +22,6 @@ const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
     STRUCTURE_TERMINAL,
 ];
-
-const _ = require('lodash');
 
 const getRoomGraves = (room: Room) => [
     ...(room.find(FIND_DROPPED_RESOURCES, {
@@ -74,6 +72,8 @@ export default class GraveKeeperRole extends BaseCreepRole {
             CreepTrait.pickupAllResources(creep, source);
         } else if (creep.store.getUsedCapacity() > 0) {
             CreepTrait.transferAllResources(creep, GraveKeeperRole.getTarget(creep));
+        } else {
+            CreepTrait.goToParking(creep, game);
         }
     }
 
@@ -84,8 +84,10 @@ export default class GraveKeeperRole extends BaseCreepRole {
         ]);
     }
 
-    protected getBody(game: Game): BodyPartConstant[] {
-        return GRAVE_KEEPER_BODY;
+    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
+        const upgraderBodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 4);
+
+        return Utils.getBiggerPossibleBodyNow(upgraderBodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {

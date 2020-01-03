@@ -22,8 +22,8 @@ export default class CreepSpawnBound implements Runnable {
                 if (spawn.room !== creep.room) {
                     creep.moveTo(
                         spawn, {
-                            visualizePathStyle: {stroke: '#ff55f4'},
-                            ignoreCreeps: true
+                            reusePath: 1,
+                            visualizePathStyle: {stroke: '#ff55f4'}
                         });
                 }
             }

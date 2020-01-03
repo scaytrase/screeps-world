@@ -9,6 +9,10 @@ const store_types: StructureConstant[] = [
 type ENERGY_STORAGE = StructureStorage | StructureLink | StructureExtension | StructureContainer;
 
 export default class EconomyUtils {
+    public static usableSpawnEnergyRation(room: Room): number {
+        return this.usableSpawnEnergyAvailable(room) / this.usableSpawnEnergyMax(room);
+    }
+
     public static usableSpawnEnergyMax(room: Room) {
         const energyStores: ENERGY_STORAGE[] = room.find<ENERGY_STORAGE>(FIND_STRUCTURES, {
             filter: (structure) => store_types.includes(structure.structureType)

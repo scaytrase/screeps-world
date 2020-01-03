@@ -12,17 +12,29 @@ export default abstract class BaseCreepRole implements Role {
     public abstract run(creep: Creep, game: Game): void;
 
     public spawn(spawn: StructureSpawn, game: Game): ScreepsReturnCode {
-        const cost = Utils.getBodyCost(this.getBody(game, spawn));
-        const energy = spawn.room.energyAvailable;
-        if (!Utils.isCapableToSpawnBodyNow(spawn, this.getBody(game, spawn))) {
-            console.log(`[WARN] [${spawn.room.name}] Not enough energy to spawn ${this.constructor.name} body (${energy} < ${cost})`);
-        }
+        try {
+            const body = this.getBody(game, spawn);
+            const cost = Utils.getBodyCost(body);
+            // const room = spawn.room;
+            const room = game.rooms[spawn.room.name];
+            const energy = room.energyAvailable;
 
-        return spawn.spawnCreep(
-            this.getBody(game, spawn),
-            this.getName(game),
-            {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn, game)}}
-        );
+            if (!Utils.isCapableToSpawnBodyNow(spawn, body)) {
+                console.log(`[WARN ] [${room.name}] [${this.constructor.name}] No energy for body ${JSON.stringify(body)} (${energy} < ${cost} ${Math.round(energy / cost * 100)}%)`);
+
+                return ERR_NOT_ENOUGH_ENERGY;
+            }
+
+            console.log(`[DEBUG] [${room.name}] [${this.constructor.name}] Trying to spawn ${JSON.stringify(body)} for ${cost} having ${energy} ${Math.round(energy / cost * 100)}%)`);
+
+            return game.spawns[spawn.name].spawnCreep(
+                body,
+                this.getName(game),
+                {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn, game)}}
+            );
+        } catch (e) {
+            console.log(JSON.stringify(e));
+        }
     }
 
     public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {

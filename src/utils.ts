@@ -5,8 +5,6 @@ export enum SORT {
     DESC = "desc"
 }
 
-const _ = require('lodash');
-
 export default class Utils {
     public static sortByDistance(target: RoomObject | { pos: RoomPosition }, direction: SORT = SORT.ASC): (a: RoomObject | { pos: RoomPosition }, b: RoomObject | { pos: RoomPosition }) => number {
         return (a, b) => (direction === SORT.ASC ? 1 : -1) * Math.sign(a.pos.getRangeTo(target) - b.pos.getRangeTo(target));
@@ -67,11 +65,8 @@ export default class Utils {
             && object.pos.x < 48;
     }
 
-    public static findCreepsByRole(game: Game, role: Role, room: Room): Creep[] {
-        return _.filter(
-            game.creeps,
-            (creep: Creep) => (role.match(creep) && (creep.room.name === room.name))
-        );
+    public static findCreepsByRole(game: Game, role: Role, room: Room | null): Creep[] {
+        return Object.values(game.creeps).filter((creep: Creep) => (role.match(creep) && (room === null || creep.room.name === room.name)));
     }
 
     public static getBodyCost(bodyParts: BodyPartConstant[]): number {
@@ -79,11 +74,11 @@ export default class Utils {
     }
 
     public static isCapableToSpawnBodyNow(spawn: StructureSpawn, bodyParts: BodyPartConstant[]): boolean {
-        return spawn.room.energyAvailable >= Utils.getBodyCost(bodyParts);
+        return Game.rooms[spawn.room.name].energyAvailable > Utils.getBodyCost(bodyParts);
     }
 
     public static isCapableToSpawnBody(spawn: StructureSpawn, bodyParts: BodyPartConstant[]): boolean {
-        return spawn.room.energyCapacityAvailable >= Utils.getBodyCost(bodyParts);
+        return Game.rooms[spawn.room.name].energyCapacityAvailable > Utils.getBodyCost(bodyParts);
     }
 
     public static* getFlagsByColors(game: Game, primary: ColorConstant, secondary?: ColorConstant): Generator<Flag> {
@@ -96,9 +91,22 @@ export default class Utils {
     }
 
     public static getWalkablePositionsAround(target: RoomObject): number {
-        return target.room.lookAtArea(target.pos.y - 1, target.pos.x - 1, target.pos.y + 1, target.pos.x + 1, true).filter(
-            result => result.terrain === "plain"
-        ).length;
+        let count = 0;
+
+        const resultMatrix = target.room
+            .lookAtArea(target.pos.y - 1, target.pos.x - 1, target.pos.y + 1, target.pos.x + 1, false);
+
+        for (const y in resultMatrix) {
+            for (const x in resultMatrix[y]) {
+                const resultArray = resultMatrix[y][x];
+                const ex = resultArray.filter(
+                    result => (result.type === "terrain" && result.terrain === "plain") || (result.type === "structure" && result.structure.structureType === STRUCTURE_ROAD))
+                    .length > 0;
+                if (ex) count++;
+            }
+        }
+
+        return count;
     }
 
     public static getBiggerPossibleBody(bodies: BodyPartConstant[][], fallback: BodyPartConstant[], spawn: StructureSpawn): BodyPartConstant[] {

@@ -1,17 +1,19 @@
 import {
     BASE_WORKER_CREEP_BODY,
-    BUILDER_BODY,
     REPAIRER_BODY,
-    REPAIRER_HEALTH_LIMIT_RATIO,
+    REPAIRER_HEALTH_EMERGENCY_RATIO,
+    REPAIRER_HEALTH_LOWER_RATIO,
+    REPAIRER_HEALTH_UPPER_RATIO,
     REPAIRERS_COUNT_LIMIT
 } from "./config";
 import CreepTrait from "./creep_traits";
+import EconomyUtils from "./economy_utils";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
+import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import Utils from "./utils";
-
-const _ = require('lodash');
 
 const FORBIDDEN_STRUCTURES: StructureConstant[] = [
     STRUCTURE_WALL,
@@ -20,29 +22,46 @@ const FORBIDDEN_STRUCTURES: StructureConstant[] = [
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
+    STRUCTURE_SPAWN,
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
+    STRUCTURE_TERMINAL,
 ];
 
 export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
     public getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(REPAIRERS_COUNT_LIMIT, this);
+        return new AndChainSpawnStrategy([
+            new LimitedSpawnByRoleCountStrategy(REPAIRERS_COUNT_LIMIT, this),
+            new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: this.filter()})
+        ]);
+    }
+
+    public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {
+        return this.isEmergency(spawn.room) && EconomyUtils.usableSpawnEnergyAvailable(spawn.room) > 2000;
     }
 
     protected shouldRenewTarget(creep: Creep, game: Game): boolean {
         const current = this.getCurrentStructureTarget(creep);
 
         if (!current) {
-            return undefined;
+            return true;
+        }
+        const emergency = this.isEmergency(creep.room);
+
+        const hitsRation = current.hits / current.hitsMax;
+
+        if (hitsRation > REPAIRER_HEALTH_LOWER_RATIO * 1.05 && emergency) {
+            return true;
         }
 
-        return (current.hits / current.hitsMax) > REPAIRER_HEALTH_LIMIT_RATIO;
+        return (hitsRation) > REPAIRER_HEALTH_UPPER_RATIO;
     }
 
     protected getTarget(creep: Creep): AnyStructure | null {
-        return creep.room.find(FIND_STRUCTURES, {
-            filter: object => !FORBIDDEN_STRUCTURES.includes(object.structureType) && object.hits < object.hitsMax
-        }).sort(Utils.sortByHealthPercent()).shift();
+        return creep.room
+            .find(FIND_STRUCTURES, {filter: this.filter()})
+            .sort(Utils.sortByHealthPercent())
+            .shift();
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
@@ -58,7 +77,7 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
     }
 
     protected rest(creep: Creep, game: Game): void {
-        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 250));
+        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 200));
     }
 
     protected shouldRest(creep: Creep, game: Game): boolean {
@@ -70,10 +89,23 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
     }
 
     protected work(creep: Creep, game: Game): void {
-        CreepTrait.build(creep, this.getCurrentStructureTarget(creep));
+        const target = this.getCurrentStructureTarget(creep);
+        if (target) {
+            CreepTrait.build(creep, target);
+        } else {
+            CreepTrait.goToParking(creep, game);
+        }
     }
 
-    private getCurrentCreepCount(game: Game): Number {
-        return _.filter(game.creeps, (creep: Creep) => this.match(creep)).length;
+    private filter() {
+        return object => !FORBIDDEN_STRUCTURES.includes(object.structureType) &&
+            ((object.hits / object.hitsMax) < REPAIRER_HEALTH_LOWER_RATIO);
+    }
+
+    private isEmergency(room: Room) {
+        const emergencyFilter = object => !FORBIDDEN_STRUCTURES.includes(object.structureType) &&
+            ((object.hits / object.hitsMax) < REPAIRER_HEALTH_EMERGENCY_RATIO);
+
+        return room.find(FIND_STRUCTURES, {filter: emergencyFilter}).length > 0;
     }
 }

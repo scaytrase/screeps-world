@@ -26,6 +26,17 @@ export default class CreepTrait {
         }
     }
 
+    public static goToParking(creep: Creep, game: Game): void {
+        const flags = [...Utils.getFlagsByColors(game, COLOR_WHITE, COLOR_WHITE)];
+
+        creep.moveTo(
+            flags.filter(flag => flag.room.name === creep.room.name).sort(Utils.sortByDistance(creep)).shift(),
+            {
+                visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}
+            }
+        );
+    }
+
     public static transferAnyResources(creep: Creep): void {
         const types: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK];
         CreepTrait.transferAllResources(creep,

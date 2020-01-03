@@ -1,4 +1,5 @@
 import {SUICIDE_TTL} from "./config";
+import Logger from "./logger";
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import Utils from "./utils";
@@ -7,10 +8,12 @@ export default class LimitedSpawnByRoleCountStrategy implements SpawnStrategy {
     private readonly limit: number;
     private readonly role: Role;
     private readonly multiplier: (spawn: StructureSpawn) => number;
+    private readonly allRooms: boolean;
 
-    constructor(limit: number, role: Role, multiplier?: (spawn: StructureSpawn) => number) {
+    constructor(limit: number, role: Role, multiplier?: (spawn: StructureSpawn) => number, allRooms: boolean = false) {
         this.limit = limit;
         this.role = role;
+        this.allRooms = allRooms;
         if (multiplier === undefined) {
             multiplier = () => 1;
         }
@@ -20,11 +23,12 @@ export default class LimitedSpawnByRoleCountStrategy implements SpawnStrategy {
     shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
         const multiplier = this.multiplier(spawn);
         const desired = this.limit;
-        const current = Utils.findCreepsByRole(game, this.role, spawn.room)
+        const current = Utils.findCreepsByRole(game, this.role, this.allRooms ? null : spawn.room)
             .filter(creep => creep.ticksToLive > SUICIDE_TTL)
+            .filter(creep => creep.memory['spawn'] === undefined || creep.memory['spawn'] === spawn.id)
             .length;
 
-        console.log(spawn.room.name, this.role.constructor.name, current, desired, multiplier);
+        Logger.debug(`[${spawn.room.name}]`, this.role.constructor.name, current, desired, multiplier);
         return current < (desired * multiplier);
     }
 }

@@ -1,10 +1,11 @@
-import {MINER_BODY, MINERS_COUNT_LIMIT} from "./config";
+import {WORKER_BODIES, WORKER_CREEP_BODY_LVL3} from "./config";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import Utils from "./utils";
 
 const filter = (mineral: Mineral) => mineral.mineralAmount > 0;
 export default class MinerRole extends BaseCreepRole {
@@ -29,13 +30,18 @@ export default class MinerRole extends BaseCreepRole {
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_MINERALS, {filter: filter}),
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_STRUCTURES, {filter: (structure) => structure.structureType === STRUCTURE_EXTRACTOR}),
-                new LimitedSpawnByRoleCountStrategy(MINERS_COUNT_LIMIT, this)
+                new LimitedSpawnByRoleCountStrategy(1, this, (
+                    spawn => spawn.room
+                        .find(FIND_MINERALS)
+                        .map(mineral => Utils.getWalkablePositionsAround(mineral))
+                        .reduce((p, v) => p + v, 0)
+                ))
             ]
         );
     }
 
-    protected getBody(game: Game) {
-        return MINER_BODY;
+    protected getBody(game: Game, spawn: StructureSpawn) {
+        return Utils.getBiggerPossibleBody(WORKER_BODIES, WORKER_CREEP_BODY_LVL3, spawn);
     }
 
     protected getRoleName(): string {

@@ -44,8 +44,8 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
 
     run(creep: Creep, game: Game): void {
         const terminal = creep.room.terminal;
-        if (terminal.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT) {
-            const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER]);
+        if (terminal && terminal.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT) {
+            const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER], 1000);
             if (source && creep.store.getFreeCapacity() > 0) {
                 CreepTrait.withdrawAllEnergy(creep, source);
             } else {
@@ -65,6 +65,7 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: TerminalResourceCarrier.filterStructure()}),
+                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: {structureType: STRUCTURE_TERMINAL}}),
                 new LimitedSpawnByRoleCountStrategy(TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT, this)
             ]
         );

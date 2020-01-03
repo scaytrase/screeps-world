@@ -1,6 +1,6 @@
 import TargetAwareCreepRole from "./role.target_aware_creep";
 
-export default abstract class WorkRestCycleCreepRole<T extends ConstructionSite | Structure> extends TargetAwareCreepRole<T> {
+export default abstract class WorkRestCycleCreepRole<T extends ConstructionSite | Structure | Source> extends TargetAwareCreepRole<T> {
     private static isWorking(creep: Creep): boolean {
         return creep.memory['working'] || false;
     }

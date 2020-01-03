@@ -13,7 +13,8 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
     STRUCTURE_CONTAINER,
     STRUCTURE_LINK,
-    STRUCTURE_SPAWN
+    STRUCTURE_SPAWN,
+    STRUCTURE_TERMINAL
 ];
 
 export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite | StructureRampart> {
@@ -35,7 +36,12 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected work(creep: Creep, game: Game): void {
-        CreepTrait.build(creep, this.getCurrentStructureTarget(creep));
+        const target = this.getCurrentStructureTarget(creep);
+        if (target) {
+            CreepTrait.build(creep, target);
+        } else {
+            CreepTrait.goToParking(creep, game);
+        }
     }
 
     protected rest(creep: Creep, game: Game): void {
@@ -72,7 +78,7 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (Utils.findCreepsByRole(game, this, spawn.room).length === 0) {
+        if (this.isPrioritySpawn(spawn, game)) {
             return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
         }
 

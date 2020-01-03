@@ -1,13 +1,23 @@
-import {BASE_WORKER_CREEP_BODY, BUILDER_BODY} from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./config";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import NotEmptyCallableResult from "./spawn_strategy.not_empty_callable_result";
 import Utils from "./utils";
 
 export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<StructureController> {
     public getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(0, this);
+        return new AndChainSpawnStrategy([
+            new LimitedSpawnByRoleCountStrategy(4, this, () => 1, true),
+            new NotEmptyCallableResult((game, spawn) => this
+                .getControllers(game)
+                .filter(controller => controller.room.name !== spawn.room.name)
+                .shift()
+            ),
+            new NotEmptyCallableResult((game, spawn) => spawn.room.storage && spawn.room.storage.store.getUsedCapacity() > 50000),
+        ]);
     }
 
     protected isSpawnBound(): boolean {
@@ -42,27 +52,27 @@ export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<Structure
     }
 
     protected getTarget(creep: Creep, game: Game): StructureController {
-        let controllers = [];
-        for (const roomName in game.rooms) {
-            const room = game.rooms[roomName];
-
-            if (room.find(FIND_MY_SPAWNS).length === 0) {
-                controllers.push(room.controller);
-            }
-        }
-
-        return controllers.sort(Utils.sortByDistance(creep)).shift();
+        return this.getControllers(game).sort(Utils.sortByDistance(creep)).shift();
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (!Utils.isCapableToSpawnBody(spawn, BUILDER_BODY)) {
-            return BASE_WORKER_CREEP_BODY;
-        }
-
-        return BUILDER_BODY;
+        return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {
         return 'remote_upgrader';
+    }
+
+    private getControllers(game: Game): StructureController[] {
+        let controllers = [];
+        for (const roomName in game.rooms) {
+            const room = game.rooms[roomName];
+
+            if (room.find(FIND_MY_SPAWNS).length === 0 || room.controller.level < 3) {
+                controllers.push(room.controller);
+            }
+        }
+
+        return controllers;
     }
 }

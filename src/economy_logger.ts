@@ -2,8 +2,6 @@ import Economy from "./economy";
 import EconomyUtils from "./economy_utils";
 import Runnable from "./runnable";
 
-const _ = require('lodash');
-
 export default class EconomyLogger implements Runnable {
     private static getSpawnMessage(spawn: StructureSpawn): String {
         const available = spawn.room.energyAvailable;
@@ -35,16 +33,19 @@ export default class EconomyLogger implements Runnable {
     }
 
     public run(game: Game, memory: Memory): void {
-        _.forEach(game.spawns, (spawn: StructureSpawn) => console.log(
-            `
-            
+
+        Object.values(game.spawns).map(
+            (spawn: StructureSpawn) => console.log(
+                `
              ROOM: ${spawn.room.name}
              ${EconomyLogger.getEconomyMessage(spawn, game, memory)}
              ${EconomyLogger.getSpawnMessage(spawn)}
+             ${JSON.stringify(spawn.spawning)}
              ${EconomyLogger.getStorageMessage(spawn.room)}
              ${EconomyLogger.getTotalMessage(spawn.room)}
               
             `
-        ));
+            )
+        );
     }
 }

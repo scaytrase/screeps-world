@@ -1,6 +1,7 @@
-import {BASE_WORKER_CREEP_BODY, UPGRADERS_COUNT_LIMIT, WORKER_BODIES} from "./config";
+import {BASE_WORKER_CREEP_BODY, MAX_WORK_PER_CONTROLLER, UPGRADERS_COUNT_LIMIT, WORKER_BODIES} from "./config";
 import CreepTrait from "./creep_traits";
 import Economy from "./economy";
+import EconomyUtils from "./economy_utils";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
@@ -17,8 +18,6 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_SPAWN,
 ];
 
-const _ = require('lodash');
-
 export default class UpgraderRole extends BaseCreepRole {
     public run(creep: Creep, game: Game): void {
         if (creep.memory['upgrading'] && creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
@@ -32,7 +31,7 @@ export default class UpgraderRole extends BaseCreepRole {
         if (creep.memory['upgrading']) {
             CreepTrait.upgradeController(creep);
         } else {
-            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 100));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, Utils.getBodyCost(BASE_WORKER_CREEP_BODY) + 50));
         }
     }
 
@@ -61,10 +60,17 @@ export default class UpgraderRole extends BaseCreepRole {
             return BASE_WORKER_CREEP_BODY;
         }
 
-        if (Utils.findCreepsByRole(game, this, spawn.room).length === 0) {
-            return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
+        let maxWork = MAX_WORK_PER_CONTROLLER;
+        if (EconomyUtils.usableSpawnEnergyRation(spawn.room) < 0.05) {
+            maxWork = 2;
         }
 
-        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
+        const upgraderBodies = WORKER_BODIES.filter(body => body.filter(part => part === WORK).length <= maxWork);
+
+        if (this.isPrioritySpawn(spawn, game)) {
+            return Utils.getBiggerPossibleBodyNow(upgraderBodies, BASE_WORKER_CREEP_BODY, spawn);
+        }
+
+        return Utils.getBiggerPossibleBody(upgraderBodies, BASE_WORKER_CREEP_BODY, spawn);
     }
 }

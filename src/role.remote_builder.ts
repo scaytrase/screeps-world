@@ -1,13 +1,19 @@
-import {BASE_WORKER_CREEP_BODY, BUILDER_BODY} from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./config";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import NotEmptyCallableResult from "./spawn_strategy.not_empty_callable_result";
 import Utils from "./utils";
 
 export default class RemoteBuilderRole extends WorkRestCycleCreepRole<ConstructionSite> {
     public getSpawnStrategy(): SpawnStrategy {
-        return new LimitedSpawnByRoleCountStrategy(0, this);
+        return new AndChainSpawnStrategy([
+            new LimitedSpawnByRoleCountStrategy(2, this, () => 1, true),
+            new NotEmptyCallableResult((game, spawn) => this.getSites(game).shift()),
+            new NotEmptyCallableResult((game, spawn) => spawn.room.storage && spawn.room.storage.store.getUsedCapacity() > 50000),
+        ]);
     }
 
     protected isSpawnBound(): boolean {
@@ -44,27 +50,26 @@ export default class RemoteBuilderRole extends WorkRestCycleCreepRole<Constructi
     }
 
     protected getTarget(creep: Creep, game: Game): ConstructionSite {
-        let sites = [];
-        for (const siteName in game.constructionSites) {
-            const site = game.constructionSites[siteName];
-
-            if (site.room.find(FIND_MY_SPAWNS).length === 0) {
-                sites.push(site);
-            }
-        }
-
-        return sites.sort(Utils.sortByDistance(creep)).shift();
+        return this.getSites(game).sort(Utils.sortByDistance(creep)).shift();
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (!Utils.isCapableToSpawnBody(spawn, BUILDER_BODY)) {
-            return BASE_WORKER_CREEP_BODY;
-        }
-
-        return BUILDER_BODY;
+        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {
         return 'remote_builder';
+    }
+
+    private getSites(game: Game): ConstructionSite[] {
+        let sites = [];
+        for (const siteName in game.constructionSites) {
+            const site = game.constructionSites[siteName];
+
+            if (site.room.find(FIND_MY_SPAWNS).length === 0 || site.room.controller.level < 3) {
+                sites.push(site);
+            }
+        }
+        return sites;
     }
 }
