@@ -1,11 +1,10 @@
 import {
-    BASE_WORKER_CREEP_BODY,
-    REPAIRER_BODY,
     REPAIRER_HEALTH_EMERGENCY_RATIO,
     REPAIRER_HEALTH_LOWER_RATIO,
     REPAIRER_HEALTH_UPPER_RATIO,
     REPAIRERS_COUNT_LIMIT
 } from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import EconomyUtils from "./economy_utils";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
@@ -65,11 +64,11 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (!Utils.isCapableToSpawnBodyNow(spawn, REPAIRER_BODY) && Utils.findCreepsByRole(game, this, spawn.room).length === 0) {
-            return BASE_WORKER_CREEP_BODY;
+        if (this.isPrioritySpawn(spawn, game)) {
+            return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
         }
 
-        return REPAIRER_BODY;
+        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {

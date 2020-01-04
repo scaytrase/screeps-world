@@ -1,4 +1,4 @@
-import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";

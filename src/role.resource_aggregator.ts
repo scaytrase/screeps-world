@@ -1,4 +1,5 @@
-import {RESOURCE_AGGREGATOR_BODY, RESOURCE_AGGREGATORS_COUNT_LIMIT} from "./config";
+import {RESOURCE_AGGREGATORS_COUNT_LIMIT} from "./config";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -42,8 +43,14 @@ export default class ResourceAggregator extends BaseCreepRole {
         );
     }
 
-    protected getBody(game: Game) {
-        return RESOURCE_AGGREGATOR_BODY;
+    protected getBody(game: Game, spawn: StructureSpawn) {
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 5);
+
+        if (this.isPrioritySpawn(spawn, game)) {
+            return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
+        }
+
+        return Utils.getBiggerPossibleBody(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {

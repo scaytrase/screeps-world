@@ -1,4 +1,4 @@
-import {WORKER_BODIES, WORKER_CREEP_BODY_LVL3} from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -41,7 +41,7 @@ export default class MinerRole extends BaseCreepRole {
     }
 
     protected getBody(game: Game, spawn: StructureSpawn) {
-        return Utils.getBiggerPossibleBody(WORKER_BODIES, WORKER_CREEP_BODY_LVL3, spawn);
+        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {

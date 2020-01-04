@@ -1,4 +1,5 @@
-import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES, SPAWN_KEEPERS_COUNT_LIMIT} from "./config";
+import {SPAWN_KEEPERS_COUNT_LIMIT} from "./config";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";

@@ -1,9 +1,5 @@
-import {
-    BASE_CARRIER_CREEP_BODY,
-    CARRIER_CREEP_BODY_LVL3,
-    TERMINAL_ENERGY_REQUIREMENT,
-    TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT
-} from "./config";
+import {TERMINAL_ENERGY_REQUIREMENT, TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT} from "./config";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_CREEP_BODY_LVL3} from "./const";
 import CreepTrait from "./creep_traits";
 import Economy, {ECONOMY_LEVEL} from "./economy";
 import BaseCreepRole from "./role.base_creep";

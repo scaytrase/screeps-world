@@ -1,4 +1,5 @@
-import {BASE_WORKER_CREEP_BODY, MAX_WORK_PER_RESOURCE, RESOURCE_ASSIGN_ALGO_VERSION, WORKER_BODIES} from "./config";
+import {MAX_WORK_PER_RESOURCE, RESOURCE_ASSIGN_ALGO_VERSION} from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import Economy from "./economy";
 import ResourceAssigner from "./resource_assigner";

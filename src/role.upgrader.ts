@@ -1,4 +1,5 @@
-import {BASE_WORKER_CREEP_BODY, MAX_WORK_PER_CONTROLLER, UPGRADERS_COUNT_LIMIT, WORKER_BODIES} from "./config";
+import {MAX_WORK_PER_CONTROLLER, UPGRADERS_COUNT_LIMIT} from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import Economy from "./economy";
 import EconomyUtils from "./economy_utils";

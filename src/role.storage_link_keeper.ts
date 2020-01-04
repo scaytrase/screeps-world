@@ -1,4 +1,4 @@
-import {LINK_KEEPER_BODY} from "./config";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import {COLOR_SPECIAL_TASKS} from "./creep_traits";
 import LinkManagerUtils from "./link_manager_utils";
 import BaseCreepRole from "./role.base_creep";
@@ -35,7 +35,9 @@ export default class StorageLinkKeeperRole extends BaseCreepRole {
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        return LINK_KEEPER_BODY;
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 5);
+
+        return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {

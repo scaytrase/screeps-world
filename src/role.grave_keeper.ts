@@ -1,4 +1,5 @@
-import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES, GRAVE_KEEPERS_COUNT_LIMIT, GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
+import {GRAVE_KEEPERS_COUNT_LIMIT, GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -85,9 +86,9 @@ export default class GraveKeeperRole extends BaseCreepRole {
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        const upgraderBodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 4);
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 4);
 
-        return Utils.getBiggerPossibleBodyNow(upgraderBodies, BASE_CARRIER_CREEP_BODY, spawn);
+        return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
     protected getRoleName(): string {

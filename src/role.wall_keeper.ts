@@ -1,4 +1,5 @@
-import {WALL_DESIRED_HITS_HIGH, WALL_DESIRED_HITS_LOW, WALL_KEEPER_BODY, WALL_KEEPERS_COUNT_LIMIT} from "./config";
+import {WALL_DESIRED_HITS_HIGH, WALL_DESIRED_HITS_LOW, WALL_KEEPERS_COUNT_LIMIT} from "./config";
+import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import SpawnStrategy from "./spawn_strategy";
@@ -59,8 +60,8 @@ export default class WallKeeperRole extends WorkRestCycleCreepRole<StructureWall
         return 'wall_keeper';
     }
 
-    protected getBody(game: Game) {
-        return WALL_KEEPER_BODY;
+    protected getBody(game: Game, spawn: StructureSpawn) {
+        return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 
     protected getTarget(creep: Creep, game: Game): StructureWall | StructureRampart | null {
