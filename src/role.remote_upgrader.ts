@@ -1,3 +1,8 @@
+import {
+    MIN_ECONOMY_FOR_REMOTE_CREEP_PRODUCERS,
+    REMOTE_UPGRADERS_COUNT_LIMIT,
+    UPGRADE_REMOTE_ROOMS_UP_TO_LEVEL
+} from "./config";
 import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
@@ -10,13 +15,13 @@ import Utils from "./utils";
 export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<StructureController> {
     public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
-            new LimitedSpawnByRoleCountStrategy(4, this, () => 1, true),
+            new LimitedSpawnByRoleCountStrategy(REMOTE_UPGRADERS_COUNT_LIMIT, this, () => 1, true),
             new NotEmptyCallableResult((game, spawn) => this
                 .getControllers(game)
                 .filter(controller => controller.room.name !== spawn.room.name)
                 .shift()
             ),
-            new NotEmptyCallableResult((game, spawn) => spawn.room.storage && spawn.room.storage.store.getUsedCapacity() > 50000),
+            new NotEmptyCallableResult((game, spawn) => spawn.room.storage && spawn.room.storage.store.getUsedCapacity() > MIN_ECONOMY_FOR_REMOTE_CREEP_PRODUCERS),
         ]);
     }
 
@@ -39,9 +44,12 @@ export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<Structure
     protected rest(creep: Creep, game: Game): void {
         const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER]);
         const closestEnergyMine = Utils.getClosestEnergyMine(creep);
+        const grave = Utils.getRoomGraves(creep.room).sort(Utils.sortByDistance(creep)).shift();
 
         if (creep.pos.getRangeTo(source) < creep.pos.getRangeTo(closestEnergyMine)) {
             CreepTrait.withdrawAllEnergy(creep, source);
+        } else if (creep.pos.getRangeTo(grave) < creep.pos.getRangeTo(closestEnergyMine)) {
+            CreepTrait.pickupAllResources(creep, grave);
         } else {
             CreepTrait.harvest(creep, closestEnergyMine);
         }
@@ -68,7 +76,7 @@ export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<Structure
         for (const roomName in game.rooms) {
             const room = game.rooms[roomName];
 
-            if (room.find(FIND_MY_SPAWNS).length === 0 || room.controller.level < 3) {
+            if (room.find(FIND_MY_SPAWNS).length === 0 || room.controller.level < UPGRADE_REMOTE_ROOMS_UP_TO_LEVEL) {
                 controllers.push(room.controller);
             }
         }

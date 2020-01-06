@@ -95,7 +95,7 @@ export default class CreepTrait {
         }
     }
 
-    public static attack(creep: Creep, target: Creep | null, opts?: MoveToOpts): void {
+    public static attack(creep: Creep, target: Creep | Structure | null, opts?: MoveToOpts): void {
         if (target) {
             if (creep.body.map(def => def.type).includes(RANGED_ATTACK) && creep.rangedAttack(target) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: COLOR_ATTACK}, ...opts});

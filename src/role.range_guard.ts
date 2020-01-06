@@ -18,10 +18,10 @@ export default class RangeGuardRole extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
         const target = RangeGuardRole.getTarget(creep);
         if (target) {
-            creep.memory['last_target'] = {pos: target.pos};
+            creep.memory['target'] = {pos: target.pos};
             CreepTrait.attack(creep, target, {reusePath: 1});
         } else {
-            if (creep.memory['last_target'] !== undefined) {
+            if (creep.memory['target'] !== undefined) {
                 const creeps = creep.room.find(FIND_MY_CREEPS);
                 creep.moveTo(
                     creep.room
@@ -32,9 +32,9 @@ export default class RangeGuardRole extends BaseCreepRole {
                         .sort(Utils.sortByDistance(
                             {
                                 pos: new RoomPosition(
-                                    creep.memory['last_target'].pos.x,
-                                    creep.memory['last_target'].pos.y,
-                                    creep.memory['last_target'].pos.roomName
+                                    creep.memory['target'].pos.x,
+                                    creep.memory['target'].pos.y,
+                                    creep.memory['target'].pos.roomName
                                 )
                             }
                         ))

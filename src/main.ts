@@ -6,6 +6,7 @@ import CreepSpawner from "./creep_spawner";
 import EconomyLogger from "./economy_logger";
 import LinkManager from "./link_manager";
 import Role from "./role";
+import AttackerRole from "./role.attacker";
 import BuilderRole from "./role.builder";
 import EnergyAggregatorRole from "./role.energy_aggregator";
 import GraveKeeperRole from "./role.grave_keeper";
@@ -46,6 +47,7 @@ const roles: Role[] = [
     new StorageLinkKeeperRole(),
     new RemoteBuilderRole(),
     new RemoteUpgraderRole(),
+    new AttackerRole(),
 ];
 
 for (let flag of Utils.getFlagsByColors(Game, COLOR_RED, COLOR_PURPLE)) {

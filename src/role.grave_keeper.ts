@@ -1,4 +1,4 @@
-import {GRAVE_KEEPERS_COUNT_LIMIT, GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
+import {GRAVE_KEEPERS_COUNT_LIMIT} from "./config";
 import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
@@ -24,29 +24,9 @@ const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_TERMINAL,
 ];
 
-const getRoomGraves = (room: Room) => [
-    ...(room.find(FIND_DROPPED_RESOURCES, {
-        filter(resource) {
-            return resource.amount > 0
-                && (GRAVE_KEEPERS_LOOT_BORDERS || Utils.isWithinTraversableBorders(resource));
-        }
-    })),
-    ...(room.find(FIND_TOMBSTONES, {
-        filter(tombstone) {
-            return tombstone.store.getUsedCapacity() > 0
-                && (GRAVE_KEEPERS_LOOT_BORDERS || Utils.isWithinTraversableBorders(tombstone));
-        }
-    })),
-    ...(room.find(FIND_RUINS, {
-        filter(ruin) {
-            return ruin.store.getUsedCapacity() > 0;
-        }
-    }))
-];
-
 export default class GraveKeeperRole extends BaseCreepRole {
     private static getSource(creep: Creep): Resource | Tombstone | Ruin | null {
-        return getRoomGraves(creep.room).sort(Utils.sortByDistance(creep)).shift();
+        return Utils.getRoomGraves(creep.room).sort(Utils.sortByDistance(creep)).shift();
     }
 
     private static getTarget(creep: Creep): AnyStructure | null {
@@ -80,13 +60,13 @@ export default class GraveKeeperRole extends BaseCreepRole {
 
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
-            new NotEmptyCallableResult((game, spawn) => getRoomGraves(spawn.room).shift()),
+            new NotEmptyCallableResult((game, spawn) => Utils.getRoomGraves(spawn.room).shift()),
             new LimitedSpawnByRoleCountStrategy(GRAVE_KEEPERS_COUNT_LIMIT, this)
         ]);
     }
 
     protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 4);
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 6);
 
         return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }

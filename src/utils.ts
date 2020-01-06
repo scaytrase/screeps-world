@@ -1,3 +1,4 @@
+import {GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
 import Role from "./role";
 
 export enum SORT {
@@ -127,5 +128,27 @@ export default class Utils {
         }
 
         return fallback;
+    }
+
+    public static getRoomGraves(room: Room) {
+        return [
+            ...(room.find(FIND_DROPPED_RESOURCES, {
+                filter(resource) {
+                    return resource.amount > 0
+                        && (GRAVE_KEEPERS_LOOT_BORDERS || Utils.isWithinTraversableBorders(resource));
+                }
+            })),
+            ...(room.find(FIND_TOMBSTONES, {
+                filter(tombstone) {
+                    return tombstone.store.getUsedCapacity() > 0
+                        && (GRAVE_KEEPERS_LOOT_BORDERS || Utils.isWithinTraversableBorders(tombstone));
+                }
+            })),
+            ...(room.find(FIND_RUINS, {
+                filter(ruin) {
+                    return ruin.store.getUsedCapacity() > 0;
+                }
+            }))
+        ];
     }
 }

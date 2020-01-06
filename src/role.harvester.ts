@@ -46,11 +46,19 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
             shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
                 const resource = ResourceAssigner.getResource(spawn.room);
                 if (!resource) {
+                    if (spawn.room.name === 'W2S17') {
+                        console.log('No resource');
+                    }
+
                     return false;
                 }
 
                 const walkable = Utils.getWalkablePositionsAround(resource);
                 const harvesting = ResourceAssigner.getCurrentHarvesters(resource).length;
+
+                if (spawn.room.name === 'W2S17') {
+                    console.log('Harvesters: ', harvesting, 'of', walkable);
+                }
 
                 return harvesting < walkable;
             }

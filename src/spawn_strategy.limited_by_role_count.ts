@@ -23,8 +23,10 @@ export default class LimitedSpawnByRoleCountStrategy implements SpawnStrategy {
     shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
         const multiplier = this.multiplier(spawn);
         const desired = this.limit;
+        const ttl = SUICIDE_TTL;
+
         const current = Utils.findCreepsByRole(game, this.role, this.allRooms ? null : spawn.room)
-            .filter(creep => creep.ticksToLive > SUICIDE_TTL)
+            .filter(creep => creep.ticksToLive > ttl)
             .filter(creep => creep.memory['spawn'] === undefined || creep.memory['spawn'] === spawn.id)
             .length;
 

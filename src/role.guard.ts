@@ -18,10 +18,10 @@ export default class GuardRole extends BaseCreepRole {
     run(creep: Creep, game: Game): void {
         const target = GuardRole.getTarget(creep);
         if (target) {
-            creep.memory['last_target'] = {pos: target.pos};
+            creep.memory['target'] = {pos: target.pos};
             CreepTrait.attack(creep, target, {reusePath: 1});
         } else {
-            if (creep.memory['last_target'] !== undefined) {
+            if (creep.memory['target'] !== undefined) {
                 creep.moveTo(
                     creep.room
                         .find<StructureRampart>(FIND_MY_STRUCTURES, {

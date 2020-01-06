@@ -1,6 +1,12 @@
 export const MAX_WORK_PER_RESOURCE = 7;
 export const MAX_WORK_PER_CONTROLLER = 7;
 
+export const UPGRADE_REMOTE_ROOMS_UP_TO_LEVEL = 3;
+export const BUILD_REMOTE_ROOMS_UP_TO_LEVEL = 4;
+export const MIN_ECONOMY_FOR_REMOTE_CREEP_PRODUCERS = 30000;
+export const REMOTE_BUILDERS_COUNT_LIMIT = 2;
+export const REMOTE_UPGRADERS_COUNT_LIMIT = 4;
+
 export const UPGRADERS_COUNT_LIMIT = 2; // @todo 1 for low economy
 
 export const ENERGY_AGGREGATORS_COUNT_LIMIT = 1; // @todo 0 for low economy

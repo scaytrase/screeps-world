@@ -1,5 +1,6 @@
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
+import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 
 export default class RoomClaimerRole extends BaseCreepRole {
@@ -11,14 +12,20 @@ export default class RoomClaimerRole extends BaseCreepRole {
     }
 
     public getSpawnStrategy(): SpawnStrategy {
-        if (this.flag.room && (this.flag.room.controller.upgradeBlocked || this.flag.room.controller.my)) {
-            return {
+        const flag = this.flag;
+
+        return new AndChainSpawnStrategy([
+            new LimitedSpawnByRoleCountStrategy(1, this, () => 1, true),
+            {
                 shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
-                    return false;
+                    if (!flag.room) {
+                        return true;
+                    }
+
+                    return !flag.room.controller.my;
                 }
-            };
-        }
-        return new LimitedSpawnByRoleCountStrategy(1, this);
+            }
+        ]);
     }
 
     public run(creep: Creep, game: Game): void {

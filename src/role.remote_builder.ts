@@ -1,3 +1,8 @@
+import {
+    BUILD_REMOTE_ROOMS_UP_TO_LEVEL,
+    MIN_ECONOMY_FOR_REMOTE_CREEP_PRODUCERS,
+    REMOTE_BUILDERS_COUNT_LIMIT
+} from "./config";
 import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
@@ -10,9 +15,9 @@ import Utils from "./utils";
 export default class RemoteBuilderRole extends WorkRestCycleCreepRole<ConstructionSite> {
     public getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
-            new LimitedSpawnByRoleCountStrategy(2, this, () => 1, true),
+            new LimitedSpawnByRoleCountStrategy(REMOTE_BUILDERS_COUNT_LIMIT, this, () => 1, true),
             new NotEmptyCallableResult((game, spawn) => this.getSites(game).shift()),
-            new NotEmptyCallableResult((game, spawn) => spawn.room.storage && spawn.room.storage.store.getUsedCapacity() > 50000),
+            new NotEmptyCallableResult((game, spawn) => spawn.room.storage && spawn.room.storage.store.getUsedCapacity() > MIN_ECONOMY_FOR_REMOTE_CREEP_PRODUCERS),
         ]);
     }
 
@@ -66,7 +71,7 @@ export default class RemoteBuilderRole extends WorkRestCycleCreepRole<Constructi
         for (const siteName in game.constructionSites) {
             const site = game.constructionSites[siteName];
 
-            if (site.room.find(FIND_MY_SPAWNS).length === 0 || site.room.controller.level < 3) {
+            if (site.room.find(FIND_MY_SPAWNS).length === 0 || site.room.controller.level < BUILD_REMOTE_ROOMS_UP_TO_LEVEL) {
                 sites.push(site);
             }
         }
