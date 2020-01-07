@@ -1,4 +1,5 @@
-import {MAX_WORK_PER_RESOURCE, RESOURCE_ASSIGN_ALGO_VERSION} from "./config";
+import GameCache from "./cache";
+import {MAX_WORK_PER_RESOURCE, RESOURCE_ASSIGN_ALGO_VERSION, RESOURCE_CACHE_TTL} from "./config";
 import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import Economy from "./economy";
@@ -17,18 +18,31 @@ const STORAGE_STRUCTURES: StructureConstant[] = [
 ];
 
 export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
-    private static getRecipientStructures(creep: Creep, game: Game): StructureConstant[] {
-        if (Economy.isHarvesterEmergency(creep.room, game) && Utils.findCreepsByRole(game, new StorageLinkKeeperRole(), creep.room).length === 0) {
+    public static resource_cache: GameCache<Source | undefined> = new GameCache<Source | undefined>();
+
+    public static getResource(room: Room): Source | undefined {
+        return HarvesterRole.resource_cache.getCached(room.name, RESOURCE_CACHE_TTL, () => ResourceAssigner.getResource(room));
+    }
+
+    public static getCurrentHarvesters(resource: Source): Creep[] {
+        return resource.room
+            .find(FIND_MY_CREEPS)
+            .filter(Utils.filterDeadCreeps)
+            .filter(creep => creep.memory['target'] === resource.id);
+    }
+
+    private static getRecipientStructures(creep: Creep): StructureConstant[] {
+        if (Economy.isHarvesterEmergency(creep.room) && Utils.findCreepsByRole(new StorageLinkKeeperRole(), creep.room).length === 0) {
             return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER];
-        } else if (Economy.isHarvesterEmergency(creep.room, game)) {
+        } else if (Economy.isHarvesterEmergency(creep.room)) {
             return [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER, STRUCTURE_LINK];
         } else {
             return STORAGE_STRUCTURES;
         }
     }
 
-    private static getRecipient(creep: Creep, game: Game) {
-        const recipient = Utils.getClosestEnergyRecipient(creep, HarvesterRole.getRecipientStructures(creep, game), creep.store.getUsedCapacity());
+    private static getRecipient(creep: Creep) {
+        const recipient = Utils.getClosestEnergyRecipient(creep, HarvesterRole.getRecipientStructures(creep), creep.store.getUsedCapacity());
 
         if (recipient) {
             return recipient;
@@ -37,57 +51,70 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
         return Utils.getClosestEnergyRecipient(creep, [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER]);
     }
 
-    public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {
-        return Utils.findCreepsByRole(game, this, spawn.room).length < spawn.room.find(FIND_SOURCES).length;
+    public spawn(spawn: StructureSpawn): ScreepsReturnCode {
+        const result = super.spawn(spawn);
+
+        if (result === OK) {
+            HarvesterRole.resource_cache.delete(spawn.room.name);
+        }
+
+        return result;
+    }
+
+    public isPrioritySpawn(spawn: StructureSpawn): boolean {
+        return Utils.findCreepsByRole(this, spawn.room).length < spawn.room.find(FIND_SOURCES).length;
     }
 
     public getSpawnStrategy(): SpawnStrategy {
         return {
-            shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
-                const resource = ResourceAssigner.getResource(spawn.room);
+            shouldSpawn(spawn: StructureSpawn): boolean {
+                const resource = HarvesterRole.getResource(spawn.room);
                 if (!resource) {
-                    if (spawn.room.name === 'W2S17') {
-                        console.log('No resource');
-                    }
-
                     return false;
                 }
 
                 const walkable = Utils.getWalkablePositionsAround(resource);
-                const harvesting = ResourceAssigner.getCurrentHarvesters(resource).length;
-
-                if (spawn.room.name === 'W2S17') {
-                    console.log('Harvesters: ', harvesting, 'of', walkable);
-                }
+                const harvesting = HarvesterRole.getCurrentHarvesters(resource).length;
 
                 return harvesting < walkable;
             }
         };
     }
 
-    protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {
-        return {...super.getSpawnMemory(spawn, game), target: ResourceAssigner.getResource(spawn.room).id};
+    public getCurrentWork(resource: Source) {
+        const creeps = HarvesterRole.getCurrentHarvesters(resource);
+        return creeps
+            .map(creep => Utils.countCreepBodyParts(creep, WORK))
+            .reduce((p, v) => p + v, 0);
     }
 
-    protected shouldWork(creep: Creep, game: Game): boolean {
+    public getRoleName(): string {
+        return 'harvester';
+    }
+
+    protected getSpawnMemory(spawn: StructureSpawn): object {
+        return {...super.getSpawnMemory(spawn), target: HarvesterRole.getResource(spawn.room).id};
+    }
+
+    protected shouldWork(creep: Creep): boolean {
         const target = this.getCurrentStructureTarget(creep);
         return creep.store.getUsedCapacity() === 0 && target && target.energy > 0;
     }
 
-    protected shouldRest(creep: Creep, game: Game): boolean {
+    protected shouldRest(creep: Creep): boolean {
         const target = this.getCurrentStructureTarget(creep);
         return creep.store.getFreeCapacity() === 0 || !target || target.energy === 0;
     }
 
-    protected work(creep: Creep, game: Game): void {
+    protected work(creep: Creep): void {
         CreepTrait.harvest(creep, this.getCurrentStructureTarget(creep));
     }
 
-    protected rest(creep: Creep, game: Game): void {
-        CreepTrait.transferAllEnergy(creep, HarvesterRole.getRecipient(creep, game));
+    protected rest(creep: Creep): void {
+        CreepTrait.transferAllEnergy(creep, HarvesterRole.getRecipient(creep));
     }
 
-    protected shouldRenewTarget(creep: Creep, game: Game): boolean {
+    protected shouldRenewTarget(creep: Creep): boolean {
         const oldVersion = creep.memory['version'] === undefined || creep.memory['version'] !== RESOURCE_ASSIGN_ALGO_VERSION;
         if (oldVersion) {
             return true;
@@ -105,25 +132,33 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
         super.setTarget(creep, target);
     }
 
-    protected getTarget(creep: Creep, game: Game): Source {
+    protected getTarget(creep: Creep): Source {
         let room = creep.room;
         if (creep.memory['spawn'] !== undefined) {
             room = Game.getObjectById<StructureSpawn>(creep.memory['spawn']).room;
         }
 
-        return ResourceAssigner.getResource(room);
+        return HarvesterRole.getResource(room);
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        const harvesterBodies = WORKER_BODIES.filter(body => body.filter(part => part === WORK).length <= MAX_WORK_PER_RESOURCE);
-        if (this.isPrioritySpawn(spawn, game)) {
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        const resource = HarvesterRole.getResource(spawn.room);
+        if (resource === undefined) {
+            return BASE_WORKER_CREEP_BODY;
+        }
+
+        const harvesterBodies = WORKER_BODIES.filter(body => body.filter(part => part === WORK).length <= this.getMaxWorkPerBody(resource));
+
+        if (this.isPrioritySpawn(spawn)) {
             return Utils.getBiggerPossibleBodyNow(harvesterBodies, BASE_WORKER_CREEP_BODY, spawn);
         }
 
         return Utils.getBiggerPossibleBody(harvesterBodies, BASE_WORKER_CREEP_BODY, spawn);
     }
 
-    protected getRoleName(): string {
-        return 'harvester';
+    private getMaxWorkPerBody(resource: Source): number {
+        const current = this.getCurrentWork(resource);
+
+        return Math.max(0, MAX_WORK_PER_RESOURCE - current) + 1;
     }
 }

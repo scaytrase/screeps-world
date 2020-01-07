@@ -4,8 +4,8 @@ import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import RoleCountStrategy from "./spawn_strategy.role_count";
+import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
 import Utils from "./utils";
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
@@ -19,8 +19,8 @@ const TARGET_STRUCTURES: StructureConstant[] = [
 export default class TowerKeeperRole extends BaseCreepRole {
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
-            new LimitedSpawnByRoleCountStrategy(TOWER_KEEPERS_COUNT_LIMIT, this),
-            new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_STRUCTURES, {
+            RoleCountStrategy.room(TOWER_KEEPERS_COUNT_LIMIT, this),
+            new RoomFindSpawnStrategy(FIND_MY_STRUCTURES, {
                 filter: (structure) =>
                     structure.structureType === STRUCTURE_TOWER &&
                     structure.store.getFreeCapacity() > 500
@@ -28,7 +28,7 @@ export default class TowerKeeperRole extends BaseCreepRole {
         ]);
     }
 
-    run(creep: Creep, game: Game): void {
+    run(creep: Creep): void {
         if (creep.store.getFreeCapacity() > 0) {
             CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES));
         } else {
@@ -36,11 +36,11 @@ export default class TowerKeeperRole extends BaseCreepRole {
         }
     }
 
-    protected getRoleName(): string {
+    public getRoleName(): string {
         return 'tower_keeper';
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
         const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 4);
 
         return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);

@@ -10,6 +10,10 @@ export default class Logger {
     }
 
     public static info(...args) {
-        console.log('[INFO]', ...args);
+        console.log('[INFO ]', ...args);
+    }
+
+    public static warn(...args) {
+        console.log('[WARN ]', ...args);
     }
 }

@@ -1,7 +1,7 @@
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import RoleCountStrategy from "./spawn_strategy.role_count";
 
 export default class RoomClaimerRole extends BaseCreepRole {
     private readonly flag: Flag;
@@ -15,9 +15,9 @@ export default class RoomClaimerRole extends BaseCreepRole {
         const flag = this.flag;
 
         return new AndChainSpawnStrategy([
-            new LimitedSpawnByRoleCountStrategy(1, this, () => 1, true),
+            RoleCountStrategy.global(1, this),
             {
-                shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
+                shouldSpawn(spawn: StructureSpawn): boolean {
                     if (!flag.room) {
                         return true;
                     }
@@ -28,7 +28,7 @@ export default class RoomClaimerRole extends BaseCreepRole {
         ]);
     }
 
-    public run(creep: Creep, game: Game): void {
+    public run(creep: Creep): void {
         const room = this.flag.room;
         if (room) {
             const controller = room.controller;
@@ -42,15 +42,19 @@ export default class RoomClaimerRole extends BaseCreepRole {
         }
     }
 
+    public getRoleName(): string {
+        return `claimer_${this.flag.name}`;
+    }
+
     protected isSpawnBound(): boolean {
         return false;
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        return [CLAIM, MOVE];
+    protected getSpawnMemory(spawn: StructureSpawn): object {
+        return {...super.getSpawnMemory(spawn), immortal: true};
     }
 
-    protected getRoleName(): string {
-        return `claimer_${this.flag.name}`;
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        return [CLAIM, MOVE];
     }
 }

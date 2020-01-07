@@ -1,21 +1,23 @@
-import {GUARD_BODY, GUARDS_ATTACK_BORDERS, GUARDS_COUNT_LIMIT} from "./config";
+import {GUARDS_ATTACK_BORDERS, GUARDS_COUNT_LIMIT} from "./config";
+import {ATTACKER_BODIES, BASE_ATTACKER_BODY} from "./const";
 import CreepTrait, {COLOR_ATTACK} from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
+import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import RoleCountStrategy from "./spawn_strategy.role_count";
+import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
 import Utils from "./utils";
 
 export default class GuardRole extends BaseCreepRole {
     private static getTarget(creep: Creep): Creep | null {
         return creep.room
             .find(FIND_HOSTILE_CREEPS, {filter: (hostile: Creep) => GUARDS_ATTACK_BORDERS || Utils.isWithinTraversableBorders(hostile)})
-            .sort(Utils.sortByDistance(creep))
+            .sort(Sort.byDistance(creep))
             .shift();
     }
 
-    run(creep: Creep, game: Game): void {
+    run(creep: Creep): void {
         const target = GuardRole.getTarget(creep);
         if (target) {
             creep.memory['target'] = {pos: target.pos};
@@ -28,7 +30,7 @@ export default class GuardRole extends BaseCreepRole {
                             filter: (structure) => structure.structureType === STRUCTURE_RAMPART &&
                                 creep.room.find(FIND_MY_CREEPS).filter(other_creep => other_creep !== creep && other_creep.pos.isEqualTo(structure)).length === 0
                         })
-                        .sort(Utils.sortByDistance(creep))
+                        .sort(Sort.byDistance(creep))
                         .shift(),
                     {visualizePathStyle: {stroke: COLOR_ATTACK}}
                 );
@@ -39,17 +41,17 @@ export default class GuardRole extends BaseCreepRole {
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_HOSTILE_CREEPS),
-                new LimitedSpawnByRoleCountStrategy(GUARDS_COUNT_LIMIT, this),
+                new RoomFindSpawnStrategy(FIND_HOSTILE_CREEPS),
+                RoleCountStrategy.room(GUARDS_COUNT_LIMIT, this),
             ]
         );
     }
 
-    protected getBody(game: Game): BodyPartConstant[] {
-        return GUARD_BODY;
+    public getRoleName(): string {
+        return 'guard';
     }
 
-    protected getRoleName(): string {
-        return 'guard';
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        return Utils.getBiggerPossibleBodyNow(ATTACKER_BODIES, BASE_ATTACKER_BODY, spawn);
     }
 }

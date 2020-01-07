@@ -9,23 +9,23 @@ export enum ECONOMY_LEVEL {
 }
 
 export default class Economy {
-    public static getCurrentEconomyLevel(room: Room, game: Game): ECONOMY_LEVEL {
-        if (Economy.anyEmergency(room, game)) {
+    public static getCurrentEconomyLevel(room: Room): ECONOMY_LEVEL {
+        if (Economy.anyEmergency(room)) {
             return ECONOMY_LEVEL.LOW;
         }
 
         return ECONOMY_LEVEL.HIGH;
     }
 
-    public static anyEmergency(room: Room, game: Game): boolean {
-        return this.isHarvesterEmergency(room, game);
+    public static anyEmergency(room: Room): boolean {
+        return this.isHarvesterEmergency(room);
     }
 
-    public static isHarvesterEmergency(room: Room, game: Game): boolean {
+    public static isHarvesterEmergency(room: Room): boolean {
         return room.energyAvailable < 500
             && (
                 EconomyUtils.usableSpawnEnergyAvailable(room) < 1000 ||
-                Utils.findCreepsByRole(game, new SpawnKeeperRole(), room).length === 0
+                Utils.findCreepsByRole(new SpawnKeeperRole(), room).length === 0
             );
     }
 }

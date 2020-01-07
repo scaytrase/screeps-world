@@ -1,13 +1,15 @@
 import SpawnStrategy from "./spawn_strategy";
 
 export default interface Role {
-    run(creep: Creep, game: Game): void;
+    getRoleName(): string;
+
+    run(creep: Creep): void;
 
     match(creep: Creep): boolean;
 
-    spawn(spawn: StructureSpawn, game: Game): ScreepsReturnCode;
+    spawn(spawn: StructureSpawn): ScreepsReturnCode;
 
     getSpawnStrategy(): SpawnStrategy;
 
-    isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean;
+    isPrioritySpawn(spawn: StructureSpawn): boolean;
 }

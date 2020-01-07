@@ -9,7 +9,7 @@ const store_types: StructureConstant[] = [
 type ENERGY_STORAGE = StructureStorage | StructureLink | StructureExtension | StructureContainer;
 
 export default class EconomyUtils {
-    public static usableSpawnEnergyRation(room: Room): number {
+    public static usableSpawnEnergyRatio(room: Room): number {
         return this.usableSpawnEnergyAvailable(room) / this.usableSpawnEnergyMax(room);
     }
 

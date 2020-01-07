@@ -1,3 +1,4 @@
+import CreepTrait from "./creep_traits";
 import TargetAwareCreepRole from "./role.target_aware_creep";
 
 export default abstract class WorkRestCycleCreepRole<T extends ConstructionSite | Structure | Source> extends TargetAwareCreepRole<T> {
@@ -15,31 +16,35 @@ export default abstract class WorkRestCycleCreepRole<T extends ConstructionSite 
         creep.say('⚡ work');
     }
 
-    protected abstract shouldWork(creep: Creep, game: Game): boolean;
+    protected abstract shouldWork(creep: Creep): boolean;
 
-    protected abstract shouldRest(creep: Creep, game: Game): boolean;
+    protected abstract shouldRest(creep: Creep): boolean;
 
-    protected abstract work(creep: Creep, game: Game): void;
+    protected abstract work(creep: Creep): void;
 
-    protected abstract rest(creep: Creep, game: Game): void;
+    protected abstract rest(creep: Creep): void;
 
-    protected doRun(creep: Creep, game: Game): void {
-        this.updateState(creep, game);
-        this.performState(creep, game);
+    protected doRun(creep: Creep): void {
+        this.updateState(creep);
+        this.performState(creep);
     }
 
-    private performState(creep: Creep, game: Game) {
-        if (WorkRestCycleCreepRole.isWorking(creep)) {
-            this.work(creep, game);
+    private performState(creep: Creep) {
+        if (this.getCurrentStructureTarget(creep)) {
+            if (WorkRestCycleCreepRole.isWorking(creep)) {
+                this.work(creep);
+            } else {
+                this.rest(creep);
+            }
         } else {
-            this.rest(creep, game);
+            CreepTrait.goToParking(creep);
         }
     }
 
-    private updateState(creep: Creep, game: Game) {
-        if (WorkRestCycleCreepRole.isWorking(creep) && this.shouldRest(creep, game)) {
+    private updateState(creep: Creep) {
+        if (WorkRestCycleCreepRole.isWorking(creep) && this.shouldRest(creep)) {
             WorkRestCycleCreepRole.stopWorking(creep);
-        } else if (!WorkRestCycleCreepRole.isWorking(creep) && this.shouldWork(creep, game)) {
+        } else if (!WorkRestCycleCreepRole.isWorking(creep) && this.shouldWork(creep)) {
             WorkRestCycleCreepRole.startWorking(creep);
         }
     }

@@ -1,10 +1,8 @@
 import Runnable from "./runnable";
 
 export default class CreepSpawnBound implements Runnable {
-    run(game: Game, memory: Memory): void {
-        for (let name in game.creeps) {
-            let creep = game.creeps[name];
-
+    run(): void {
+        for (const creep of Object.values(Game.creeps)) {
             if (creep.spawning) {
                 continue;
             }

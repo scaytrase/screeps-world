@@ -3,10 +3,10 @@ import BaseCreepRole from "./role.base_creep";
 const TARGET_FIELD = 'target';
 
 export default abstract class TargetAwareCreepRole<T extends Structure | ConstructionSite | Source> extends BaseCreepRole {
-    run(creep: Creep, game: Game): void {
-        this.renewTarget(creep, game);
+    run(creep: Creep): void {
+        this.renewTarget(creep);
 
-        this.doRun(creep, game);
+        this.doRun(creep);
     }
 
     protected getCurrentTargetId(creep: Creep): Id<any> | null {
@@ -24,17 +24,17 @@ export default abstract class TargetAwareCreepRole<T extends Structure | Constru
         }
     }
 
-    protected abstract shouldRenewTarget(creep: Creep, game: Game): boolean;
+    protected abstract shouldRenewTarget(creep: Creep): boolean;
 
-    protected abstract getTarget(creep: Creep, game: Game): T;
+    protected abstract getTarget(creep: Creep): T;
 
-    protected renewTarget(creep: Creep, game: Game): void {
+    protected renewTarget(creep: Creep): void {
         const noTarget = this.getCurrentStructureTarget(creep) === null;
-        const shouldRenew = this.shouldRenewTarget(creep, game);
+        const shouldRenew = this.shouldRenewTarget(creep);
         if (noTarget || shouldRenew) {
-            this.setTarget(creep, this.getTarget(creep, game));
+            this.setTarget(creep, this.getTarget(creep));
         }
     }
 
-    protected abstract doRun(creep: Creep, game: Game): void ;
+    protected abstract doRun(creep: Creep): void ;
 }

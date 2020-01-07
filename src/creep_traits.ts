@@ -1,4 +1,5 @@
-import {SUICIDE_CREEPS} from "./config";
+import {PARKING_SLEEP_TIME} from "./config";
+import {Sort} from "./sort_utils";
 import Utils from "./utils";
 
 const _ = require('lodash');
@@ -11,10 +12,6 @@ export const COLOR_SPECIAL_TASKS = '#ff55f4';
 
 export default class CreepTrait {
     public static suicideOldCreep(creep: Creep, ttl: number): void {
-        if (!SUICIDE_CREEPS) {
-            return;
-        }
-
         if (creep.ticksToLive >= ttl) {
             return;
         }
@@ -26,15 +23,16 @@ export default class CreepTrait {
         }
     }
 
-    public static goToParking(creep: Creep, game: Game): void {
-        const flags = [...Utils.getFlagsByColors(game, COLOR_WHITE, COLOR_WHITE)];
+    public static goToParking(creep: Creep): void {
+        const flag = [...Utils.getFlagsByColors(COLOR_WHITE, COLOR_WHITE)].filter(flag => flag.room.name === creep.room.name).sort(Sort.byDistance(creep)).shift();
 
-        creep.moveTo(
-            flags.filter(flag => flag.room.name === creep.room.name).sort(Utils.sortByDistance(creep)).shift(),
-            {
-                visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}
-            }
-        );
+        if (creep.store.getUsedCapacity() > 0) {
+            CreepTrait.transferAnyResources(creep);
+        } else if (!creep.pos.inRangeTo(flag, 2)) {
+            creep.moveTo(flag, {visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}});
+        } else {
+            creep.memory['sleep_until'] = Game.time + PARKING_SLEEP_TIME;
+        }
     }
 
     public static transferAnyResources(creep: Creep): void {
@@ -44,7 +42,7 @@ export default class CreepTrait {
                 .find(FIND_MY_STRUCTURES, {
                     filter: (structure: StructureStorage | StructureContainer) => types.includes(structure.structureType) && structure.store.getFreeCapacity() > creep.store.getUsedCapacity()
                 })
-                .sort(Utils.sortByDistance(creep))
+                .sort(Sort.byDistance(creep))
                 .shift());
     }
 
@@ -141,15 +139,5 @@ export default class CreepTrait {
                 });
             }
         }
-    }
-
-    private static getClosestSpawn(creep: Creep): StructureSpawn {
-        return creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-    }
-
-    private static moveToSpawnToRenew(creep: Creep): void {
-        const spawn = CreepTrait.getClosestSpawn(creep);
-        creep.moveTo(spawn, {visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}});
-        creep.transfer(spawn, RESOURCE_ENERGY);
     }
 }

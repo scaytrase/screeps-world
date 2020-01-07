@@ -1,74 +1,61 @@
-import {GRAVE_KEEPERS_LOOT_BORDERS} from "./config";
+import GameCache from "./cache";
+import {BORDER_WIDTH, GRAVE_KEEPERS_LOOT_BORDERS, WALKABLE_CACHE_TTL} from "./config";
 import Role from "./role";
-
-export enum SORT {
-    ASC = "asc",
-    DESC = "desc"
-}
+import {Sort} from "./sort_utils";
 
 export default class Utils {
-    public static sortByDistance(target: RoomObject | { pos: RoomPosition }, direction: SORT = SORT.ASC): (a: RoomObject | { pos: RoomPosition }, b: RoomObject | { pos: RoomPosition }) => number {
-        return (a, b) => (direction === SORT.ASC ? 1 : -1) * Math.sign(a.pos.getRangeTo(target) - b.pos.getRangeTo(target));
-    }
+    private static walkable_cache: GameCache<number> = new GameCache<number>();
 
-    public static sortByHealthPercent(direction: SORT = SORT.ASC): (a: AnyStructure, b: AnyStructure) => number {
-        return (a, b) => (direction === SORT.ASC ? 1 : -1) * Math.sign(a.hits / a.hitsMax - b.hits / b.hitsMax);
-    }
-
-    public static getFlagByName(name: string, room: Room): Flag | null {
-        return room.find(FIND_FLAGS, {filter: {name: name}}).shift();
-    }
-
-    public static getClosestEnergyMine(target: RoomObject): Source {
-        return target.room.find(FIND_SOURCES_ACTIVE).sort(Utils.sortByDistance(target)).shift();
+    public static getClosestEnergyMine(target: RoomObject): Source | undefined {
+        return target.room.find(FIND_SOURCES_ACTIVE).sort(Sort.byDistance(target)).shift();
     }
 
     public static getClosestEnergySource<T extends Structure = AnyStructure>(
         target: RoomObject,
         allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],
-        lowerStructureLimit: number = 0,
-        additionalFilter: (structure: AnyStructure) => boolean = () => true
+        lowerStructureLimit: number = 0
     ): T | null {
         return target.room
             .find<T>(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return allowedTypes.includes(structure.structureType) &&
-                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) > lowerStructureLimit &&
-                        additionalFilter(structure);
+                        structure['store'].getUsedCapacity(RESOURCE_ENERGY) > lowerStructureLimit;
                 }
             })
-            .sort(this.sortByDistance(target))
+            .sort(Sort.byDistance(target))
             .shift();
     }
 
     public static getClosestEnergyRecipient<T extends Structure = AnyStructure>(
         target: RoomObject,
         allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],
-        lowerStructureLimit: number = 0,
-        additionalFilter: (structure: AnyStructure) => boolean = () => true
+        lowerStructureLimit: number = 0
     ): T | null {
         return target.room
             .find<T>(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return allowedTypes.includes(structure.structureType) &&
-                        structure['store'].getFreeCapacity(RESOURCE_ENERGY) > lowerStructureLimit &&
-                        additionalFilter(structure);
+                        structure['store'].getFreeCapacity(RESOURCE_ENERGY) > lowerStructureLimit;
                 }
             })
-            .sort(this.sortByDistance(target))
+            .sort(Sort.byDistance(target))
             .shift();
     }
 
     public static isWithinTraversableBorders(object: RoomObject): boolean {
-        return object.pos.y > 1
-            && object.pos.y < 48
-            && object.pos.x > 1
-            && object.pos.x < 48;
+        return object.pos.y > BORDER_WIDTH
+            && object.pos.y < 49 - BORDER_WIDTH
+            && object.pos.x > BORDER_WIDTH
+            && object.pos.x < 49 - BORDER_WIDTH;
     }
 
-    public static findCreepsByRole(game: Game, role: Role, room: Room | null): Creep[] {
-        return Object.values(game.creeps).filter((creep: Creep) => (role.match(creep) && (room === null || creep.room.name === room.name)));
+    public static findCreepsByRole(role: Role, room: Room | null): Creep[] {
+        return Object
+            .values(Game.creeps)
+            .filter((creep: Creep) => role.match(creep))
+            .filter((creep: Creep) => room === null || creep.room.name === room.name);
     }
+
 
     public static getBodyCost(bodyParts: BodyPartConstant[]): number {
         return bodyParts.map(part => BODYPART_COST[part]).reduce((p, v) => p + v, 0);
@@ -82,9 +69,8 @@ export default class Utils {
         return Game.rooms[spawn.room.name].energyCapacityAvailable > Utils.getBodyCost(bodyParts);
     }
 
-    public static* getFlagsByColors(game: Game, primary: ColorConstant, secondary?: ColorConstant): Generator<Flag> {
-        for (let flagName in Game.flags) {
-            const flag = Game.flags[flagName];
+    public static* getFlagsByColors(primary: ColorConstant, secondary?: ColorConstant): Generator<Flag> {
+        for (const flag of Object.values(Game.flags)) {
             if (flag.color === primary && (!secondary || flag.secondaryColor === secondary)) {
                 yield flag;
             }
@@ -92,22 +78,27 @@ export default class Utils {
     }
 
     public static getWalkablePositionsAround(target: RoomObject): number {
-        let count = 0;
+        return Utils.walkable_cache.getCached(
+            target['id'] || `r${target.room.name}x${target.pos.x}y${target.pos.y}`,
+            WALKABLE_CACHE_TTL,
+            () => {
+                let count = 0;
 
-        const resultMatrix = target.room
-            .lookAtArea(target.pos.y - 1, target.pos.x - 1, target.pos.y + 1, target.pos.x + 1, false);
+                const resultMatrix = target.room
+                    .lookAtArea(target.pos.y - 1, target.pos.x - 1, target.pos.y + 1, target.pos.x + 1, false);
 
-        for (const y in resultMatrix) {
-            for (const x in resultMatrix[y]) {
-                const resultArray = resultMatrix[y][x];
-                const ex = resultArray.filter(
-                    result => (result.type === "terrain" && result.terrain === "plain") || (result.type === "structure" && result.structure.structureType === STRUCTURE_ROAD))
-                    .length > 0;
-                if (ex) count++;
-            }
-        }
+                for (const y in resultMatrix) {
+                    for (const x in resultMatrix[y]) {
+                        const resultArray = resultMatrix[y][x];
+                        const ex = resultArray.filter(
+                            result => (result.type === "terrain" && result.terrain === "plain") || (result.type === "structure" && result.structure.structureType === STRUCTURE_ROAD))
+                            .length > 0;
+                        if (ex) count++;
+                    }
+                }
 
-        return count;
+                return count;
+            });
     }
 
     public static getBiggerPossibleBody(bodies: BodyPartConstant[][], fallback: BodyPartConstant[], spawn: StructureSpawn): BodyPartConstant[] {
@@ -122,7 +113,7 @@ export default class Utils {
 
     public static getBiggerPossibleBodyNow(bodies: BodyPartConstant[][], fallback: BodyPartConstant[], spawn: StructureSpawn): BodyPartConstant[] {
         for (const body of bodies) {
-            if (Utils.isCapableToSpawnBodyNow(spawn, body)) {
+            if (spawn.spawnCreep(body, 'check', {dryRun: true}) === OK) {
                 return body;
             }
         }
@@ -150,5 +141,17 @@ export default class Utils {
                 }
             }))
         ];
+    }
+
+    public static countCreepBodyParts(creep: Creep, type: BodyPartConstant): number {
+        return creep.body.filter(part => part.type === type).length;
+    }
+
+    public static getCreepRenewTtl(creep: Creep): number {
+        return creep.body.map(part => 3).reduce((p, v) => p + v, 0);
+    }
+
+    public static filterDeadCreeps(creep: Creep): boolean {
+        return creep.ticksToLive >= Utils.getCreepRenewTtl(creep);
     }
 }

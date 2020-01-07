@@ -2,10 +2,11 @@ import {GRAVE_KEEPERS_COUNT_LIMIT} from "./config";
 import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
+import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import NotEmptyCallableResult from "./spawn_strategy.not_empty_callable_result";
+import RoleCountStrategy from "./spawn_strategy.role_count";
 import Utils from "./utils";
 
 const STORAGE_STRUCTURES: StructureConstant[] = [
@@ -26,7 +27,7 @@ const ENERGY_STORAGE_STRUCTURES: StructureConstant[] = [
 
 export default class GraveKeeperRole extends BaseCreepRole {
     private static getSource(creep: Creep): Resource | Tombstone | Ruin | null {
-        return Utils.getRoomGraves(creep.room).sort(Utils.sortByDistance(creep)).shift();
+        return Utils.getRoomGraves(creep.room).sort(Sort.byDistance(creep)).shift();
     }
 
     private static getTarget(creep: Creep): AnyStructure | null {
@@ -36,7 +37,7 @@ export default class GraveKeeperRole extends BaseCreepRole {
                     return ENERGY_STORAGE_STRUCTURES.includes(structure.structureType) &&
                         structure['store'].getFreeCapacity() > 0;
                 }
-            }).sort(Utils.sortByDistance(creep)).shift();
+            }).sort(Sort.byDistance(creep)).shift();
         }
 
         return creep.room.find(FIND_STRUCTURES, {
@@ -44,34 +45,34 @@ export default class GraveKeeperRole extends BaseCreepRole {
                 return STORAGE_STRUCTURES.includes(structure.structureType) &&
                     structure['store'].getFreeCapacity() > 0;
             }
-        }).sort(Utils.sortByDistance(creep)).shift();
+        }).sort(Sort.byDistance(creep)).shift();
     }
 
-    run(creep: Creep, game: Game): void {
+    run(creep: Creep): void {
         const source = GraveKeeperRole.getSource(creep);
         if (source && creep.store.getFreeCapacity() > 0 && creep.ticksToLive > 100) {
             CreepTrait.pickupAllResources(creep, source);
         } else if (creep.store.getUsedCapacity() > 0) {
             CreepTrait.transferAllResources(creep, GraveKeeperRole.getTarget(creep));
         } else {
-            CreepTrait.goToParking(creep, game);
+            CreepTrait.goToParking(creep);
         }
     }
 
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy([
-            new NotEmptyCallableResult((game, spawn) => Utils.getRoomGraves(spawn.room).shift()),
-            new LimitedSpawnByRoleCountStrategy(GRAVE_KEEPERS_COUNT_LIMIT, this)
+            new NotEmptyCallableResult((spawn) => Utils.getRoomGraves(spawn.room).shift()),
+            RoleCountStrategy.room(GRAVE_KEEPERS_COUNT_LIMIT, this)
         ]);
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
+    public getRoleName(): string {
+        return 'grave_keeper';
+    }
+
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
         const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 6);
 
         return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
-    }
-
-    protected getRoleName(): string {
-        return 'grave_keeper';
     }
 }

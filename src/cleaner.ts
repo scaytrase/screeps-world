@@ -1,10 +1,10 @@
 import Runnable from "./runnable";
 
 export default class Cleaner implements Runnable {
-    run(game: Game, memory: Memory): void {
-        for (let name in memory.creeps) {
-            if (!game.creeps[name]) {
-                delete memory.creeps[name];
+    run(): void {
+        for (let name in Memory.creeps) {
+            if (!Game.creeps[name]) {
+                delete Memory.creeps[name];
             }
         }
     }

@@ -1,5 +1,6 @@
 import CreepTrait from "./creep_traits";
 import LinkProxy, {LinkType} from "./link_proxy";
+import Logger from "./logger";
 import StorageLinkKeeperRole from "./role.storage_link_keeper";
 import Runnable from "./runnable";
 import Utils from "./utils";
@@ -11,8 +12,8 @@ export default class LinkManager implements Runnable {
         this.room = room;
     }
 
-    public static getLinks(room: Room, game: Game): LinkProxy[] {
-        return room.find<StructureLink>(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_LINK}}).map(link => new LinkProxy(link, game));
+    public static getLinks(room: Room): LinkProxy[] {
+        return room.find<StructureLink>(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_LINK}}).map(link => new LinkProxy(link));
     }
 
     public static getDemandLinks(links: LinkProxy[]): LinkProxy[] {
@@ -27,8 +28,8 @@ export default class LinkManager implements Runnable {
         return links.filter(link => link.type === LinkType.STORAGE);
     }
 
-    private static getKeeper(link: LinkProxy, game: Game): Creep | undefined {
-        const keepers = Utils.findCreepsByRole(game, new StorageLinkKeeperRole(), link.link.room);
+    private static getKeeper(link: LinkProxy): Creep | undefined {
+        const keepers = Utils.findCreepsByRole(new StorageLinkKeeperRole(), link.link.room);
 
         for (let keeper of keepers) {
             if (keeper.memory['target'] === link.link.id) {
@@ -39,8 +40,8 @@ export default class LinkManager implements Runnable {
         return undefined;
     }
 
-    private static resetKeeper(link: LinkProxy, game: Game) {
-        const keeper = LinkManager.getKeeper(link, game);
+    private static resetKeeper(link: LinkProxy) {
+        const keeper = LinkManager.getKeeper(link);
         if (!keeper) {
             return;
         }
@@ -48,8 +49,8 @@ export default class LinkManager implements Runnable {
         CreepTrait.transferAllEnergy(keeper, keeper.room.storage);
     }
 
-    private static fillStorageLink(link: LinkProxy, game: Game) {
-        const keeper = LinkManager.getKeeper(link, game);
+    private static fillStorageLink(link: LinkProxy) {
+        const keeper = LinkManager.getKeeper(link);
         if (!keeper) {
             return;
         }
@@ -61,8 +62,8 @@ export default class LinkManager implements Runnable {
         }
     }
 
-    private static emptyStorageLink(link: LinkProxy, game: Game) {
-        const keeper = LinkManager.getKeeper(link, game);
+    private static emptyStorageLink(link: LinkProxy) {
+        const keeper = LinkManager.getKeeper(link);
         if (!keeper) {
             return;
         }
@@ -74,16 +75,16 @@ export default class LinkManager implements Runnable {
         }
     }
 
-    public run(game: Game, memory: Memory): void {
-        const links = LinkManager.getLinks(this.room, game);
+    public run(): void {
+        const links = LinkManager.getLinks(this.room);
 
         for (let demandLink of LinkManager.getDemandLinks(links)) {
             for (let sourceLink of LinkManager.getSourceLinks(links)) {
                 const amount = Math.min(sourceLink.getAmount(), demandLink.getAmount());
 
-                console.log(`[DEBUG] providing ${amount} to ${demandLink.link.id} from ${sourceLink.link.id}`);
+                Logger.debug(`providing ${amount} to ${demandLink.link.id} from ${sourceLink.link.id}`);
                 if (sourceLink.link.cooldown > 0) {
-                    console.log(`[DEBUG] link ${sourceLink.link.id} is cooling down for ${sourceLink.link.cooldown}`);
+                    Logger.debug(`link ${sourceLink.link.id} is cooling down for ${sourceLink.link.cooldown}`);
                 } else {
                     demandLink.withdraw(sourceLink, amount);
                     if (!demandLink.isDemanding()) {
@@ -100,11 +101,11 @@ export default class LinkManager implements Runnable {
             for (let storageLink of LinkManager.getStorageLinks(links)) {
                 const amount = Math.min(storageLink.getAmount(), demandLink.getAmount());
 
-                console.log(`[DEBUG] demanding ${demandLink.getAmount()} to ${demandLink.link.id} from storage ${storageLink.link.id}`);
+                Logger.debug(`demanding ${demandLink.getAmount()} to ${demandLink.link.id} from storage ${storageLink.link.id}`);
                 if (storageLink.link.cooldown > 0) {
-                    console.log(`[DEBUG] storage ${storageLink.link.id} is cooling down for ${storageLink.link.cooldown}`);
+                    Logger.debug(`storage ${storageLink.link.id} is cooling down for ${storageLink.link.cooldown}`);
                 } else {
-                    LinkManager.fillStorageLink(storageLink, game);
+                    LinkManager.fillStorageLink(storageLink);
                     demandLink.withdraw(storageLink, amount);
 
                     if (!demandLink.isDemanding()) {
@@ -120,17 +121,17 @@ export default class LinkManager implements Runnable {
                 const amount = sourceLink.getAmount();
 
                 if (sourceLink.link.cooldown > 0) {
-                    console.log(`[DEBUG] providing ${amount} to storage from ${sourceLink.link.id} after cooldown ${sourceLink.link.cooldown}`);
+                    Logger.debug(`providing ${amount} to storage from ${sourceLink.link.id} after cooldown ${sourceLink.link.cooldown}`);
                 } else {
-                    console.log(`[DEBUG] providing ${amount} to storage from ${sourceLink.link.id}`);
-                    LinkManager.emptyStorageLink(storageLink, game);
+                    Logger.debug(`providing ${amount} to storage from ${sourceLink.link.id}`);
+                    LinkManager.emptyStorageLink(storageLink);
                     storageLink.withdraw(sourceLink, amount);
                 }
             }
         }
 
         for (let storageLink of LinkManager.getStorageLinks(links)) {
-            LinkManager.resetKeeper(storageLink, game);
+            LinkManager.resetKeeper(storageLink);
         }
     }
 }

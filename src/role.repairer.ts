@@ -8,10 +8,10 @@ import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import EconomyUtils from "./economy_utils";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
+import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
 import Utils from "./utils";
 
 const FORBIDDEN_STRUCTURES: StructureConstant[] = [
@@ -28,18 +28,41 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 ];
 
 export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
+    private static filter(object) {
+        return !FORBIDDEN_STRUCTURES.includes(object.structureType) &&
+            ((object.hits / object.hitsMax) < REPAIRER_HEALTH_LOWER_RATIO);
+    }
+
     public getSpawnStrategy(): SpawnStrategy {
+        const that = this;
         return new AndChainSpawnStrategy([
-            new LimitedSpawnByRoleCountStrategy(REPAIRERS_COUNT_LIMIT, this),
-            new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: this.filter()})
+            new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: RepairerRole.filter}),
+            {
+                shouldSpawn(spawn: StructureSpawn): boolean {
+                    const towers = spawn.room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}}).length;
+                    if (towers > 2) {
+                        return false;
+                    }
+                    const creeps = Utils.findCreepsByRole(that, spawn.room).length;
+                    if (towers === 1) {
+                        return creeps < 1;
+                    }
+
+                    return creeps < REPAIRERS_COUNT_LIMIT;
+                }
+            },
         ]);
     }
 
-    public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {
+    public isPrioritySpawn(spawn: StructureSpawn): boolean {
         return this.isEmergency(spawn.room) && EconomyUtils.usableSpawnEnergyAvailable(spawn.room) > 2000;
     }
 
-    protected shouldRenewTarget(creep: Creep, game: Game): boolean {
+    public getRoleName(): string {
+        return 'repairer';
+    }
+
+    protected shouldRenewTarget(creep: Creep): boolean {
         const current = this.getCurrentStructureTarget(creep);
 
         if (!current) {
@@ -58,47 +81,33 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
 
     protected getTarget(creep: Creep): AnyStructure | null {
         return creep.room
-            .find(FIND_STRUCTURES, {filter: this.filter()})
-            .sort(Utils.sortByHealthPercent())
+            .find(FIND_STRUCTURES, {filter: RepairerRole.filter})
+            .sort(Sort.byHealthPercent())
             .shift();
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (this.isPrioritySpawn(spawn, game)) {
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        if (this.isPrioritySpawn(spawn)) {
             return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
         }
 
         return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 
-    protected getRoleName(): string {
-        return 'repairer';
-    }
-
-    protected rest(creep: Creep, game: Game): void {
+    protected rest(creep: Creep): void {
         CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, 200));
     }
 
-    protected shouldRest(creep: Creep, game: Game): boolean {
+    protected shouldRest(creep: Creep): boolean {
         return creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0;
     }
 
-    protected shouldWork(creep: Creep, game: Game): boolean {
+    protected shouldWork(creep: Creep): boolean {
         return creep.store.getFreeCapacity() === 0;
     }
 
-    protected work(creep: Creep, game: Game): void {
-        const target = this.getCurrentStructureTarget(creep);
-        if (target) {
-            CreepTrait.build(creep, target);
-        } else {
-            CreepTrait.goToParking(creep, game);
-        }
-    }
-
-    private filter() {
-        return object => !FORBIDDEN_STRUCTURES.includes(object.structureType) &&
-            ((object.hits / object.hitsMax) < REPAIRER_HEALTH_LOWER_RATIO);
+    protected work(creep: Creep): void {
+        CreepTrait.build(creep, this.getCurrentStructureTarget(creep));
     }
 
     private isEmergency(room: Room) {

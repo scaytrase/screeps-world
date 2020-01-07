@@ -10,15 +10,15 @@ export default class StorageLinkKeeperRole extends BaseCreepRole {
         const role = this;
 
         return {
-            shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
-                return Utils.findCreepsByRole(game, role, spawn.room).length < LinkManagerUtils.getStorageLinks(spawn.room, game).length;
+            shouldSpawn(spawn: StructureSpawn): boolean {
+                return Utils.findCreepsByRole(role, spawn.room).length < LinkManagerUtils.getStorageLinks(spawn.room).length;
             }
         };
     }
 
-    public run(creep: Creep, game: Game): void {
+    public run(creep: Creep): void {
         if (!creep.memory['target']) {
-            creep.memory['target'] = this.assignCreepToLink(creep.room, game);
+            creep.memory['target'] = this.assignCreepToLink(creep.room);
         }
 
         const target = Game.getObjectById<StructureLink>(creep.memory['target']);
@@ -34,19 +34,19 @@ export default class StorageLinkKeeperRole extends BaseCreepRole {
         // @see LinkManager.run()
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
+    public getRoleName(): string {
+        return "storage_link_keeper";
+    }
+
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
         const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 5);
 
         return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
-    protected getRoleName(): string {
-        return "storage_link_keeper";
-    }
-
-    private assignCreepToLink(room: Room, game: Game): Id<StructureLink> {
-        const creeps = Utils.findCreepsByRole(game, this, room);
-        const links = LinkManagerUtils.getStorageLinks(room, game);
+    private assignCreepToLink(room: Room): Id<StructureLink> {
+        const creeps = Utils.findCreepsByRole(this, room);
+        const links = LinkManagerUtils.getStorageLinks(room);
 
         for (let link of links) {
             if (creeps.filter(creep => creep.memory['target'] === link.link.id).length === 0) {

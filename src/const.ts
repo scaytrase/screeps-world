@@ -1,29 +1,16 @@
-export const BASE_WORKER_CREEP_BODY = [WORK, CARRY, MOVE];
-export const WORKER_CREEP_BODY_LVL2 = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-export const WORKER_CREEP_BODY_LVL3 = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-export const WORKER_CREEP_BODY_LVL4 = [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
-export const WORKER_CREEP_BODY_LVL5 = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-export const WORKER_CREEP_BODY_LVL6 = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-export const WORKER_CREEP_BODY_LVL7 = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+function generateBody(pattern: BodyPartConstant[], level: number): BodyPartConstant[] {
+    return pattern.map(part => Array(level).fill(part)).reduce((p, c) => [...c, ...p]);
+}
 
-export const WORKER_BODIES = [
-    WORKER_CREEP_BODY_LVL7,
-    WORKER_CREEP_BODY_LVL6,
-    WORKER_CREEP_BODY_LVL5,
-    WORKER_CREEP_BODY_LVL4,
-    WORKER_CREEP_BODY_LVL3,
-    WORKER_CREEP_BODY_LVL2,
-    BASE_WORKER_CREEP_BODY,
-];
+function generateBodySet(pattern: BodyPartConstant[], level: number): BodyPartConstant[][] {
+    return Array<number>(level).fill(0).map((index, level) => generateBody(pattern, level + 1)).reverse();
+}
+
+export const BASE_WORKER_CREEP_BODY = [WORK, CARRY, MOVE];
+export const WORKER_BODIES = generateBodySet(BASE_WORKER_CREEP_BODY, 12);
 
 export const BASE_CARRIER_CREEP_BODY = [CARRY, CARRY, MOVE];
-export const CARRIER_CREEP_BODY_LVL2 = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE];
-export const CARRIER_CREEP_BODY_LVL3 = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-export const CARRIER_CREEP_BODY_LVL4 = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+export const CARRIER_BODIES = generateBodySet(BASE_CARRIER_CREEP_BODY, 5);
 
-export const CARRIER_BODIES = [
-    CARRIER_CREEP_BODY_LVL4,
-    CARRIER_CREEP_BODY_LVL3,
-    CARRIER_CREEP_BODY_LVL2,
-    BASE_CARRIER_CREEP_BODY,
-];
+export const BASE_ATTACKER_BODY = [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK];
+export const ATTACKER_BODIES = [...generateBodySet([TOUGH, MOVE, RANGED_ATTACK], 7), BASE_ATTACKER_BODY];

@@ -1,10 +1,12 @@
 import {GUARDS_ATTACK_BORDERS} from "./config";
+import {ATTACKER_BODIES, BASE_ATTACKER_BODY} from "./const";
 import CreepTrait, {COLOR_SPECIAL_TASKS} from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
+import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import NotEmptyCallableResult from "./spawn_strategy.not_empty_callable_result";
+import RoleCountStrategy from "./spawn_strategy.role_count";
 import Utils from "./utils";
 
 export default class AttackerRole extends BaseCreepRole {
@@ -17,19 +19,19 @@ export default class AttackerRole extends BaseCreepRole {
         ];
     }
 
-    private static getFlag(game: Game): Flag {
-        return [...Utils.getFlagsByColors(game, COLOR_RED, COLOR_RED)].shift();
+    private static getFlag(): Flag {
+        return [...Utils.getFlagsByColors(COLOR_RED, COLOR_RED)].shift();
     }
 
-    run(creep: Creep, game: Game): void {
-        const flag = AttackerRole.getFlag(game);
+    run(creep: Creep): void {
+        const flag = AttackerRole.getFlag();
         if (creep.room.name !== flag.room.name) {
             creep.moveTo(flag, {visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}});
             return;
         }
 
         const target = AttackerRole.getTargets(creep.room)
-            .sort(Utils.sortByDistance(creep))
+            .sort(Sort.byDistance(creep))
             .shift();
 
         CreepTrait.attack(creep, target, {reusePath: 1});
@@ -38,22 +40,24 @@ export default class AttackerRole extends BaseCreepRole {
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
-                new NotEmptyCallableResult((game, spawn) => AttackerRole.getFlag(game)),
-                new NotEmptyCallableResult((game, spawn) => AttackerRole.getTargets(AttackerRole.getFlag(game).room).shift()),
-                new LimitedSpawnByRoleCountStrategy(2, this, () => 1, true),
+                new NotEmptyCallableResult((spawn) => AttackerRole.getFlag()),
+                new NotEmptyCallableResult((spawn) => AttackerRole.getTargets(AttackerRole.getFlag().room).shift()),
+                RoleCountStrategy.global(2, this),
             ]
         );
+    }
+
+    public getRoleName(): string {
+        return 'attacker';
     }
 
     protected isSpawnBound(): boolean {
         return false;
     }
 
-    protected getBody(game: Game): BodyPartConstant[] {
-        return [TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK];
-    }
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        const bodies = ATTACKER_BODIES.filter(body => body.filter(part => part === ATTACK || part === RANGED_ATTACK).length <= 5);
 
-    protected getRoleName(): string {
-        return 'attacker';
+        return Utils.getBiggerPossibleBody(bodies, BASE_ATTACKER_BODY, spawn);
     }
 }

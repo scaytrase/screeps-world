@@ -2,12 +2,13 @@ import {ENERGY_AGGREGATORS_COUNT_LIMIT} from "./config";
 import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
+import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
 import OrChainSpawnStrategy from "./spawn_strategy.or_chain";
-import Utils, {SORT} from "./utils";
+import RoleCountStrategy from "./spawn_strategy.role_count";
+import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
+import Utils from "./utils";
 
 const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
 
@@ -26,29 +27,33 @@ export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<Structu
 
         const spawn = creep.room.find(FIND_MY_SPAWNS).shift();
 
-        return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: recipientFilter}).sort(Utils.sortByDistance(spawn)).shift();
+        return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: recipientFilter}).sort(Sort.byDistance(spawn)).shift();
     }
 
-    public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {
-        return Utils.findCreepsByRole(game, this, spawn.room).length === 0;
+    public isPrioritySpawn(spawn: StructureSpawn): boolean {
+        return Utils.findCreepsByRole(this, spawn.room).length === 0;
     }
 
     public getSpawnStrategy(): SpawnStrategy {
         const filter = capacity => (structure: StructureContainer) => structure.structureType === STRUCTURE_CONTAINER && structure.store.getUsedCapacity() > capacity;
         return new OrChainSpawnStrategy([
             new AndChainSpawnStrategy([
-                new LimitedSpawnByRoleCountStrategy(ENERGY_AGGREGATORS_COUNT_LIMIT, this),
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: filter(500)}),
+                RoleCountStrategy.room(ENERGY_AGGREGATORS_COUNT_LIMIT, this),
+                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: filter(500)}),
             ]),
             new AndChainSpawnStrategy([
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE}}),
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: filter(1000)}),
-                new LimitedSpawnByRoleCountStrategy(3, this),
+                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE}}),
+                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: filter(1000)}),
+                RoleCountStrategy.room(3, this),
             ])
         ]);
     }
 
-    protected shouldRenewTarget(creep: Creep, game: Game): boolean {
+    public getRoleName(): string {
+        return ROLE_ENERGY_AGGREGATOR;
+    }
+
+    protected shouldRenewTarget(creep: Creep): boolean {
         const target = this.getCurrentStructureTarget(creep);
         if (!target) {
             return true;
@@ -58,42 +63,33 @@ export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<Structu
         return target.store.getUsedCapacity(RESOURCE_ENERGY) === 0;
     }
 
-    protected getTarget(creep: Creep, game: Game): StructureContainer | StructureLink {
+    protected getTarget(creep: Creep): StructureContainer | StructureLink {
         const spawn = creep.room.find(FIND_MY_SPAWNS).shift();
 
-        return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: sourceFilter}).sort(Utils.sortByDistance(spawn, SORT.DESC)).shift();
+        return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: sourceFilter}).sort(Sort.byDistance(spawn)).shift();
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[] {
-        if (this.isPrioritySpawn(spawn, game)) {
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        if (this.isPrioritySpawn(spawn)) {
             return Utils.getBiggerPossibleBodyNow(CARRIER_BODIES, BASE_CARRIER_CREEP_BODY, spawn);
         }
 
         return Utils.getBiggerPossibleBody(CARRIER_BODIES, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
-    protected getRoleName(): string {
-        return ROLE_ENERGY_AGGREGATOR;
-    }
-
-    protected rest(creep: Creep, game: Game): void {
+    protected rest(creep: Creep): void {
         CreepTrait.transferAllResources(creep, EnergyAggregatorRole.getRecipient(creep));
     }
 
-    protected shouldRest(creep: Creep, game: Game): boolean {
+    protected shouldRest(creep: Creep): boolean {
         return !this.getCurrentStructureTarget(creep) || creep.store.getFreeCapacity() === 0;
     }
 
-    protected shouldWork(creep: Creep, game: Game): boolean {
+    protected shouldWork(creep: Creep): boolean {
         return this.getCurrentStructureTarget(creep) && creep.store.getUsedCapacity() === 0;
     }
 
-    protected work(creep: Creep, game: Game): void {
-        const target = this.getCurrentStructureTarget(creep);
-        if (target) {
-            CreepTrait.withdrawAllResources(creep, target);
-        } else {
-            CreepTrait.goToParking(creep, game);
-        }
+    protected work(creep: Creep): void {
+        CreepTrait.withdrawAllResources(creep, this.getCurrentStructureTarget(creep));
     }
 }

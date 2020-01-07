@@ -1,6 +1,12 @@
-import {TOWER_ATTACK_BORDERS, TOWER_RANGE} from "./config";
+import {REPAIRER_HEALTH_LOWER_RATIO, TOWER_ATTACK_BORDERS, TOWER_RANGE} from "./config";
 import Runnable from "./runnable";
+import {Sort} from "./sort_utils";
 import Utils from "./utils";
+
+const FORBIDDEN_STRUCTURES: StructureConstant[] = [
+    STRUCTURE_WALL,
+    STRUCTURE_RAMPART,
+];
 
 export default class TowerController implements Runnable {
     private room: Room;
@@ -9,40 +15,56 @@ export default class TowerController implements Runnable {
         this.room = room;
     }
 
-    run(game: Game, memory: Memory): void {
-        const towers = this.room.find(FIND_STRUCTURES, {
-            filter(structure) {
-                return structure.structureType === STRUCTURE_TOWER;
-            }
-        });
+    run(): void {
+        const towers = this.room.find<StructureTower>(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
 
-        towers.forEach((tower: StructureTower) => {
-            let hostiles = this.room.find(FIND_HOSTILE_CREEPS, {
-                filter(creep) {
-                    return creep.pos.getRangeTo(tower) < TOWER_RANGE && (TOWER_ATTACK_BORDERS || creep.owner.username === 'Invader' || Utils.isWithinTraversableBorders(creep));
-                }
-            });
-
-            if (hostiles.length === 0) {
-                this.heal(tower);
-                return;
+        for (const tower of towers) {
+            const hostiles = this.getHostiles(tower);
+            if (hostiles.length > 0) {
+                tower.attack(hostiles.shift());
+                continue;
             }
 
-            tower.attack(hostiles.shift());
+            const friends = this.getDamagedFriends();
+            if (friends.length > 0) {
+                tower.heal(friends.shift());
+                continue;
+            }
+
+            const structures = this.getDamagedStructures();
+            if (structures.length > 0) {
+                tower.repair(structures.sort(Sort.byHealthPercent()).shift());
+            }
+        }
+    }
+
+    private getHostiles(tower: StructureTower) {
+        return this.room.find(FIND_HOSTILE_CREEPS, {
+            filter(creep) {
+                return creep.pos.getRangeTo(tower) < TOWER_RANGE && (TOWER_ATTACK_BORDERS || this.isInvader(creep) || Utils.isWithinTraversableBorders(creep));
+            }
         });
     }
 
-    private heal(tower: StructureTower): void {
-        let friends = this.room.find(FIND_MY_CREEPS, {
+    private isInvader(creep: Creep): boolean {
+        return creep.owner.username === 'Invader';
+    }
+
+    private getDamagedFriends(): Creep[] {
+        return this.room.find(FIND_MY_CREEPS, {
             filter(creep: Creep) {
                 return creep.hits < creep.hitsMax;
             }
         });
+    }
 
-        if (friends.length === 0) {
-            return;
-        }
 
-        tower.heal(friends.shift());
+    private getDamagedStructures(): Structure[] {
+        return this.room.find(FIND_STRUCTURES, {
+            filter(structure: Structure) {
+                return !FORBIDDEN_STRUCTURES.includes(structure.structureType) &&
+                    structure.hits / structure.hitsMax < REPAIRER_HEALTH_LOWER_RATIO;
+            }
+        });
     }
 }

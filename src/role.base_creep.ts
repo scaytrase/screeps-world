@@ -1,3 +1,4 @@
+import Logger from "./logger";
 import Role from "./role";
 import SpawnStrategy from "./spawn_strategy";
 import Utils from "./utils";
@@ -9,35 +10,37 @@ export default abstract class BaseCreepRole implements Role {
         return creep.memory['role'] == this.getRoleName();
     }
 
-    public abstract run(creep: Creep, game: Game): void;
+    public abstract run(creep: Creep): void;
 
-    public spawn(spawn: StructureSpawn, game: Game): ScreepsReturnCode {
+    public spawn(spawn: StructureSpawn): ScreepsReturnCode {
         try {
-            const body = this.getBody(game, spawn);
+            const body = this.getBody(spawn);
             const cost = Utils.getBodyCost(body);
             // const room = spawn.room;
-            const room = game.rooms[spawn.room.name];
+            const room = Game.rooms[spawn.room.name];
             const energy = room.energyAvailable;
 
             if (!Utils.isCapableToSpawnBodyNow(spawn, body)) {
-                console.log(`[WARN ] [${room.name}] [${this.constructor.name}] No energy for body ${JSON.stringify(body)} (${energy} < ${cost} ${Math.round(energy / cost * 100)}%)`);
+                Logger.warn(`${room.name}] [${this.constructor.name}] No energy for body ${JSON.stringify(body)} (${energy} < ${cost} ${Math.round(energy / cost * 100)}%)`);
 
                 return ERR_NOT_ENOUGH_ENERGY;
             }
 
-            console.log(`[DEBUG] [${room.name}] [${this.constructor.name}] Trying to spawn ${JSON.stringify(body)} for ${cost} having ${energy} ${Math.round(energy / cost * 100)}%)`);
+            Logger.debug(`[${room.name}] [${this.constructor.name}] Trying to spawn ${JSON.stringify(body)} for ${cost} having ${energy} ${Math.round(energy / cost * 100)}%)`);
 
-            return game.spawns[spawn.name].spawnCreep(
+            return Game.spawns[spawn.name].spawnCreep(
                 body,
-                this.getName(game),
-                {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn, game)}}
+                this.getName(),
+                {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn)}}
             );
         } catch (e) {
             console.log(JSON.stringify(e));
         }
     }
 
-    public isPrioritySpawn(spawn: StructureSpawn, game: Game): boolean {
+    public abstract getRoleName(): string;
+
+    public isPrioritySpawn(spawn: StructureSpawn): boolean {
         return false;
     }
 
@@ -45,26 +48,24 @@ export default abstract class BaseCreepRole implements Role {
         return true;
     }
 
-    protected getSpawnMemory(spawn: StructureSpawn, game: Game): object {
+    protected getSpawnMemory(spawn: StructureSpawn): object {
         return {
             spawn: this.isSpawnBound() ? spawn.id : undefined
         };
     }
 
-    protected abstract getRoleName(): string;
+    protected abstract getBody(spawn: StructureSpawn): BodyPartConstant[];
 
-    protected abstract getBody(game: Game, spawn: StructureSpawn): BodyPartConstant[];
-
-    private getName(game: Game): string {
+    private getName(): string {
         let i = 0;
-        while (game.creeps[this.generateName(game, i)] !== undefined) {
+        while (Game.creeps[this.generateName(i)] !== undefined) {
             i++;
         }
 
-        return this.generateName(game, i);
+        return this.generateName(i);
     }
 
-    private generateName(game: Game, i: number): string {
+    private generateName(i: number): string {
         return `${this.getRoleName()}_` + i;
     }
 }

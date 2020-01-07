@@ -13,7 +13,6 @@ import GraveKeeperRole from "./role.grave_keeper";
 import GuardRole from "./role.guard";
 import HarvesterRole from "./role.harvester";
 import MinerRole from "./role.miner";
-import RangeGuardRole from "./role.range_guard";
 import RemoteBuilderRole from "./role.remote_builder";
 import RemoteUpgraderRole from "./role.remote_upgrader";
 import RepairerRole from "./role.repairer";
@@ -37,7 +36,6 @@ const roles: Role[] = [
     new SpawnKeeperRole(),
     new EnergyAggregatorRole(),
     new GuardRole(),
-    new RangeGuardRole(),
     new TowerKeeperRole(),
     new GraveKeeperRole(),
     new WallKeeperRole(),
@@ -47,33 +45,36 @@ const roles: Role[] = [
     new StorageLinkKeeperRole(),
     new RemoteBuilderRole(),
     new RemoteUpgraderRole(),
-    new AttackerRole(),
 ];
 
-for (let flag of Utils.getFlagsByColors(Game, COLOR_RED, COLOR_PURPLE)) {
+if ([...Utils.getFlagsByColors(COLOR_RED, COLOR_RED)].length > 0) {
+    roles.push(new AttackerRole());
+}
+
+for (let flag of Utils.getFlagsByColors(COLOR_RED, COLOR_PURPLE)) {
     roles.push(new RoomClaimerRole(flag));
 }
 
-let spawns: StructureSpawn[] = [];
-for (const spawnName in Game.spawns) {
-    spawns.push(Game.spawns[spawnName]);
-}
-
 module.exports.loop = function () {
-    for (const spawn of spawns) {
-        let runnables: Array<Runnable> = [];
+    let runnables: Array<Runnable> = [];
 
-        runnables.push(new EconomyLogger());
-        runnables.push(new Cleaner());
+    runnables.push(new CreepRunner(roles));
+
+    for (const room of Object.values(Game.rooms)) {
+        runnables.push(new LinkManager(room));
+        runnables.push(new TowerController(room));
+    }
+
+    for (const spawn of Object.values(Game.spawns)) {
         runnables.push(new CreepSpawner(roles, spawn));
-        runnables.push(new CreepRunner(roles));
-        runnables.push(new TowerController(spawn.room));
-        runnables.push(new CreepSpawnBound());
-        runnables.push(new CreepRetirementProgram());
-        runnables.push(new LinkManager(spawn.room));
+    }
 
-        for (let runnable of runnables) {
-            runnable.run(Game, Memory);
-        }
+    runnables.push(new CreepSpawnBound());
+    runnables.push(new CreepRetirementProgram());
+    runnables.push(new Cleaner());
+    runnables.push(new EconomyLogger());
+
+    for (const runnable of runnables) {
+        runnable.run();
     }
 };

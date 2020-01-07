@@ -8,12 +8,10 @@ export enum LinkType {
 export default class LinkProxy {
     public readonly link: StructureLink;
     public readonly type: LinkType;
-    private readonly game: Game;
     private amount: number;
 
-    constructor(link: StructureLink, game: Game) {
+    constructor(link: StructureLink) {
         this.link = link;
-        this.game = game;
         this.type = this.detectType();
         this.amount = this.getInitialAmount();
     }

@@ -3,8 +3,8 @@ import CreepTrait from "./creep_traits";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import RoleCountStrategy from "./spawn_strategy.role_count";
+import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
 import Utils from "./utils";
 
 const filter = (mineral: Mineral) => mineral.mineralAmount > 0;
@@ -17,7 +17,7 @@ export default class MinerRole extends BaseCreepRole {
         return creep.room.find(FIND_MINERALS, {filter: filter}).shift();
     }
 
-    run(creep: Creep, game: Game): void {
+    run(creep: Creep): void {
         if (creep.store.getFreeCapacity() > 0) {
             CreepTrait.harvest(creep, MinerRole.getSourceStructure(creep));
         } else {
@@ -28,23 +28,19 @@ export default class MinerRole extends BaseCreepRole {
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_MINERALS, {filter: filter}),
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_MY_STRUCTURES, {filter: (structure) => structure.structureType === STRUCTURE_EXTRACTOR}),
-                new LimitedSpawnByRoleCountStrategy(1, this, (
-                    spawn => spawn.room
-                        .find(FIND_MINERALS)
-                        .map(mineral => Utils.getWalkablePositionsAround(mineral))
-                        .reduce((p, v) => p + v, 0)
-                ))
+                new RoomFindSpawnStrategy(FIND_MINERALS, {filter: filter}),
+                new RoomFindSpawnStrategy(FIND_MY_STRUCTURES, {filter: (structure) => structure.structureType === STRUCTURE_EXTRACTOR}),
+                // @todo: rewrite walkable back
+                RoleCountStrategy.room(2, this)
             ]
         );
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn) {
-        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
+    public getRoleName(): string {
+        return 'miner';
     }
 
-    protected getRoleName(): string {
-        return 'miner';
+    protected getBody(spawn: StructureSpawn) {
+        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
     }
 }

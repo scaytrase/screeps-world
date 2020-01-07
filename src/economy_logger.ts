@@ -10,8 +10,8 @@ export default class EconomyLogger implements Runnable {
         return `❤️ Spawn energy level: ${available} of ${max} (${Math.round(100 * available / max)}%)`;
     }
 
-    private static getEconomyMessage(spawn: StructureSpawn, game: Game, memory: Memory): String {
-        return `💰 Economy level: ${Economy.getCurrentEconomyLevel(spawn.room, game)}`;
+    private static getEconomyMessage(spawn: StructureSpawn): String {
+        return `💰 Economy level: ${Economy.getCurrentEconomyLevel(spawn.room)}`;
     }
 
     private static getTotalMessage(room: Room): String {
@@ -32,13 +32,13 @@ export default class EconomyLogger implements Runnable {
         return `💳 Storage energy level: ${store.getUsedCapacity(RESOURCE_ENERGY)} of ${store.getCapacity(RESOURCE_ENERGY)} (${Math.round(100 * store.getUsedCapacity(RESOURCE_ENERGY) / store.getCapacity(RESOURCE_ENERGY))}%)`;
     }
 
-    public run(game: Game, memory: Memory): void {
+    public run(): void {
 
-        Object.values(game.spawns).map(
+        Object.values(Game.spawns).map(
             (spawn: StructureSpawn) => console.log(
                 `
              ROOM: ${spawn.room.name}
-             ${EconomyLogger.getEconomyMessage(spawn, game, memory)}
+             ${EconomyLogger.getEconomyMessage(spawn)}
              ${EconomyLogger.getSpawnMessage(spawn)}
              ${JSON.stringify(spawn.spawning)}
              ${EconomyLogger.getStorageMessage(spawn.room)}

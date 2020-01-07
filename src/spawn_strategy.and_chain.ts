@@ -7,9 +7,9 @@ export default class AndChainSpawnStrategy implements SpawnStrategy {
         this.chain = chain;
     }
 
-    shouldSpawn(spawn: StructureSpawn, game: Game): boolean {
+    shouldSpawn(spawn: StructureSpawn): boolean {
         for (let strategy of this.chain) {
-            if (!strategy.shouldSpawn(spawn, game)) {
+            if (!strategy.shouldSpawn(spawn)) {
                 return false;
             }
         }

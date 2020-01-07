@@ -1,12 +1,12 @@
 import {TERMINAL_ENERGY_REQUIREMENT, TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT} from "./config";
-import {BASE_CARRIER_CREEP_BODY, CARRIER_CREEP_BODY_LVL3} from "./const";
+import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
-import Economy, {ECONOMY_LEVEL} from "./economy";
 import BaseCreepRole from "./role.base_creep";
+import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import FoundMoreThanLimitSpawnStrategy from "./spawn_strategy.find_condition_more_than";
-import LimitedSpawnByRoleCountStrategy from "./spawn_strategy.limited_by_role_count";
+import RoleCountStrategy from "./spawn_strategy.role_count";
+import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
 import Utils from "./utils";
 
 const SOURCE_TYPES: StructureConstant[] = [
@@ -35,10 +35,10 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
     }
 
     private static getSourceStructure(creep: Creep): StructureContainer | StructureStorage | null {
-        return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: this.filterStructure()}).sort(Utils.sortByDistance(creep)).shift();
+        return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: this.filterStructure()}).sort(Sort.byDistance(creep)).shift();
     }
 
-    run(creep: Creep, game: Game): void {
+    run(creep: Creep): void {
         const terminal = creep.room.terminal;
         if (terminal && terminal.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT) {
             const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER], 1000);
@@ -60,22 +60,20 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: TerminalResourceCarrier.filterStructure()}),
-                new FoundMoreThanLimitSpawnStrategy(0, FIND_STRUCTURES, {filter: {structureType: STRUCTURE_TERMINAL}}),
-                new LimitedSpawnByRoleCountStrategy(TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT, this)
+                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: TerminalResourceCarrier.filterStructure()}),
+                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_TERMINAL}}),
+                RoleCountStrategy.room(TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT, this)
             ]
         );
     }
 
-    protected getBody(game: Game, spawn: StructureSpawn) {
-        if (Utils.isCapableToSpawnBody(spawn, CARRIER_CREEP_BODY_LVL3) && Economy.getCurrentEconomyLevel(spawn.room, game) !== ECONOMY_LEVEL.LOW) {
-            return CARRIER_CREEP_BODY_LVL3;
-        }
-
-        return BASE_CARRIER_CREEP_BODY;
+    public getRoleName(): string {
+        return 'terminal_resource_carrier';
     }
 
-    protected getRoleName(): string {
-        return 'terminal_resource_carrier';
+    protected getBody(spawn: StructureSpawn) {
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 5);
+
+        return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 }

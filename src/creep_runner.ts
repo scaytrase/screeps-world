@@ -2,25 +2,31 @@ import Role from "./role";
 import Runnable from "./runnable";
 
 export default class CreepRunner implements Runnable {
-    private readonly roles: Array<Role>;
+    private readonly roles: Map<string, Role> = new Map<string, Role>();
 
     constructor(roles: Array<Role>) {
-        this.roles = roles;
+        for (const role of roles) {
+            this.roles.set(role.getRoleName(), role);
+        }
     }
 
-    run(game: Game, memory: Memory): void {
-        for (let name in game.creeps) {
-            let creep = game.creeps[name];
-
+    run(): void {
+        for (const creep of Object.values(Game.creeps)) {
             if (creep.spawning) {
                 continue;
             }
 
-            for (let role of this.roles) {
-                if (role.match(creep)) {
-                    role.run(creep, game);
-                }
+            if (creep.memory['sleep_until'] && creep.memory['sleep_until'] > Game.time) {
+                continue;
             }
+
+            const role = this.roles.get(creep.memory['role']);
+
+            if (!role) {
+                continue;
+            }
+
+            role.run(creep);
         }
     }
 }
