@@ -71,8 +71,6 @@ export default class GraveKeeperRole extends BaseCreepRole {
     }
 
     protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
-        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 6);
-
-        return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
+        return Utils.getBiggerPossibleBodyNow(CARRIER_BODIES, BASE_CARRIER_CREEP_BODY, spawn);
     }
 }

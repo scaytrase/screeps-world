@@ -25,10 +25,12 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
     }
 
     public static getCurrentHarvesters(resource: Source): Creep[] {
-        return resource.room
+        const harvesters = resource.room
             .find(FIND_MY_CREEPS)
             .filter(Utils.filterDeadCreeps)
             .filter(creep => creep.memory['target'] === resource.id);
+
+        return harvesters;
     }
 
     private static getRecipientStructures(creep: Creep): StructureConstant[] {

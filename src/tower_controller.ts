@@ -40,9 +40,7 @@ export default class TowerController implements Runnable {
 
     private getHostiles(tower: StructureTower) {
         return this.room.find(FIND_HOSTILE_CREEPS, {
-            filter(creep) {
-                return creep.pos.getRangeTo(tower) < TOWER_RANGE && (TOWER_ATTACK_BORDERS || this.isInvader(creep) || Utils.isWithinTraversableBorders(creep));
-            }
+            filter: (creep) => creep.pos.getRangeTo(tower) < TOWER_RANGE && (TOWER_ATTACK_BORDERS || this.isInvader(creep) || Utils.isWithinTraversableBorders(creep))
         });
     }
 
