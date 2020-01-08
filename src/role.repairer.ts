@@ -40,7 +40,7 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
             {
                 shouldSpawn(spawn: StructureSpawn): boolean {
                     const towers = spawn.room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}}).length;
-                    if (towers > 2) {
+                    if (towers > 1) {
                         return false;
                     }
                     const creeps = Utils.findCreepsByRole(that, spawn.room).length;

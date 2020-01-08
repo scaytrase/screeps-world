@@ -10,7 +10,7 @@ export const GUARDS_COUNT_LIMIT = 1;
 export const BUILDERS_COUNT_LIMIT = 2; // @todo 1 or 0 for low economy
 export const REPAIRERS_COUNT_LIMIT = 1; // @todo 1 or 0 for low economy
 export const WALL_KEEPERS_COUNT_LIMIT = 1;
-export const SPAWN_KEEPERS_COUNT_LIMIT = 1; // @todo 1 for low economy, 2 for high economy
+export const SPAWN_KEEPERS_COUNT_LIMIT = 2; // @todo 1 for low economy, 2 for high economy
 export const TOWER_KEEPERS_COUNT_LIMIT = 1;
 export const RESOURCE_AGGREGATORS_COUNT_LIMIT = 1;
 export const GRAVE_KEEPERS_COUNT_LIMIT = 1; // @todo 0 for low economy
@@ -24,6 +24,7 @@ export const PARKING_SLEEP_TIME = 5;
 
 export const MAX_WORK_PER_RESOURCE = 6;
 export const MAX_WORK_PER_CONTROLLER = 12;
+export const MAX_WORK_PER_CONTROLLER_EMERGENCY = 2;
 
 export const UPGRADE_REMOTE_ROOMS_UP_TO_LEVEL = 3;
 export const BUILD_REMOTE_ROOMS_UP_TO_LEVEL = 3;
