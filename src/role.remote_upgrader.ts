@@ -77,6 +77,10 @@ export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<Structure
         for (const roomName in Game.rooms) {
             const room = Game.rooms[roomName];
 
+            if (!room.controller.my) {
+                continue;
+            }
+
             if (room.find(FIND_MY_SPAWNS).length === 0 || room.controller.level < UPGRADE_REMOTE_ROOMS_UP_TO_LEVEL) {
                 controllers.push(room.controller);
             }

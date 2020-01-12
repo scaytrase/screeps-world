@@ -62,11 +62,11 @@ export default class Utils {
     }
 
     public static isCapableToSpawnBodyNow(spawn: StructureSpawn, bodyParts: BodyPartConstant[]): boolean {
-        return Game.rooms[spawn.room.name].energyAvailable > Utils.getBodyCost(bodyParts);
+        return Game.rooms[spawn.room.name].energyAvailable >= Utils.getBodyCost(bodyParts);
     }
 
     public static isCapableToSpawnBody(spawn: StructureSpawn, bodyParts: BodyPartConstant[]): boolean {
-        return Game.rooms[spawn.room.name].energyCapacityAvailable > Utils.getBodyCost(bodyParts);
+        return Game.rooms[spawn.room.name].energyCapacityAvailable >= Utils.getBodyCost(bodyParts);
     }
 
     public static* getFlagsByColors(primary: ColorConstant, secondary?: ColorConstant): Generator<Flag> {

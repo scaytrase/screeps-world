@@ -2,8 +2,6 @@ import {PARKING_SLEEP_TIME} from "./config";
 import {Sort} from "./sort_utils";
 import Utils from "./utils";
 
-const _ = require('lodash');
-
 export const COLOR_HARVEST_RESOURCE = '#ffdf02';
 export const COLOR_TRANSFER_RESOURCE = '#00a4ff';
 export const COLOR_BUILD = '#8bff00';
@@ -25,6 +23,10 @@ export default class CreepTrait {
 
     public static goToParking(creep: Creep): void {
         const flag = [...Utils.getFlagsByColors(COLOR_WHITE, COLOR_WHITE)].filter(flag => flag.room.name === creep.room.name).sort(Sort.byDistance(creep)).shift();
+
+        if (!flag) {
+            return;
+        }
 
         if (creep.store.getUsedCapacity() > 0) {
             CreepTrait.transferAnyResources(creep);
@@ -56,7 +58,7 @@ export default class CreepTrait {
 
     public static transferAllResources(creep: Creep, target: AnyStructure | null): void {
         if (target) {
-            const resourceType = _.findKey(creep.store);
+            const resourceType = CreepTrait.findKey(creep.store);
             if (creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
                     visualizePathStyle: {stroke: COLOR_TRANSFER_RESOURCE}
@@ -77,7 +79,7 @@ export default class CreepTrait {
 
     public static withdrawAllResources(creep: Creep, target: AnyStructure | Tombstone | Ruin | null): void {
         if (target) {
-            if (creep.withdraw(target, _.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
+            if (creep.withdraw(target, CreepTrait.findKey(target['store'])) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {
                     visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}
                 });
@@ -139,5 +141,10 @@ export default class CreepTrait {
                 });
             }
         }
+    }
+
+    private static findKey(store: Store<ResourceConstant, any>): ResourceConstant {
+        const keys: ResourceConstant[] = <ResourceConstant[]>Object.keys(store);
+        return keys.filter((key: ResourceConstant) => store.getUsedCapacity(key) > 0).shift();
     }
 }

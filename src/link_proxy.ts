@@ -63,12 +63,12 @@ export default class LinkProxy {
     }
 
     private detectType(): LinkType {
-        if (this.link.pos.getRangeTo(this.link.room.controller) < 5) {
-            return LinkType.DEMAND;
+        if (this.link.pos.getRangeTo(this.link.room.storage) < 3) {
+            return LinkType.STORAGE;
         }
 
-        if (this.link.pos.getRangeTo(this.link.room.storage) < 2) {
-            return LinkType.STORAGE;
+        if (this.link.pos.getRangeTo(this.link.room.controller) < 5) {
+            return LinkType.DEMAND;
         }
 
         const sources: Source[] = this.link.room.find(FIND_SOURCES);

@@ -109,7 +109,11 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
     }
 
     protected work(creep: Creep): void {
-        CreepTrait.harvest(creep, this.getCurrentStructureTarget(creep));
+        const target = this.getCurrentStructureTarget(creep);
+
+        if (target.energy > 0) {
+            CreepTrait.harvest(creep, target);
+        }
     }
 
     protected rest(creep: Creep): void {

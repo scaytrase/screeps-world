@@ -1,5 +1,5 @@
 function generateBody(pattern: BodyPartConstant[], level: number): BodyPartConstant[] {
-    return pattern.map(part => Array(level).fill(part)).reduce((p, c) => [...c, ...p]);
+    return pattern.map(part => Array(level).fill(part)).reduce((p, c) => [...p, ...c]);
 }
 
 function generateBodySet(pattern: BodyPartConstant[], level: number): BodyPartConstant[][] {
@@ -13,4 +13,4 @@ export const BASE_CARRIER_CREEP_BODY = [CARRY, CARRY, MOVE];
 export const CARRIER_BODIES = generateBodySet(BASE_CARRIER_CREEP_BODY, 10);
 
 export const BASE_ATTACKER_BODY = [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK];
-export const ATTACKER_BODIES = [...generateBodySet([TOUGH, MOVE, RANGED_ATTACK], 7), BASE_ATTACKER_BODY];
+export const ATTACKER_BODIES = [...generateBodySet([TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, RANGED_ATTACK, HEAL, HEAL], 7), BASE_ATTACKER_BODY];

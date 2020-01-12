@@ -51,10 +51,6 @@ export default class ResourceAggregator extends BaseCreepRole {
     protected getBody(spawn: StructureSpawn) {
         const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 5);
 
-        if (this.isPrioritySpawn(spawn)) {
-            return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
-        }
-
         return Utils.getBiggerPossibleBody(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 }

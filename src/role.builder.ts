@@ -79,10 +79,12 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        const bodies = WORKER_BODIES.filter(body => body.filter(part => part === WORK).length <= 6);
+
         if (this.isPrioritySpawn(spawn)) {
-            return Utils.getBiggerPossibleBodyNow(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
+            return Utils.getBiggerPossibleBodyNow(bodies, BASE_WORKER_CREEP_BODY, spawn);
         }
 
-        return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
+        return Utils.getBiggerPossibleBody(bodies, BASE_WORKER_CREEP_BODY, spawn);
     }
 }

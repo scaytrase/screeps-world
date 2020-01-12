@@ -12,6 +12,10 @@ export default class CreepSpawner implements Runnable {
     }
 
     run(): void {
+        if (this.spawn.spawning !== null) {
+            return;
+        }
+
         for (let role of this.roles) {
             const shouldSpawn = role.getSpawnStrategy().shouldSpawn(this.spawn);
             let result = null;
@@ -19,16 +23,16 @@ export default class CreepSpawner implements Runnable {
                 result = role.spawn(this.spawn);
 
                 if (role.isPrioritySpawn(this.spawn) && result !== OK) {
-                    Logger.info(`Priority role ${role.constructor.name} spawn failed with ${result}`);
+                    Logger.info(`[${this.spawn.room.name}] Priority role ${role.constructor.name} spawn failed with ${result}`);
 
                     return;
                 } else if (result === OK) {
-                    Logger.debug(`Spawning ${role.constructor.name}`);
+                    Logger.debug(`[${this.spawn.room.name}] Spawning ${role.constructor.name}`);
                 } else {
-                    Logger.debug(`Not spawning ${role.constructor.name} with ${result}`);
+                    Logger.debug(`[${this.spawn.room.name}] Not spawning ${role.constructor.name} with ${result}`);
                 }
             } else {
-                Logger.debug(`Not spawning ${role.constructor.name}`);
+                Logger.debug(`[${this.spawn.room.name}] Not spawning ${role.constructor.name}`);
             }
         }
     }

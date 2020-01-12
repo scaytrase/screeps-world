@@ -12,23 +12,24 @@ export default abstract class BaseCreepRole implements Role {
 
     public abstract run(creep: Creep): void;
 
-    public spawn(spawn: StructureSpawn): ScreepsReturnCode {
+    public spawn(_spawn: StructureSpawn): ScreepsReturnCode {
         try {
+            const spawn = Game.spawns[_spawn.name];
             const body = this.getBody(spawn);
             const cost = Utils.getBodyCost(body);
-            // const room = spawn.room;
             const room = Game.rooms[spawn.room.name];
             const energy = room.energyAvailable;
 
             if (!Utils.isCapableToSpawnBodyNow(spawn, body)) {
-                Logger.warn(`${room.name}] [${this.constructor.name}] No energy for body ${JSON.stringify(body)} (${energy} < ${cost} ${Math.round(energy / cost * 100)}%)`);
+                Logger.info(`[${room.name}] [${this.constructor.name}] No energy for body ${JSON.stringify(body)} (${energy} < ${cost} ${Math.round(energy / cost * 100)}%)`);
 
                 return ERR_NOT_ENOUGH_ENERGY;
             }
 
             Logger.debug(`[${room.name}] [${this.constructor.name}] Trying to spawn ${JSON.stringify(body)} for ${cost} having ${energy} ${Math.round(energy / cost * 100)}%)`);
 
-            return Game.spawns[spawn.name].spawnCreep(
+
+            return spawn.spawnCreep(
                 body,
                 this.getName(),
                 {memory: {role: this.getRoleName(), ...this.getSpawnMemory(spawn)}}

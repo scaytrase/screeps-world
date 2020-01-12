@@ -63,7 +63,9 @@ export default class SpawnKeeperRole extends WorkRestCycleCreepRole<StructureSpa
     }
 
     protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
-        return Utils.getBiggerPossibleBodyNow(CARRIER_BODIES, BASE_CARRIER_CREEP_BODY, spawn);
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 10);
+
+        return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
     protected getTarget(creep: Creep): StructureSpawn | StructureExtension | StructureTower {

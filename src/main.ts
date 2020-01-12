@@ -6,7 +6,6 @@ import CreepSpawner from "./creep_spawner";
 import EconomyLogger from "./economy_logger";
 import LinkManager from "./link_manager";
 import Role from "./role";
-import AttackerRole from "./role.attacker";
 import BuilderRole from "./role.builder";
 import EnergyAggregatorRole from "./role.energy_aggregator";
 import GraveKeeperRole from "./role.grave_keeper";
@@ -28,34 +27,31 @@ import Runnable from "./runnable";
 import TowerController from "./tower_controller";
 import Utils from "./utils";
 
-const roles: Role[] = [
-    new HarvesterRole(),
-    new UpgraderRole(),
-    new BuilderRole(),
-    new RepairerRole(),
-    new SpawnKeeperRole(),
-    new EnergyAggregatorRole(),
-    new GuardRole(),
-    new TowerKeeperRole(),
-    new GraveKeeperRole(),
-    new WallKeeperRole(),
-    new MinerRole(),
-    new TerminalResourceCarrierRole(),
-    new ResourceAggregatorRole(),
-    new StorageLinkKeeperRole(),
-    new RemoteBuilderRole(),
-    new RemoteUpgraderRole(),
-];
-
-if ([...Utils.getFlagsByColors(COLOR_RED, COLOR_RED)].length > 0) {
-    roles.push(new AttackerRole());
-}
-
-for (let flag of Utils.getFlagsByColors(COLOR_RED, COLOR_PURPLE)) {
-    roles.push(new RoomClaimerRole(flag));
-}
-
 module.exports.loop = function () {
+    const roles: Role[] = [
+        // new AttackerRole(),
+        new HarvesterRole(),
+        new UpgraderRole(),
+        new BuilderRole(),
+        new RepairerRole(),
+        new SpawnKeeperRole(),
+        new EnergyAggregatorRole(),
+        new GuardRole(),
+        new TowerKeeperRole(),
+        new GraveKeeperRole(),
+        new WallKeeperRole(),
+        new MinerRole(),
+        new TerminalResourceCarrierRole(),
+        new ResourceAggregatorRole(),
+        new StorageLinkKeeperRole(),
+        new RemoteBuilderRole(),
+        new RemoteUpgraderRole(),
+    ];
+
+    for (let flag of Utils.getFlagsByColors(COLOR_RED, COLOR_PURPLE)) {
+        roles.push(new RoomClaimerRole(flag));
+    }
+
     let runnables: Array<Runnable> = [];
 
     runnables.push(new CreepRunner(roles));

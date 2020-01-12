@@ -72,7 +72,7 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
     }
 
     protected getBody(spawn: StructureSpawn) {
-        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 5);
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 8);
 
         return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }

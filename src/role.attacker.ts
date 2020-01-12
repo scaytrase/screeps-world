@@ -9,13 +9,15 @@ import NotEmptyCallableResult from "./spawn_strategy.not_empty_callable_result";
 import RoleCountStrategy from "./spawn_strategy.role_count";
 import Utils from "./utils";
 
+const IGNORED_STRUCTURES: StructureConstant[] = [STRUCTURE_RAMPART, STRUCTURE_WALL];
+
 export default class AttackerRole extends BaseCreepRole {
     private static getTargets(room: Room): (Creep | Structure | null)[] {
         return [
             ...room
                 .find(FIND_HOSTILE_CREEPS, {filter: (hostile: Creep) => GUARDS_ATTACK_BORDERS || Utils.isWithinTraversableBorders(hostile)}),
             ...room
-                .find(FIND_HOSTILE_STRUCTURES, {filter: (hostile: Creep) => GUARDS_ATTACK_BORDERS || Utils.isWithinTraversableBorders(hostile)})
+                .find(FIND_HOSTILE_STRUCTURES, {filter: (structure: Structure) => !IGNORED_STRUCTURES.includes(structure.structureType)})
         ];
     }
 
@@ -25,24 +27,33 @@ export default class AttackerRole extends BaseCreepRole {
 
     run(creep: Creep): void {
         const flag = AttackerRole.getFlag();
-        if (creep.room.name !== flag.room.name) {
+        if (!flag.room || creep.room.name !== flag.room.name) {
             creep.moveTo(flag, {visualizePathStyle: {stroke: COLOR_SPECIAL_TASKS}});
             return;
         }
 
-        const target = AttackerRole.getTargets(creep.room)
+        if (creep.getActiveBodyparts(HEAL) > 0) {
+            const friend = flag.room.find(FIND_MY_CREEPS).filter(creep => creep.hits < creep.hitsMax).sort(Sort.byDistance(creep)).shift();
+            if (friend && creep.pos.inRangeTo(friend, 2)) {
+                creep.rangedHeal(friend);
+            } else {
+                creep.moveTo(friend);
+            }
+        }
+
+        const hostile = AttackerRole.getTargets(creep.room)
             .sort(Sort.byDistance(creep))
             .shift();
 
-        CreepTrait.attack(creep, target, {reusePath: 1});
+        CreepTrait.attack(creep, hostile, {reusePath: 1});
     }
 
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
                 new NotEmptyCallableResult((spawn) => AttackerRole.getFlag()),
-                new NotEmptyCallableResult((spawn) => AttackerRole.getTargets(AttackerRole.getFlag().room).shift()),
-                RoleCountStrategy.global(2, this),
+                new NotEmptyCallableResult((spawn) => !AttackerRole.getFlag().room || AttackerRole.getTargets(AttackerRole.getFlag().room).shift()),
+                RoleCountStrategy.global(0, this),
             ]
         );
     }
@@ -56,7 +67,7 @@ export default class AttackerRole extends BaseCreepRole {
     }
 
     protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
-        const bodies = ATTACKER_BODIES.filter(body => body.filter(part => part === ATTACK || part === RANGED_ATTACK).length <= 5);
+        const bodies = ATTACKER_BODIES.filter(body => body.filter(part => part === ATTACK || part === RANGED_ATTACK).length <= 6);
 
         return Utils.getBiggerPossibleBody(bodies, BASE_ATTACKER_BODY, spawn);
     }

@@ -1,5 +1,5 @@
 import {ENERGY_AGGREGATORS_COUNT_LIMIT} from "./config";
-import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
+import {BASE_CARRIER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import {Sort} from "./sort_utils";
@@ -70,11 +70,13 @@ export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<Structu
     }
 
     protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        const bodies = WORKER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 10);
+
         if (this.isPrioritySpawn(spawn)) {
-            return Utils.getBiggerPossibleBodyNow(CARRIER_BODIES, BASE_CARRIER_CREEP_BODY, spawn);
+            return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
         }
 
-        return Utils.getBiggerPossibleBody(CARRIER_BODIES, BASE_CARRIER_CREEP_BODY, spawn);
+        return Utils.getBiggerPossibleBody(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }
 
     protected rest(creep: Creep): void {
