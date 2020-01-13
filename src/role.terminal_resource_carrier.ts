@@ -1,7 +1,7 @@
 import {TERMINAL_ENERGY_REQUIREMENT, TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT} from "./config";
 import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
-import BaseCreepRole from "./role.base_creep";
+import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
 import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
@@ -18,7 +18,7 @@ const FORBIDDEN_RESOURCES: ResourceConstant[] = [
     RESOURCE_ENERGY
 ];
 
-export default class TerminalResourceCarrier extends BaseCreepRole {
+export default class TerminalResourceCarrier extends WorkRestCycleCreepRole<StructureTerminal> {
     private static getCurrentResource(store: StructureStorage | StructureContainer): ResourceConstant {
         return Object.keys(store.store)
             .filter((type: ResourceConstant) => !FORBIDDEN_RESOURCES.includes(type))
@@ -38,25 +38,6 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
         return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: this.filterStructure()}).sort(Sort.byDistance(creep)).shift();
     }
 
-    run(creep: Creep): void {
-        const terminal = creep.room.terminal;
-        if (terminal && terminal.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT) {
-            const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER], 1000);
-            if (source && creep.store.getFreeCapacity() > 0) {
-                CreepTrait.withdrawAllEnergy(creep, source);
-            } else {
-                CreepTrait.transferAllEnergy(creep, terminal);
-            }
-        } else {
-            const source = TerminalResourceCarrier.getSourceStructure(creep);
-            if (source && creep.store.getFreeCapacity() > 0) {
-                CreepTrait.withdrawResource(creep, source, TerminalResourceCarrier.getCurrentResource(source));
-            } else {
-                CreepTrait.transferAllResources(creep, terminal);
-            }
-        }
-    }
-
     getSpawnStrategy(): SpawnStrategy {
         return new AndChainSpawnStrategy(
             [
@@ -69,6 +50,42 @@ export default class TerminalResourceCarrier extends BaseCreepRole {
 
     public getRoleName(): string {
         return 'terminal_resource_carrier';
+    }
+
+    protected shouldWork(creep: Creep): boolean {
+        return creep.store.getFreeCapacity() === 0;
+    }
+
+    protected shouldRest(creep: Creep): boolean {
+        return creep.store.getUsedCapacity() === 0;
+    }
+
+    protected work(creep: Creep): void {
+        const target = this.getCurrentStructureTarget(creep);
+
+        CreepTrait.transferAllResources(creep, target);
+    }
+
+    protected rest(creep: Creep): void {
+        const target = this.getCurrentStructureTarget(creep);
+
+        if (target && target.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT) {
+            const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER], 1000);
+            CreepTrait.withdrawAllEnergy(creep, source);
+        } else {
+            const source = TerminalResourceCarrier.getSourceStructure(creep);
+            if (source) {
+                CreepTrait.withdrawResource(creep, source, TerminalResourceCarrier.getCurrentResource(source));
+            }
+        }
+    }
+
+    protected shouldRenewTarget(creep: Creep): boolean {
+        return false;
+    }
+
+    protected getTarget(creep: Creep): StructureTerminal {
+        return creep.room.terminal;
     }
 
     protected getBody(spawn: StructureSpawn) {

@@ -29,3 +29,9 @@ game development process
 ```sh
 npm run watch
 ```
+
+## Todo
+
+* [ ] Labs management
+* [ ] Dynamically modify harvester body if target source has a storage\link\container nearby
+* [ ] Trade excess minerals
