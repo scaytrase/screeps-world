@@ -91,7 +91,8 @@ export default class Utils {
                     for (const x in resultMatrix[y]) {
                         const resultArray = resultMatrix[y][x];
                         const ex = resultArray.filter(
-                            result => (result.type === "terrain" && result.terrain === "plain") || (result.type === "structure" && result.structure.structureType === STRUCTURE_ROAD))
+                            result => (result.type === "terrain" && (result.terrain === "plain" || result.terrain === "swamp"))
+                                || (result.type === "structure" && (result.structure.structureType === STRUCTURE_ROAD || result.structure.structureType === STRUCTURE_CONTAINER)))
                             .length > 0;
                         if (ex) count++;
                     }

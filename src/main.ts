@@ -26,6 +26,7 @@ import WallKeeperRole from "./role.wall_keeper";
 import Runnable from "./runnable";
 import TowerController from "./tower_controller";
 import Utils from "./utils";
+import RoomCleanerRole from "./role.room_cleaner";
 
 module.exports.loop = function () {
     const roles: Role[] = [
@@ -46,6 +47,7 @@ module.exports.loop = function () {
         new StorageLinkKeeperRole(),
         new RemoteBuilderRole(),
         new RemoteUpgraderRole(),
+        new RoomCleanerRole(),
     ];
 
     for (let flag of Utils.getFlagsByColors(COLOR_RED, COLOR_PURPLE)) {

@@ -38,7 +38,7 @@ export default class ResourceAggregator extends BaseCreepRole {
         return new AndChainSpawnStrategy(
             [
                 new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: filter}),
-                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE}}),
+                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE, my: true}}),
                 RoleCountStrategy.room(RESOURCE_AGGREGATORS_COUNT_LIMIT, this)
             ]
         );

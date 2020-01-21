@@ -8,6 +8,7 @@ import OrChainSpawnStrategy from "./spawn_strategy.or_chain";
 import RoleCountStrategy from "./spawn_strategy.role_count";
 import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
 import Utils from "./utils";
+import {Sort} from "./sort_utils";
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_LINK,
@@ -70,7 +71,7 @@ export default class SpawnKeeperRole extends WorkRestCycleCreepRole<StructureSpa
 
     protected getTarget(creep: Creep): StructureSpawn | StructureExtension | StructureTower {
         const target = Utils.getClosestEnergyRecipient<StructureSpawn | StructureExtension>(creep, PRIORITY_TARGET_STRUCTURES);
-        if (target) {
+        if (target && target.my) {
             return target;
         }
 
@@ -78,6 +79,17 @@ export default class SpawnKeeperRole extends WorkRestCycleCreepRole<StructureSpa
     }
 
     protected rest(creep: Creep): void {
+        const enemySource: Structure = creep.room.find(FIND_HOSTILE_STRUCTURES, {
+            filter: (structure: StructureSpawn | StructureStorage | StructureContainer | StructureTower | StructureLink) =>
+                ((structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE || structure.structureType === STRUCTURE_TOWER || structure.structureType === STRUCTURE_LINK)
+                    // @ts-ignore
+                    && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0)
+        }).sort(Sort.byDistance(creep)).shift();
+        if (enemySource) {
+            CreepTrait.withdrawAllEnergy(creep, enemySource);
+            return;
+        }
+
         const energySource = Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES);
 
         if (energySource && energySource.pos.getRangeTo(creep.pos) < 15) {
@@ -90,7 +102,7 @@ export default class SpawnKeeperRole extends WorkRestCycleCreepRole<StructureSpa
     protected shouldRenewTarget(creep: Creep): boolean {
         const target = this.getCurrentStructureTarget(creep);
 
-        if (!target) {
+        if (!target || !target.my) {
             return true;
         }
 

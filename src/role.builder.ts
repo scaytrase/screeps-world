@@ -46,8 +46,19 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected rest(creep: Creep): void {
-        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, [STRUCTURE_CONTAINER, STRUCTURE_STORAGE], 100));
-        CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, Utils.getBodyCost(BASE_WORKER_CREEP_BODY) + 50));
+        const enemySource: Structure = creep.room.find(FIND_HOSTILE_STRUCTURES, {
+            filter: (structure: StructureSpawn | StructureStorage | StructureContainer | StructureTower) =>
+                ((structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE || structure.structureType === STRUCTURE_TOWER)
+                    // @ts-ignore
+                    && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0)
+        }).sort(Sort.byDistance(creep)).shift();
+
+        if (enemySource) {
+            CreepTrait.withdrawAllEnergy(creep, enemySource)
+        } else {
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, [STRUCTURE_CONTAINER, STRUCTURE_STORAGE], 100));
+            CreepTrait.withdrawAllEnergy(creep, Utils.getClosestEnergySource(creep, SOURCE_STRUCTURES, Utils.getBodyCost(BASE_WORKER_CREEP_BODY) + 50));
+        }
     }
 
     protected shouldRenewTarget(creep: Creep): boolean {

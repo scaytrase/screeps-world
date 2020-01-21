@@ -47,11 +47,19 @@ export default class RemoteUpgraderRole extends WorkRestCycleCreepRole<Structure
     }
 
     protected rest(creep: Creep): void {
+        const enemySource: Structure = creep.room.find(FIND_HOSTILE_STRUCTURES, {
+            filter: (structure: StructureSpawn | StructureStorage | StructureContainer | StructureTower | StructureLink) =>
+                ((structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE || structure.structureType === STRUCTURE_TOWER || structure.structureType === STRUCTURE_LINK)
+                    // @ts-ignore
+                    && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0)
+        }).sort(Sort.byDistance(creep)).shift();
         const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER]);
         const closestEnergyMine = Utils.getClosestEnergyMine(creep);
         const grave = Utils.getRoomGraves(creep.room).sort(Sort.byDistance(creep)).shift();
 
-        if (creep.pos.getRangeTo(source) < creep.pos.getRangeTo(closestEnergyMine)) {
+        if (enemySource) {
+            CreepTrait.withdrawAllEnergy(creep, enemySource);
+        } else if (creep.pos.getRangeTo(source) < creep.pos.getRangeTo(closestEnergyMine)) {
             CreepTrait.withdrawAllEnergy(creep, source);
         } else if (creep.pos.getRangeTo(grave) < creep.pos.getRangeTo(closestEnergyMine)) {
             CreepTrait.pickupAllResources(creep, grave);

@@ -12,16 +12,16 @@ import Utils from "./utils";
 
 const ROLE_ENERGY_AGGREGATOR = 'energy_aggregator';
 
-const recipientFilter = (structure: StructureContainer | StructureSpawn) =>
+const recipientFilter = (structure: StructureContainer | StructureStorage | StructureTower | StructureLink | StructureSpawn) =>
     structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_SPAWN
-    && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+    && structure.my && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
 
 const sourceFilter = (structure: StructureContainer) =>
     structure.structureType === STRUCTURE_CONTAINER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
 
-export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<StructureContainer | StructureLink> {
+export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<StructureContainer | StructureStorage | StructureTower | StructureLink> {
     private static getRecipient(creep: Creep): StructureContainer | StructureStorage | null {
-        if (creep.room.storage) {
+        if (creep.room.storage && creep.room.storage.my) {
             return creep.room.storage;
         }
 
@@ -35,7 +35,9 @@ export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<Structu
     }
 
     public getSpawnStrategy(): SpawnStrategy {
-        const filter = capacity => (structure: StructureContainer) => structure.structureType === STRUCTURE_CONTAINER && structure.store.getUsedCapacity() > capacity;
+        const filter = capacity => (structure: StructureContainer | StructureStorage) =>
+            (structure.structureType === STRUCTURE_CONTAINER && structure.store.getUsedCapacity() > capacity)
+            || (structure.structureType === STRUCTURE_STORAGE && !structure.my && structure.store.getUsedCapacity() > 0);
         return new OrChainSpawnStrategy([
             new AndChainSpawnStrategy([
                 RoleCountStrategy.room(ENERGY_AGGREGATORS_COUNT_LIMIT, this),
@@ -63,7 +65,19 @@ export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<Structu
         return target.store.getUsedCapacity(RESOURCE_ENERGY) === 0;
     }
 
-    protected getTarget(creep: Creep): StructureContainer | StructureLink {
+    protected getTarget(creep: Creep): StructureContainer | StructureStorage | StructureTower | StructureLink {
+        const enemySource: StructureStorage | StructureTower | StructureContainer | StructureLink =
+            creep.room
+                .find<StructureStorage | StructureTower | StructureContainer | StructureLink>(FIND_HOSTILE_STRUCTURES, {
+                    filter: (structure: StructureStorage | StructureTower | StructureContainer | StructureLink) =>
+                        ((structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE || structure.structureType === STRUCTURE_TOWER || structure.structureType === STRUCTURE_LINK)
+                            // @ts-ignore
+                            && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0)
+                }).sort(Sort.byDistance(creep)).shift();
+        if (enemySource) {
+            return enemySource;
+        }
+
         const spawn = creep.room.find(FIND_MY_SPAWNS).shift();
 
         return creep.room.find<StructureContainer>(FIND_STRUCTURES, {filter: sourceFilter}).sort(Sort.byDistance(spawn)).shift();
