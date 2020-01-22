@@ -35,7 +35,7 @@ export default class Utils {
             .find<T>(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return allowedTypes.includes(structure.structureType) &&
-                        structure['store'].getFreeCapacity(RESOURCE_ENERGY) > lowerStructureLimit;
+                        structure['store'].getFreeCapacity() > lowerStructureLimit;
                 }
             })
             .sort(Sort.byDistance(target))
