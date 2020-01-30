@@ -32,7 +32,7 @@ export default class TowerController implements Runnable {
             }
 
             const structures = this.getDamagedStructures();
-            if (structures.length > 0) {
+            if (structures.length > 0 && tower.energy > 800) {
                 tower.repair(structures.sort(Sort.byHealthPercent()).shift());
             }
         }

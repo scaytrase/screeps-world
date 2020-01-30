@@ -1,4 +1,9 @@
-import {MAX_WORK_PER_CONTROLLER, MAX_WORK_PER_CONTROLLER_EMERGENCY, UPGRADERS_COUNT_LIMIT} from "./config";
+import {
+    AGGRESSIVE_UPGRADING_WORK,
+    MAX_WORK_PER_CONTROLLER,
+    MAX_WORK_PER_CONTROLLER_EMERGENCY,
+    UPGRADERS_COUNT_LIMIT
+} from "./config";
 import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "./const";
 import CreepTrait from "./creep_traits";
 import Economy from "./economy";
@@ -58,6 +63,10 @@ export default class UpgraderRole extends BaseCreepRole {
                         return current < MAX_WORK_PER_CONTROLLER_EMERGENCY;
                     }
 
+                    if (EconomyUtils.usableSpawnEnergyAvailable(spawn.room) > 400000) {
+                        return current < AGGRESSIVE_UPGRADING_WORK;
+                    }
+
                     return current < MAX_WORK_PER_CONTROLLER;
                 }
             }
@@ -94,6 +103,10 @@ export default class UpgraderRole extends BaseCreepRole {
 
         if (EconomyUtils.usableSpawnEnergyRatio(spawn.room) < 0.05) {
             return Math.max(0, MAX_WORK_PER_CONTROLLER_EMERGENCY - current);
+        }
+
+        if (EconomyUtils.usableSpawnEnergyAvailable(spawn.room) > 400000) {
+            return Math.max(0, AGGRESSIVE_UPGRADING_WORK - current);
         }
 
         return Math.max(0, MAX_WORK_PER_CONTROLLER - current);

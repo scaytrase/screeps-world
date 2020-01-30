@@ -44,13 +44,13 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
     }
 
     private static getRecipient(creep: Creep) {
-        const recipient = Utils.getClosestEnergyRecipient(creep, HarvesterRole.getRecipientStructures(creep), creep.store.getUsedCapacity());
+        const recipient = Utils.getClosestEnergyRecipient2(creep, HarvesterRole.getRecipientStructures(creep), creep.store.getUsedCapacity());
 
         if (recipient) {
             return recipient;
         }
 
-        return Utils.getClosestEnergyRecipient(creep, [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER]);
+        return Utils.getClosestEnergyRecipient2(creep, [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER]);
     }
 
     public spawn(spawn: StructureSpawn): ScreepsReturnCode {

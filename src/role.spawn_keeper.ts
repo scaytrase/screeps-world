@@ -70,12 +70,12 @@ export default class SpawnKeeperRole extends WorkRestCycleCreepRole<StructureSpa
     }
 
     protected getTarget(creep: Creep): StructureSpawn | StructureExtension | StructureTower {
-        const target = Utils.getClosestEnergyRecipient<StructureSpawn | StructureExtension>(creep, PRIORITY_TARGET_STRUCTURES);
+        const target = Utils.getClosestEnergyRecipient2<StructureSpawn | StructureExtension>(creep, PRIORITY_TARGET_STRUCTURES);
         if (target && target.my) {
             return target;
         }
 
-        return Utils.getClosestEnergyRecipient(creep, TARGET_STRUCTURES);
+        return Utils.getClosestEnergyRecipient2(creep, TARGET_STRUCTURES);
     }
 
     protected rest(creep: Creep): void {

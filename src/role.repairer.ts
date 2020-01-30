@@ -39,7 +39,11 @@ export default class RepairerRole extends WorkRestCycleCreepRole<AnyStructure> {
             new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: RepairerRole.filter}),
             {
                 shouldSpawn(spawn: StructureSpawn): boolean {
-                    const towers = spawn.room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}}).length;
+                    const towers = spawn.room
+                        .find(FIND_MY_STRUCTURES, {
+                            // @ts-ignore
+                            filter: (structure: StructureTower) => structure.structureType === STRUCTURE_TOWER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 500
+                        }).length;
                     if (towers > 1) {
                         return false;
                     }
