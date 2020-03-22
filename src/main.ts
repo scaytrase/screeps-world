@@ -3,7 +3,6 @@ import CreepRetirementProgram from "./creep_retirement_program";
 import CreepRunner from "./creep_runner";
 import CreepSpawnBound from "./creep_spawn_bound";
 import CreepSpawner from "./creep_spawner";
-import EconomyLogger from "./economy_logger";
 import LinkManager from "./link_manager";
 import Role from "./role";
 import BuilderRole from "./role.builder";
@@ -12,8 +11,6 @@ import GraveKeeperRole from "./role.grave_keeper";
 import GuardRole from "./role.guard";
 import HarvesterRole from "./role.harvester";
 import MinerRole from "./role.miner";
-import RemoteBuilderRole from "./role.remote_builder";
-import RemoteUpgraderRole from "./role.remote_upgrader";
 import RepairerRole from "./role.repairer";
 import ResourceAggregatorRole from "./role.resource_aggregator";
 import RoomClaimerRole from "./role.room_claimer";
@@ -26,7 +23,6 @@ import WallKeeperRole from "./role.wall_keeper";
 import Runnable from "./runnable";
 import TowerController from "./tower_controller";
 import Utils from "./utils";
-import RoomCleanerRole from "./role.room_cleaner";
 
 module.exports.loop = function () {
     const roles: Role[] = [
@@ -45,9 +41,9 @@ module.exports.loop = function () {
         new TerminalResourceCarrierRole(),
         new ResourceAggregatorRole(),
         new StorageLinkKeeperRole(),
-        new RemoteBuilderRole(),
-        new RemoteUpgraderRole(),
-        new RoomCleanerRole(),
+        // new RemoteBuilderRole(),
+        // new RemoteUpgraderRole(),
+        // new RoomCleanerRole(),
     ];
 
     for (let flag of Utils.getFlagsByColors(COLOR_RED, COLOR_PURPLE)) {
@@ -70,7 +66,7 @@ module.exports.loop = function () {
     runnables.push(new CreepSpawnBound());
     runnables.push(new CreepRetirementProgram());
     runnables.push(new Cleaner());
-    runnables.push(new EconomyLogger());
+    //runnables.push(new EconomyLogger());
 
     for (const runnable of runnables) {
         runnable.run();

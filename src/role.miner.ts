@@ -16,7 +16,7 @@ const RECIPIENT_TYPES: StructureConstant[] = [
 
 export default class MinerRole extends BaseCreepRole {
     private static getRecipientStructure(creep: Creep): StructureStorage | null {
-        return creep.room.find<StructureStorage>(FIND_MY_STRUCTURES, {filter: (structure) => RECIPIENT_TYPES.includes(structure.structureType)}).sort(Sort.byDistance(creep)).shift();
+        return creep.room.find<StructureStorage>(FIND_MY_STRUCTURES, {filter: (structure) => RECIPIENT_TYPES.includes(structure.structureType) && structure['store'].getFreeCapacity() > 0}).sort(Sort.byDistance(creep)).shift();
     }
 
     private static getSourceStructure(creep: Creep): Mineral | null {

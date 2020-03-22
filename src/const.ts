@@ -7,10 +7,10 @@ function generateBodySet(pattern: BodyPartConstant[], level: number): BodyPartCo
 }
 
 export const BASE_WORKER_CREEP_BODY = [WORK, CARRY, MOVE];
-export const WORKER_BODIES = generateBodySet(BASE_WORKER_CREEP_BODY, 12);
+export const WORKER_BODIES = generateBodySet(BASE_WORKER_CREEP_BODY, 15);
 
 export const BASE_CARRIER_CREEP_BODY = [CARRY, CARRY, MOVE];
-export const CARRIER_BODIES = generateBodySet(BASE_CARRIER_CREEP_BODY, 10);
+export const CARRIER_BODIES = generateBodySet(BASE_CARRIER_CREEP_BODY, 15);
 
 export const BASE_ATTACKER_BODY = [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK];
 export const ATTACKER_BODIES = [...generateBodySet([TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, RANGED_ATTACK, HEAL, HEAL], 7), BASE_ATTACKER_BODY];

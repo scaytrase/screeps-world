@@ -9,7 +9,7 @@ export default class CreepSpawnBound implements Runnable {
 
             if (creep.memory['spawn']) {
                 const spawn = Game.getObjectById<StructureSpawn>(creep.memory['spawn']);
-                if (spawn.room !== creep.room) {
+                if (spawn && spawn.room !== creep.room) {
                     creep.memory['target'] = undefined;
                     creep.memory['working'] = undefined;
                     creep.moveTo(

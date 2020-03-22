@@ -46,7 +46,7 @@ export default class EnergyAggregatorRole extends WorkRestCycleCreepRole<Structu
             new AndChainSpawnStrategy([
                 new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_STORAGE}}),
                 new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: filter(1000)}),
-                RoleCountStrategy.room(3, this),
+                RoleCountStrategy.room(1, this),
             ])
         ]);
     }

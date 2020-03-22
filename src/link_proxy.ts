@@ -71,6 +71,10 @@ export default class LinkProxy {
             return LinkType.DEMAND;
         }
 
+        if (this.link.pos.getRangeTo(this.link.room.terminal) < 5) {
+            return LinkType.DEMAND;
+        }
+
         const sources: Source[] = this.link.room.find(FIND_SOURCES);
         for (let source of sources) {
             if (this.link.pos.getRangeTo(source) < 3) {

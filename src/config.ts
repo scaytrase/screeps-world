@@ -17,10 +17,10 @@ export const GRAVE_KEEPERS_COUNT_LIMIT = 1; // @todo 0 for low economy
 export const TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT = 1;
 
 // PER-ROOM HARD LIMITS (actual limit by body parts)
-export const UPGRADERS_COUNT_LIMIT = 4;
+export const UPGRADERS_COUNT_LIMIT = 2;
 
 // GLOBALS
-export const PARKING_SLEEP_TIME = 5;
+export const PARKING_SLEEP_TIME = 10;
 
 export const MAX_WORK_PER_RESOURCE = 6;
 export const MAX_WORK_PER_CONTROLLER = 12;
@@ -48,4 +48,4 @@ export const TOWER_ATTACK_BORDERS = false;
 export const GUARDS_ATTACK_BORDERS = false;
 export const GRAVE_KEEPERS_LOOT_BORDERS = true;
 
-export const TERMINAL_ENERGY_REQUIREMENT = 50000;
+export const TERMINAL_ENERGY_REQUIREMENT = 150000;

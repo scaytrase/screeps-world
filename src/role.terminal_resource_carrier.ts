@@ -4,18 +4,17 @@ import CreepTrait from "./creep_traits";
 import WorkRestCycleCreepRole from "./role.work_rest_cycle_creep";
 import {Sort} from "./sort_utils";
 import SpawnStrategy from "./spawn_strategy";
-import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
 import RoleCountStrategy from "./spawn_strategy.role_count";
 import RoomFindSpawnStrategy from "./spawn_strategy.room_find";
 import Utils from "./utils";
 
 const SOURCE_TYPES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
-    STRUCTURE_STORAGE
+    STRUCTURE_STORAGE,
 ];
 
 const FORBIDDEN_RESOURCES: ResourceConstant[] = [
-    RESOURCE_ENERGY
+    RESOURCE_ENERGY,
 ];
 
 export default class TerminalResourceCarrier extends WorkRestCycleCreepRole<StructureTerminal> {
@@ -39,13 +38,23 @@ export default class TerminalResourceCarrier extends WorkRestCycleCreepRole<Stru
     }
 
     getSpawnStrategy(): SpawnStrategy {
-        return new AndChainSpawnStrategy(
-            [
-                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: TerminalResourceCarrier.filterStructure()}),
-                new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_TERMINAL}}),
-                RoleCountStrategy.room(TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT, this)
-            ]
-        );
+        const that = this;
+
+        return {
+            shouldSpawn(spawn: StructureSpawn): boolean {
+                if (!spawn.room.terminal) {
+                    return false;
+                }
+
+                if (!RoleCountStrategy.room(TERMINAL_RESOURCE_CARRIERS_COUNT_LIMIT, that).shouldSpawn(spawn)) {
+                    return false;
+                }
+
+                let strat = new RoomFindSpawnStrategy(FIND_STRUCTURES, {filter: TerminalResourceCarrier.filterStructure()});
+
+                return strat.shouldSpawn(spawn) || spawn.room.terminal.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT
+            }
+        };
     }
 
     public getRoleName(): string {
@@ -70,7 +79,7 @@ export default class TerminalResourceCarrier extends WorkRestCycleCreepRole<Stru
         const target = this.getCurrentStructureTarget(creep);
 
         if (target && target.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT) {
-            const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER], 1000);
+            const source = Utils.getClosestEnergySource2(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER, STRUCTURE_LINK]);
             CreepTrait.withdrawAllEnergy(creep, source);
         } else {
             const source = TerminalResourceCarrier.getSourceStructure(creep);
@@ -89,7 +98,7 @@ export default class TerminalResourceCarrier extends WorkRestCycleCreepRole<Stru
     }
 
     protected getBody(spawn: StructureSpawn) {
-        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 8);
+        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 10);
 
         return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
     }

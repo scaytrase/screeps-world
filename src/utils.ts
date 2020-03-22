@@ -26,6 +26,22 @@ export default class Utils {
             .shift();
     }
 
+    public static getClosestEnergySource2<T extends Structure = AnyStructure>(
+        target: RoomObject,
+        allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],
+        lowerStructureLimit: number = 0
+    ): T | null {
+        return target.room
+            .find<T>(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return allowedTypes.includes(structure.structureType) &&
+                        structure['store'].getUsedCapacity() > lowerStructureLimit;
+                }
+            })
+            .sort(Sort.byDistance(target))
+            .shift();
+    }
+
     public static getClosestEnergyRecipient<T extends Structure = AnyStructure>(
         target: RoomObject,
         allowedTypes: StructureConstant[] = [STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_CONTAINER],

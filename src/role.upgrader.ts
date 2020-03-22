@@ -10,10 +10,6 @@ import Economy from "./economy";
 import EconomyUtils from "./economy_utils";
 import BaseCreepRole from "./role.base_creep";
 import SpawnStrategy from "./spawn_strategy";
-import AndChainSpawnStrategy from "./spawn_strategy.and_chain";
-import EmergencySpawnStrategy from "./spawn_strategy.emergency";
-import NotSpawnStrategy from "./spawn_strategy.not";
-import OrChainSpawnStrategy from "./spawn_strategy.or_chain";
 import RoleCountStrategy from "./spawn_strategy.role_count";
 import Utils from "./utils";
 
@@ -47,30 +43,34 @@ export default class UpgraderRole extends BaseCreepRole {
 
     public getSpawnStrategy(): SpawnStrategy {
         const that = this;
-        return new AndChainSpawnStrategy([
-            RoleCountStrategy.room(UPGRADERS_COUNT_LIMIT, this),
-            new OrChainSpawnStrategy([
-                new NotSpawnStrategy(
-                    new EmergencySpawnStrategy((spawn) => Economy.isHarvesterEmergency(spawn.room))
-                ),
-                RoleCountStrategy.room(1, this),
-            ]),
-            {
-                shouldSpawn(spawn: StructureSpawn): boolean {
-                    const current = that.getCurrentWork(spawn);
 
-                    if (EconomyUtils.usableSpawnEnergyRatio(spawn.room) < 0.05) {
-                        return current < MAX_WORK_PER_CONTROLLER_EMERGENCY;
-                    }
-
-                    if (EconomyUtils.usableSpawnEnergyAvailable(spawn.room) > 400000) {
-                        return current < AGGRESSIVE_UPGRADING_WORK;
-                    }
-
-                    return current < MAX_WORK_PER_CONTROLLER;
+        return {
+            shouldSpawn(spawn: StructureSpawn): boolean {
+                if (Economy.isHarvesterEmergency(spawn.room)) {
+                    return RoleCountStrategy.room(1, that).shouldSpawn(spawn);
                 }
+
+                if (spawn.room.controller.level === 8) {
+                    return RoleCountStrategy.room(1, that).shouldSpawn(spawn);
+                }
+
+                if (!RoleCountStrategy.room(UPGRADERS_COUNT_LIMIT, that).shouldSpawn(spawn)) {
+                    return false;
+                }
+
+                const current = that.getCurrentWork(spawn);
+
+                if (EconomyUtils.usableSpawnEnergyRatio(spawn.room) < 0.05) {
+                    return current < MAX_WORK_PER_CONTROLLER_EMERGENCY;
+                }
+
+                if (EconomyUtils.usableSpawnEnergyAvailable(spawn.room) > 400000) {
+                    return current < AGGRESSIVE_UPGRADING_WORK;
+                }
+
+                return current < MAX_WORK_PER_CONTROLLER;
             }
-        ]);
+        };
     }
 
     public getCurrentWork(spawn: StructureSpawn) {
