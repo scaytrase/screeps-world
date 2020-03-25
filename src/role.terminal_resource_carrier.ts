@@ -11,6 +11,7 @@ import Utils from "./utils";
 const SOURCE_TYPES: StructureConstant[] = [
     STRUCTURE_CONTAINER,
     STRUCTURE_STORAGE,
+    STRUCTURE_LINK,
 ];
 
 const FORBIDDEN_RESOURCES: ResourceConstant[] = [
@@ -79,7 +80,7 @@ export default class TerminalResourceCarrier extends WorkRestCycleCreepRole<Stru
         const target = this.getCurrentStructureTarget(creep);
 
         if (target && target.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_REQUIREMENT) {
-            const source = Utils.getClosestEnergySource2(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER, STRUCTURE_LINK]);
+            const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER, STRUCTURE_LINK]);
             CreepTrait.withdrawAllEnergy(creep, source);
         } else {
             const source = TerminalResourceCarrier.getSourceStructure(creep);
