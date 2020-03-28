@@ -4,9 +4,11 @@ import Logger from "./logger";
 import StorageLinkKeeperRole from "./role.storage_link_keeper";
 import Runnable from "./runnable";
 import Utils from "./utils";
+import {DEMANDING, SOURCING, STORAGE_TYPE} from "./link_manager_const";
 
 export default class LinkManager implements Runnable {
     private readonly room: Room;
+    private storage_state: STORAGE_TYPE;
 
     constructor(room: Room) {
         this.room = room;
@@ -17,15 +19,15 @@ export default class LinkManager implements Runnable {
     }
 
     public static getDemandLinks(links: LinkProxy[]): LinkProxy[] {
-        return links.filter(link => link.isDemanding());
+        return links.filter(link => link.isDemanding() && link.type === LinkType.DEMAND);
     }
 
     public static getSourceLinks(links: LinkProxy[]): LinkProxy[] {
-        return links.filter(link => link.isSourcing());
+        return links.filter(link => link.isSourcing() && link.type === LinkType.SOURCE);
     }
 
-    public static getStorageLinks(links: LinkProxy[]): LinkProxy[] {
-        return links.filter(link => link.type === LinkType.STORAGE);
+    public static getStorageLinks(links: LinkProxy[], storageType: STORAGE_TYPE): LinkProxy[] {
+        return links.filter(link => link.type === LinkType.STORAGE).map(link => link.setStorageType(storageType));
     }
 
     private static getKeeper(link: LinkProxy): Creep | undefined {
@@ -75,63 +77,76 @@ export default class LinkManager implements Runnable {
         }
     }
 
-    public run(): void {
-        const links = LinkManager.getLinks(this.room);
+    private static fulfilDemand(demandLinks: LinkProxy[], sourceLinks: LinkProxy[]) {
+        for (const demandLink of demandLinks) {
+            for (const sourceLink of sourceLinks) {
+                if (!sourceLink.isSourcing()) {
+                    Logger.debug(`link ${sourceLink.link.id} is cooling down for ${sourceLink.link.cooldown}`);
 
-        for (let demandLink of LinkManager.getDemandLinks(links)) {
-            for (let sourceLink of LinkManager.getSourceLinks(links)) {
+                    continue;
+                }
+
                 const amount = Math.min(sourceLink.getAmount(), demandLink.getAmount());
 
                 Logger.debug(`providing ${amount} to ${demandLink.link.id} from ${sourceLink.link.id}`);
-                if (sourceLink.link.cooldown > 0) {
-                    Logger.debug(`link ${sourceLink.link.id} is cooling down for ${sourceLink.link.cooldown}`);
-                } else {
-                    demandLink.withdraw(sourceLink, amount);
-                    if (!demandLink.isDemanding()) {
-                        break;
-                    }
+                demandLink.withdraw(sourceLink, amount);
+                if (!demandLink.isDemanding()) {
+                    break;
                 }
             }
+        }
+    }
 
-            if (!demandLink.isDemanding()) {
-                continue;
-            }
+    public run(): void {
+        const links = LinkManager.getLinks(this.room);
 
+        LinkManager.fulfilDemand(LinkManager.getDemandLinks(links), LinkManager.getSourceLinks(links));
 
-            for (let storageLink of LinkManager.getStorageLinks(links)) {
-                const amount = Math.min(storageLink.getAmount(), demandLink.getAmount());
+        this.detectStorageState(links);
+        this.processStorageState(links);
+    }
 
-                Logger.debug(`demanding ${demandLink.getAmount()} to ${demandLink.link.id} from storage ${storageLink.link.id}`);
-                if (storageLink.link.cooldown > 0) {
-                    Logger.debug(`storage ${storageLink.link.id} is cooling down for ${storageLink.link.cooldown}`);
-                } else {
+    private processStorageState(links: LinkProxy[]) {
+        const storageLinks = LinkManager.getStorageLinks(links, this.storage_state);
+        switch (this.storage_state) {
+            case SOURCING:
+                for (const storageLink of storageLinks) {
                     LinkManager.fillStorageLink(storageLink);
-                    demandLink.withdraw(storageLink, amount);
-
-                    if (!demandLink.isDemanding()) {
-                        break;
-                    }
                 }
-            }
-        }
 
-
-        for (let sourceLink of LinkManager.getSourceLinks(links)) {
-            for (let storageLink of LinkManager.getStorageLinks(links)) {
-                const amount = sourceLink.getAmount();
-
-                if (sourceLink.link.cooldown > 0) {
-                    Logger.debug(`providing ${amount} to storage from ${sourceLink.link.id} after cooldown ${sourceLink.link.cooldown}`);
-                } else {
-                    Logger.debug(`providing ${amount} to storage from ${sourceLink.link.id}`);
+                LinkManager.fulfilDemand(LinkManager.getDemandLinks(links), storageLinks);
+                break;
+            case DEMANDING:
+                for (const storageLink of storageLinks) {
                     LinkManager.emptyStorageLink(storageLink);
-                    storageLink.withdraw(sourceLink, amount);
                 }
-            }
+
+                LinkManager.fulfilDemand(storageLinks, LinkManager.getSourceLinks(links));
+                break;
+            case null:
+                for (const storageLink of storageLinks) {
+                    LinkManager.resetKeeper(storageLink)
+                }
+                break;
+        }
+    }
+
+    private detectStorageState(links: LinkProxy[]) {
+        const sourceLinks = LinkManager.getSourceLinks(links);
+        const demandLinks = LinkManager.getDemandLinks(links);
+
+        if (sourceLinks.length > 0 && demandLinks.length > 0) {
+            Logger.warn(`invalid link proxy logic. both sourcing and demanding links exist after processing in ${this.room.name}`);
         }
 
-        for (let storageLink of LinkManager.getStorageLinks(links)) {
-            LinkManager.resetKeeper(storageLink);
+        this.storage_state = null;
+
+        if (sourceLinks.length > 0) {
+            this.storage_state = DEMANDING;
+        }
+
+        if (demandLinks.length > 0) {
+            this.storage_state = SOURCING;
         }
     }
 }
