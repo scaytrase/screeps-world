@@ -48,13 +48,19 @@ export default abstract class BaseCreepRole implements Role {
         return false;
     }
 
-    protected abstract getSpawnStrategy(): SpawnStrategy;
+    protected getSpawnStrategy(): SpawnStrategy {
+        return new class implements SpawnStrategy {
+            shouldSpawn(spawn: StructureSpawn): boolean {
+                return false;
+            }
+        }
+    };
 
     protected isSpawnBound(): boolean {
         return true;
     }
 
-    protected getSpawnMemory(spawn: StructureSpawn): object {
+    protected getDefaultMemory(spawn: StructureSpawn): object {
         return {
             spawn: this.isSpawnBound() ? spawn.id : undefined,
             role: this.getRoleName(),
@@ -63,13 +69,15 @@ export default abstract class BaseCreepRole implements Role {
 
     protected createPrototype(spawn: StructureSpawn): ProtoCreep | null {
         if (this.getSpawnStrategy().shouldSpawn(spawn)) {
-            return new ProtoCreep(this.getBody(spawn), this.getSpawnMemory(spawn));
+            return new ProtoCreep(this.getBody(spawn), this.getDefaultMemory(spawn));
         }
 
         return null;
     }
 
-    protected abstract getBody(spawn: StructureSpawn): BodyPartConstant[];
+    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
+        return []
+    };
 
     private getName(): string {
         let i = 0;

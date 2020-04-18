@@ -3,12 +3,12 @@ import {ATTACKER_BODIES, BASE_ATTACKER_BODY} from "../config/const";
 import CreepTrait from "../creep_traits";
 import BaseCreepRole from "../base_roles/base_creep";
 import {Sort} from "../utils/sort_utils";
-import SpawnStrategy from "../spawn_strategy";
 import AndChainSpawnStrategy from "../spawn_strategy/and_chain";
 import RoleCountStrategy from "../spawn_strategy/role_count";
 import RoomFindSpawnStrategy from "../spawn_strategy/room_find";
 import Utils from "../utils/utils";
 import {COLOR_ATTACK} from "../config/colors";
+import ProtoCreep from "../proto_creep";
 
 export default class GuardRole extends BaseCreepRole {
     private static getTarget(creep: Creep): Creep | null {
@@ -39,20 +39,25 @@ export default class GuardRole extends BaseCreepRole {
         }
     }
 
-    getSpawnStrategy(): SpawnStrategy {
-        return new AndChainSpawnStrategy(
+    public getRoleName(): string {
+        return 'guard';
+    }
+
+    protected createPrototype(spawn: StructureSpawn): ProtoCreep | null {
+        const strategy = new AndChainSpawnStrategy(
             [
                 new RoomFindSpawnStrategy(FIND_HOSTILE_CREEPS),
                 RoleCountStrategy.room(GUARDS_COUNT_LIMIT, this),
             ]
         );
-    }
 
-    public getRoleName(): string {
-        return 'guard';
-    }
+        if (strategy.shouldSpawn(spawn)) {
+            return new ProtoCreep(
+                Utils.getBiggerPossibleBodyNow(ATTACKER_BODIES, BASE_ATTACKER_BODY, spawn),
+                this.getDefaultMemory(spawn)
+            );
+        }
 
-    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
-        return Utils.getBiggerPossibleBodyNow(ATTACKER_BODIES, BASE_ATTACKER_BODY, spawn);
+        return null;
     }
 }

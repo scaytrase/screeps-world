@@ -3,12 +3,13 @@ import {ATTACKER_BODIES, BASE_ATTACKER_BODY} from "../config/const";
 import CreepTrait from "../creep_traits";
 import BaseCreepRole from "../base_roles/base_creep";
 import {Sort} from "../utils/sort_utils";
-import SpawnStrategy from "../spawn_strategy";
 import AndChainSpawnStrategy from "../spawn_strategy/and_chain";
 import NotEmptyCallableResult from "../spawn_strategy/not_empty_callable_result";
 import RoleCountStrategy from "../spawn_strategy/role_count";
 import Utils from "../utils/utils";
 import {COLOR_SPECIAL_TASKS} from "../config/colors";
+import ProtoCreep from "../proto_creep";
+import BodyFilter from "../utils/body_filter";
 
 const IGNORED_STRUCTURES: StructureConstant[] = [STRUCTURE_RAMPART, STRUCTURE_WALL];
 
@@ -49,27 +50,29 @@ export default class AttackerRole extends BaseCreepRole {
         CreepTrait.attack(creep, hostile, {reusePath: 1});
     }
 
-    getSpawnStrategy(): SpawnStrategy {
-        return new AndChainSpawnStrategy(
+    public getRoleName(): string {
+        return 'attacker';
+    }
+
+    protected createPrototype(spawn: StructureSpawn): ProtoCreep | null {
+        const strategy = new AndChainSpawnStrategy(
             [
                 new NotEmptyCallableResult((spawn) => AttackerRole.getFlag()),
                 new NotEmptyCallableResult((spawn) => !AttackerRole.getFlag().room || AttackerRole.getTargets(AttackerRole.getFlag().room).shift()),
                 RoleCountStrategy.global(0, this),
             ]
         );
-    }
 
-    public getRoleName(): string {
-        return 'attacker';
+        if (strategy.shouldSpawn(spawn)) {
+            return new ProtoCreep(
+                Utils.getBiggerPossibleBody(ATTACKER_BODIES.filter(BodyFilter.byPartsCount(6, [ATTACK, RANGED_ATTACK])), BASE_ATTACKER_BODY, spawn),
+                this.getDefaultMemory(spawn));
+        }
+
+        return null;
     }
 
     protected isSpawnBound(): boolean {
         return false;
-    }
-
-    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
-        const bodies = ATTACKER_BODIES.filter(body => body.filter(part => part === ATTACK || part === RANGED_ATTACK).length <= 6);
-
-        return Utils.getBiggerPossibleBody(bodies, BASE_ATTACKER_BODY, spawn);
     }
 }

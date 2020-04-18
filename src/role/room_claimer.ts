@@ -50,8 +50,8 @@ export default class RoomClaimerRole extends BaseCreepRole {
         return false;
     }
 
-    protected getSpawnMemory(spawn: StructureSpawn): object {
-        return {...super.getSpawnMemory(spawn), immortal: true};
+    protected getDefaultMemory(spawn: StructureSpawn): object {
+        return {...super.getDefaultMemory(spawn), immortal: true};
     }
 
     protected getBody(spawn: StructureSpawn): BodyPartConstant[] {

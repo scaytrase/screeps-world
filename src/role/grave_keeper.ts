@@ -3,11 +3,12 @@ import {BASE_CARRIER_CREEP_BODY, CARRIER_BODIES} from "../config/const";
 import CreepTrait from "../creep_traits";
 import BaseCreepRole from "../base_roles/base_creep";
 import {Sort} from "../utils/sort_utils";
-import SpawnStrategy from "../spawn_strategy";
 import AndChainSpawnStrategy from "../spawn_strategy/and_chain";
 import NotEmptyCallableResult from "../spawn_strategy/not_empty_callable_result";
 import RoleCountStrategy from "../spawn_strategy/role_count";
 import Utils from "../utils/utils";
+import ProtoCreep from "../proto_creep";
+import BodyFilter from "../utils/body_filter";
 
 const STORAGE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
@@ -59,20 +60,23 @@ export default class GraveKeeperRole extends BaseCreepRole {
         }
     }
 
-    getSpawnStrategy(): SpawnStrategy {
-        return new AndChainSpawnStrategy([
-            new NotEmptyCallableResult((spawn) => Utils.getRoomGraves(spawn.room).shift()),
-            RoleCountStrategy.room(GRAVE_KEEPERS_COUNT_LIMIT, this)
-        ]);
-    }
-
     public getRoleName(): string {
         return 'grave_keeper';
     }
 
-    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
-        const bodies = CARRIER_BODIES.filter(body => body.filter(part => part === CARRY).length <= 10);
+    protected createPrototype(spawn: StructureSpawn): ProtoCreep | null {
+        const strategy = new AndChainSpawnStrategy([
+            new NotEmptyCallableResult((spawn) => Utils.getRoomGraves(spawn.room).shift()),
+            RoleCountStrategy.room(GRAVE_KEEPERS_COUNT_LIMIT, this)
+        ]);
 
-        return Utils.getBiggerPossibleBodyNow(bodies, BASE_CARRIER_CREEP_BODY, spawn);
+        if (strategy.shouldSpawn(spawn)) {
+            return new ProtoCreep(
+                Utils.getBiggerPossibleBodyNow(CARRIER_BODIES.filter(BodyFilter.byPartsCount(10, [CARRY])), BASE_CARRIER_CREEP_BODY, spawn),
+                this.getDefaultMemory(spawn)
+            );
+        }
+
+        return null;
     }
 }

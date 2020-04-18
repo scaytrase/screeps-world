@@ -3,13 +3,12 @@ import {BASE_WORKER_CREEP_BODY, WORKER_BODIES} from "../config/const";
 import CreepTrait from "../creep_traits";
 import WorkRestCycleCreepRole from "../base_roles/work_rest_cycle_creep";
 import {Sort} from "../utils/sort_utils";
-import SpawnStrategy from "../spawn_strategy";
 import AndChainSpawnStrategy from "../spawn_strategy/and_chain";
 import RoleCountStrategy from "../spawn_strategy/role_count";
 import RoomFindSpawnStrategy from "../spawn_strategy/room_find";
 import Utils from "../utils/utils";
-
-const ROLE_BUILDER = 'builder';
+import ProtoCreep from "../proto_creep";
+import BodyFilter from "../utils/body_filter";
 
 const SOURCE_STRUCTURES: StructureConstant[] = [
     STRUCTURE_STORAGE,
@@ -20,17 +19,8 @@ const SOURCE_STRUCTURES: StructureConstant[] = [
 ];
 
 export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite | StructureRampart> {
-    getSpawnStrategy(): SpawnStrategy {
-        return new AndChainSpawnStrategy(
-            [
-                new RoomFindSpawnStrategy(FIND_MY_CONSTRUCTION_SITES),
-                RoleCountStrategy.room(BUILDERS_COUNT_LIMIT, this),
-            ]
-        );
-    }
-
     public getRoleName(): string {
-        return ROLE_BUILDER;
+        return 'builder';
     }
 
     protected shouldWork(creep: Creep): boolean {
@@ -89,13 +79,21 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
             .shift();
     }
 
-    protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
-        const bodies = WORKER_BODIES.filter(body => body.filter(part => part === WORK).length <= 6);
+    protected createPrototype(spawn: StructureSpawn): ProtoCreep | null {
+        const strategy = new AndChainSpawnStrategy(
+            [
+                new RoomFindSpawnStrategy(FIND_MY_CONSTRUCTION_SITES),
+                RoleCountStrategy.room(BUILDERS_COUNT_LIMIT, this),
+            ]
+        );
 
-        if (this.isPrioritySpawn(spawn)) {
-            return Utils.getBiggerPossibleBodyNow(bodies, BASE_WORKER_CREEP_BODY, spawn);
+        if (strategy.shouldSpawn(spawn)) {
+            return new ProtoCreep(
+                Utils.getBiggerPossibleBody(WORKER_BODIES.filter(BodyFilter.byPartsCount(6, [WORK])), BASE_WORKER_CREEP_BODY, spawn),
+                this.getDefaultMemory(spawn)
+            );
         }
 
-        return Utils.getBiggerPossibleBody(bodies, BASE_WORKER_CREEP_BODY, spawn);
+        return null;
     }
 }

@@ -92,8 +92,8 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
         return 'harvester';
     }
 
-    protected getSpawnMemory(spawn: StructureSpawn): object {
-        return {...super.getSpawnMemory(spawn), target: HarvesterRole.getResource(spawn.room).id};
+    protected getDefaultMemory(spawn: StructureSpawn): object {
+        return {...super.getDefaultMemory(spawn), target: HarvesterRole.getResource(spawn.room).id};
     }
 
     protected shouldWork(creep: Creep): boolean {
