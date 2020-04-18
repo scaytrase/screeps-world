@@ -7,12 +7,14 @@
     "watch": "./node_modules/.bin/grunt watch"
   },
   "devDependencies": {
-    "@types/node": "^12.12.25",
-    "@types/screeps": "^3.0.0",
-    "grunt": "^1.0.4",
+    "@types/node": "^12.12.36",
+    "@types/screeps": "^3.1.0",
+    "grunt": "^1.1.0",
+    "grunt-contrib-clean": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-screeps": "^1.4.0",
     "grunt-ts": "^6.0.0-beta.22",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   }
 }

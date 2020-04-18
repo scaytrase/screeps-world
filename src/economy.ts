@@ -1,6 +1,6 @@
-import EconomyUtils from "./economy_utils";
-import SpawnKeeperRole from "./role.spawn_keeper";
-import Utils from "./utils";
+import EconomyUtils from "./utils/economy_utils";
+import SpawnKeeperRole from "./role/spawn_keeper";
+import Utils from "./utils/utils";
 
 export enum ECONOMY_LEVEL {
     HIGH = 'high',

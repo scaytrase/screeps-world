@@ -1,5 +1,3 @@
-import SpawnStrategy from "./spawn_strategy";
-
 export default interface Role {
     getRoleName(): string;
 
@@ -8,8 +6,6 @@ export default interface Role {
     match(creep: Creep): boolean;
 
     spawn(spawn: StructureSpawn): ScreepsReturnCode;
-
-    getSpawnStrategy(): SpawnStrategy;
 
     isPrioritySpawn(spawn: StructureSpawn): boolean;
 }

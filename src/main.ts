@@ -1,32 +1,32 @@
-import Cleaner from "./cleaner";
-import CreepRetirementProgram from "./creep_retirement_program";
-import CreepRunner from "./creep_runner";
-import CreepSpawnBound from "./creep_spawn_bound";
-import CreepSpawner from "./creep_spawner";
-import LinkManager from "./link_manager";
+import Cleaner from "./activities/cleaner";
+import CreepRetirementProgram from "./activities/creep_retirement_program";
+import CreepRunner from "./activities/creep_runner";
+import CreepSpawnBound from "./activities/creep_spawn_bound";
+import CreepSpawner from "./activities/creep_spawner";
+import LinkManager from "./links/link_manager";
 import Role from "./role";
-import BuilderRole from "./role.builder";
-import EnergyAggregatorRole from "./role.energy_aggregator";
-import GraveKeeperRole from "./role.grave_keeper";
-import GuardRole from "./role.guard";
-import HarvesterRole from "./role.harvester";
-import MinerRole from "./role.miner";
-import RepairerRole from "./role.repairer";
-import ResourceAggregatorRole from "./role.resource_aggregator";
-import RoomClaimerRole from "./role.room_claimer";
-import SpawnKeeperRole from "./role.spawn_keeper";
-import StorageLinkKeeperRole from "./role.storage_link_keeper";
-import TerminalResourceCarrierRole from "./role.terminal_resource_carrier";
-import TowerKeeperRole from "./role.tower_keeper";
-import UpgraderRole from "./role.upgrader";
-import WallKeeperRole from "./role.wall_keeper";
-import Runnable from "./runnable";
-import TowerController from "./tower_controller";
-import Utils from "./utils";
+import BuilderRole from "./role/builder";
+import EnergyAggregatorRole from "./role/energy_aggregator";
+import GraveKeeperRole from "./role/grave_keeper";
+import GuardRole from "./role/guard";
+import HarvesterRole from "./role/harvester";
+import MinerRole from "./role/miner";
+import RepairerRole from "./role/repairer";
+import ResourceAggregatorRole from "./role/resource_aggregator";
+import RoomClaimerRole from "./role/room_claimer";
+import SpawnKeeperRole from "./role/spawn_keeper";
+import StorageLinkKeeperRole from "./role/storage_link_keeper";
+import TerminalResourceCarrierRole from "./role/terminal_resource_carrier";
+import TowerKeeperRole from "./role/tower_keeper";
+import UpgraderRole from "./role/upgrader";
+import WallKeeperRole from "./role/wall_keeper";
+import Activity from "./activity";
+import TowerController from "./activities/tower_controller";
+import Utils from "./utils/utils";
+import EconomyLogger from "./activities/economy_logger";
 
 module.exports.loop = function () {
     const roles: Role[] = [
-        // new AttackerRole(),
         new HarvesterRole(),
         new UpgraderRole(),
         new BuilderRole(),
@@ -41,6 +41,7 @@ module.exports.loop = function () {
         new TerminalResourceCarrierRole(),
         new ResourceAggregatorRole(),
         new StorageLinkKeeperRole(),
+        // new AttackerRole(),
         // new RemoteBuilderRole(),
         // new RemoteUpgraderRole(),
         // new RoomCleanerRole(),
@@ -50,7 +51,7 @@ module.exports.loop = function () {
         roles.push(new RoomClaimerRole(flag));
     }
 
-    let runnables: Array<Runnable> = [];
+    let runnables: Array<Activity> = [];
 
     runnables.push(new CreepRunner(roles));
 
@@ -66,7 +67,9 @@ module.exports.loop = function () {
     runnables.push(new CreepSpawnBound());
     runnables.push(new CreepRetirementProgram());
     runnables.push(new Cleaner());
-    //runnables.push(new EconomyLogger());
+    if (Game.cpu.bucket > 9000) {
+        runnables.push(new EconomyLogger());
+    }
 
     for (const runnable of runnables) {
         runnable.run();

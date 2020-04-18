@@ -1,12 +1,13 @@
-import {PARKING_SLEEP_TIME} from "./config";
-import {Sort} from "./sort_utils";
-import Utils from "./utils";
-
-export const COLOR_HARVEST_RESOURCE = '#ffdf02';
-export const COLOR_TRANSFER_RESOURCE = '#00a4ff';
-export const COLOR_BUILD = '#8bff00';
-export const COLOR_ATTACK = '#ff0b00';
-export const COLOR_SPECIAL_TASKS = '#ff55f4';
+import {PARKING_SLEEP_TIME} from "./config/config";
+import {Sort} from "./utils/sort_utils";
+import Utils from "./utils/utils";
+import {
+    COLOR_ATTACK,
+    COLOR_BUILD,
+    COLOR_HARVEST_RESOURCE,
+    COLOR_SPECIAL_TASKS,
+    COLOR_TRANSFER_RESOURCE
+} from "./config/colors";
 
 export default class CreepTrait {
     public static suicideOldCreep(creep: Creep, ttl: number): void {
