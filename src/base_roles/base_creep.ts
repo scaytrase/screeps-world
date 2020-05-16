@@ -11,7 +11,7 @@ export default abstract class BaseCreepRole implements Role {
 
     public abstract run(creep: Creep): void;
 
-    public spawn(_spawn: StructureSpawn): ScreepsReturnCode {
+    public spawn(_spawn: StructureSpawn): ScreepsReturnCode | null {
         const spawn = Game.spawns[_spawn.name];
         const prototype = this.createPrototype(spawn);
 
@@ -35,11 +35,15 @@ export default abstract class BaseCreepRole implements Role {
                     {memory: prototype.memory}
                 );
             } catch (e) {
-                console.log(JSON.stringify(e));
+                Logger.warn(JSON.stringify(e));
+
+                return null
             }
-        } else {
-            Logger.debug(`[${_spawn.room.name}] Not spawning ${this.getRoleName()}`);
         }
+
+        Logger.debug(`[${_spawn.room.name}] Not spawning ${this.getRoleName()}`);
+
+        return null;
     }
 
     public abstract getRoleName(): string;

@@ -11,7 +11,7 @@ export default class CreepSpawner implements Activity {
         this.spawn = spawn;
     }
 
-    run(): void {
+    public run(): void {
         if (this.spawn.spawning !== null) {
             return;
         }
@@ -19,7 +19,7 @@ export default class CreepSpawner implements Activity {
         for (let role of this.roles) {
             const result = role.spawn(this.spawn);
 
-            if (role.isPrioritySpawn(this.spawn) && result !== OK) {
+            if (role.isPrioritySpawn(this.spawn) && result !== OK && result !== null) {
                 Logger.info(`[${this.spawn.room.name}] Priority role ${role.constructor.name} spawn failed with ${result}`);
 
                 break;

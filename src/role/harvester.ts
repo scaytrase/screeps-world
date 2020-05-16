@@ -51,7 +51,7 @@ export default class HarvesterRole extends WorkRestCycleCreepRole<Source> {
         return Utils.getClosestEnergyRecipient2(creep, [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_CONTAINER]);
     }
 
-    public spawn(spawn: StructureSpawn): ScreepsReturnCode {
+    public spawn(spawn: StructureSpawn): ScreepsReturnCode | null {
         const result = super.spawn(spawn);
 
         if (result === OK) {
