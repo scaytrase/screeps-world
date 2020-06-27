@@ -136,7 +136,7 @@ export default class LinkManager implements Activity {
         const demandLinks = LinkManager.getDemandLinks(links);
 
         if (sourceLinks.length > 0 && demandLinks.length > 0) {
-            Logger.warn(`invalid link proxy logic. both sourcing and demanding links exist after processing in ${this.room.name}`);
+            Logger.debug(`invalid link proxy logic. both sourcing and demanding links exist after processing in ${this.room.name}`);
         }
 
         this.storage_state = null;

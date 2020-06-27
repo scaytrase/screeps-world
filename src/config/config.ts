@@ -49,3 +49,11 @@ export const GUARDS_ATTACK_BORDERS = false;
 export const GRAVE_KEEPERS_LOOT_BORDERS = true;
 
 export const TERMINAL_ENERGY_REQUIREMENT = 150000;
+
+// Marketing
+export const DEFENSIVE_PRICE_LIMIT = 0.010;
+export const DEFENSIVE_TICKS_TIMEOUT = 5;
+export const EXCESS_ORDER_SIZE = 100000;
+export const STORAGE_EXCESS_LIMIT = 400000;
+export const TERMINAL_EXCESS_LIMIT = 100000;
+export const PRICE_FORMULA = (log: PriceHistory) => 0.8 * (log.avgPrice - log.stddevPrice);

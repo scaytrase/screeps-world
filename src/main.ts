@@ -24,6 +24,8 @@ import Activity from "./activity";
 import TowerController from "./activities/tower_controller";
 import Utils from "./utils/utils";
 import EconomyLogger from "./activities/economy_logger";
+import ResourceSeller from "./activities/resource_seller";
+import Logger from "./utils/logger";
 
 module.exports.loop = function () {
     const roles: Role[] = [
@@ -58,6 +60,7 @@ module.exports.loop = function () {
     for (const room of Object.values(Game.rooms)) {
         runnables.push(new LinkManager(room));
         runnables.push(new TowerController(room));
+        runnables.push(new ResourceSeller(room));
     }
 
     for (const spawn of Object.values(Game.spawns)) {
@@ -72,6 +75,11 @@ module.exports.loop = function () {
     }
 
     for (const runnable of runnables) {
-        runnable.run();
+        try {
+            runnable.run();
+        } catch (e) {
+            Logger.warn(`Unable to run activity ${runnable.constructor.name}`)
+            Logger.warn(e.toString())
+        }
     }
 };
