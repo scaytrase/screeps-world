@@ -2,12 +2,9 @@ import Logger from "../utils/logger";
 import {PRICE_FORMULA, STORAGE_EXCESS_LIMIT, TERMINAL_EXCESS_LIMIT} from "../config/config";
 
 export default class OrderUtil {
-    public static hasOrder(room: Room, resource: ResourceConstant): boolean {
-        return Game.market
-            .getAllOrders({
-                resourceType: resource,
-                roomName: room.name
-            })
+    public static hasPlacedOrder(room: Room, resource: ResourceConstant): boolean {
+        return Object.values(Game.market.orders)
+            .filter(order => order.resourceType === resource && order.roomName === room.name && order.remainingAmount > 0)
             .length > 0;
     }
 

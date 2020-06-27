@@ -13,7 +13,7 @@ export default class ResourceSeller implements Activity {
 
     run(): void {
         OrderUtil.getExcessResources(this.room).map(resource => {
-            if (!OrderUtil.hasOrder(this.room, resource)) {
+            if (!OrderUtil.hasPlacedOrder(this.room, resource)) {
                 if (ResourceSeller.lastTick !== undefined && (Game.time - ResourceSeller.lastTick) < DEFENSIVE_TICKS_TIMEOUT) {
                     return
                 }
