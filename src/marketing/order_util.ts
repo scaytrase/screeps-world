@@ -24,6 +24,7 @@ export default class OrderUtil {
         if (room.terminal) {
             Object.keys(room.terminal.store)
                 .filter((resource: ResourceConstant) => room.terminal.store.getUsedCapacity(resource) > TERMINAL_EXCESS_LIMIT)
+                .filter((resource: ResourceConstant) => resource !== RESOURCE_ENERGY)
                 .map((resource: ResourceConstant) => resources.push(resource));
         }
 
