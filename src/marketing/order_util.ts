@@ -1,4 +1,3 @@
-import Logger from "../utils/logger";
 import {PRICE_FORMULA, STORAGE_EXCESS_LIMIT, TERMINAL_EXCESS_LIMIT} from "../config/config";
 
 export default class OrderUtil {
@@ -38,8 +37,6 @@ export default class OrderUtil {
         date.setDate(date.getDate() - 1);
 
         const dateString = date.toISOString().slice(0, 10);
-
-        Logger.warn(dateString);
 
         let logs = Game.market.getHistory(resource).filter(entry => entry.date === dateString);
 
