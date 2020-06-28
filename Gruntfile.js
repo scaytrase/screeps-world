@@ -11,9 +11,17 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
         screeps: {
-            options: grunt.file.readJSON("env.json"),
-            dist: {
-                src: ["dist/js/*.js"]
+            main: {
+                options: grunt.file.readJSON("env.json"),
+                files: {
+                    src: ["dist/js/*.js"]
+                }
+            },
+            beta: {
+                options: Object.assign(grunt.file.readJSON("env.json"), {branch: 'beta'}),
+                files: {
+                    src: ["dist/js/*.js"]
+                }
             }
         },
         ts: {
@@ -68,16 +76,32 @@ module.exports = function (grunt) {
             }
         },
         watch: {
-            scripts: {
-                files: ["src/**"],
-                tasks: ["ts", "copy:screeps", "screeps"],
-                options: {
-                    spawn: false,
-                    debounceDelay: 50,
+            main: {
+                scripts: {
+                    files: ["src/**"],
+                    tasks: ["ts", "copy:screeps", "screeps:main"],
+                    options: {
+                        spawn: false,
+                        debounceDelay: 50,
+                    },
                 },
             },
+            beta: {
+                scripts: {
+                    files: ["src/**"],
+                    tasks: ["ts", "copy:screeps", "screeps:beta"],
+                    options: {
+                        spawn: false,
+                        debounceDelay: 50,
+                    },
+                },
+            }
         },
     });
 
-    grunt.registerTask("default", ["clean", "ts", "copy:screeps", "screeps"]);
+    grunt.registerTask("default", ["beta"]);
+    grunt.registerTask("watch", ["clean", "ts", "copy:screeps", "screeps:beta", "watch:beta"]);
+    grunt.registerTask("watch-main", ["clean", "ts", "copy:screeps", "screeps:main", "watch:main"]);
+    grunt.registerTask("beta", ["clean", "ts", "copy:screeps", "screeps:beta"]);
+    grunt.registerTask("main", ["clean", "ts", "copy:screeps", "screeps:main"]);
 };
