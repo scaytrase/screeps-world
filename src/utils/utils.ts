@@ -155,7 +155,7 @@ export default class Utils {
         return fallback;
     }
 
-    public static getRoomGraves(room: Room) {
+    public static getRoomGraves(room: Room): (Ruin|Tombstone|Resource)[] {
         return [
             ...(room.find(FIND_DROPPED_RESOURCES, {
                 filter(resource) {

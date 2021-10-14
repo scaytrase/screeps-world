@@ -1,4 +1,6 @@
 import {
+    BUILD_REMOTE_ROOMS_UP_ENERGY_CURRENT,
+    BUILD_REMOTE_ROOMS_UP_ENERGY_MAX,
     BUILD_REMOTE_ROOMS_UP_TO_LEVEL,
     MIN_ECONOMY_FOR_REMOTE_CREEP_PRODUCERS,
     REMOTE_BUILDERS_COUNT_LIMIT
@@ -44,9 +46,12 @@ export default class RemoteBuilderRole extends WorkRestCycleCreepRole<Constructi
 
     protected rest(creep: Creep): void {
         const source = Utils.getClosestEnergySource(creep, [STRUCTURE_STORAGE, STRUCTURE_CONTAINER]);
+        const grave = Utils.getRoomGraves(creep.room).shift();
         const closestEnergyMine = Utils.getClosestEnergyMine(creep);
 
-        if (creep.pos.getRangeTo(source) < creep.pos.getRangeTo(closestEnergyMine)) {
+        if (grave) {
+            CreepTrait.pickupAllEnergy(creep, grave);
+        } else if (creep.pos.getRangeTo(source) < creep.pos.getRangeTo(closestEnergyMine)) {
             CreepTrait.withdrawAllEnergy(creep, source);
         } else {
             CreepTrait.harvest(creep, closestEnergyMine);
@@ -56,15 +61,48 @@ export default class RemoteBuilderRole extends WorkRestCycleCreepRole<Constructi
     protected shouldRenewTarget(creep: Creep): boolean {
         const target = this.getCurrentStructureTarget(creep);
 
-        return !(target instanceof ConstructionSite);
+        const newTarget = this.getTarget(creep);
+
+        return target === undefined || target === null || newTarget !== target || !(target instanceof ConstructionSite);
     }
 
-    protected getTarget(creep: Creep): ConstructionSite {
-        return this.getSites().sort(Sort.byDistance(creep)).shift();
+    protected getTarget(creep: Creep): ConstructionSite | null {
+        return this.findPrioritySite(creep, this.getSites());
     }
 
     protected getBody(spawn: StructureSpawn): BodyPartConstant[] {
         return Utils.getBiggerPossibleBody(WORKER_BODIES, BASE_WORKER_CREEP_BODY, spawn);
+    }
+
+    private findPrioritySite(creep: Creep, sites: ConstructionSite[]): ConstructionSite
+    {
+        for (let site of sites) {
+            if (site.structureType === 'spawn') {
+                return site;
+            }
+
+            if (site.structureType === 'storage') {
+                return site;
+            }
+
+            if (site.structureType === 'tower') {
+                return site;
+            }
+
+            if (site.structureType === 'extension') {
+                return site;
+            }
+
+            if (site.structureType === 'link') {
+                return site;
+            }
+
+            if (site.structureType === 'container') {
+                return site;
+            }
+        }
+
+        return sites.sort(Sort.byDistance(creep)).shift();
     }
 
     private getSites(): ConstructionSite[] {
@@ -72,7 +110,11 @@ export default class RemoteBuilderRole extends WorkRestCycleCreepRole<Constructi
         for (const siteName in Game.constructionSites) {
             const site = Game.constructionSites[siteName];
 
-            if (site.room.find(FIND_MY_SPAWNS).length === 0 || site.room.controller.level < BUILD_REMOTE_ROOMS_UP_TO_LEVEL) {
+            if (site.room.find(FIND_MY_SPAWNS).length === 0
+                || site.room.energyCapacityAvailable < BUILD_REMOTE_ROOMS_UP_ENERGY_MAX
+                || site.room.energyAvailable < BUILD_REMOTE_ROOMS_UP_ENERGY_CURRENT
+                || site.room.controller.level < BUILD_REMOTE_ROOMS_UP_TO_LEVEL
+            ) {
                 sites.push(site);
             }
         }

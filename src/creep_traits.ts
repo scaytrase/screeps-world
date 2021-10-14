@@ -132,6 +132,18 @@ export default class CreepTrait {
         }
     }
 
+    static pickupAllEnergy(creep: Creep, source: Resource | Tombstone | Ruin | null) {
+        if (source) {
+            if (source instanceof Tombstone || source instanceof Ruin) {
+                CreepTrait.withdrawAllEnergy(creep, source);
+            } else if (source instanceof Resource && source.resourceType === RESOURCE_ENERGY && source.amount > 0 && creep.pickup(source) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(source, {
+                    visualizePathStyle: {stroke: COLOR_HARVEST_RESOURCE}
+                });
+            }
+        }
+    }
+
     static pickupAllResources(creep: Creep, source: Resource | Tombstone | Ruin | null) {
         if (source) {
             if (source instanceof Tombstone || source instanceof Ruin) {

@@ -10,11 +10,17 @@ export default abstract class TargetAwareCreepRole<T extends Structure | Constru
     }
 
     protected getCurrentTargetId(creep: Creep): Id<any> | null {
-        return creep.memory[TARGET_FIELD];
+        return creep.memory[TARGET_FIELD] ?? null;
     }
 
     protected getCurrentStructureTarget(creep: Creep): T | null {
-        return Game.getObjectById(this.getCurrentTargetId(creep));
+        let targetId = this.getCurrentTargetId(creep);
+
+        if (targetId == null) {
+            return null;
+        }
+
+        return Game.getObjectById(targetId);
     }
 
     protected setTarget(creep: Creep, target: T | null): void {

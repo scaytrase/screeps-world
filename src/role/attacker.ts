@@ -1,4 +1,4 @@
-import {GUARDS_ATTACK_BORDERS} from "../config/config";
+import {ATTACKER_COUNT_LIMIT, GUARDS_ATTACK_BORDERS} from "../config/config";
 import {ATTACKER_BODIES, BASE_ATTACKER_BODY} from "../config/const";
 import CreepTrait from "../creep_traits";
 import BaseCreepRole from "../base_roles/base_creep";
@@ -59,7 +59,7 @@ export default class AttackerRole extends BaseCreepRole {
             [
                 new NotEmptyCallableResult((spawn) => AttackerRole.getFlag()),
                 new NotEmptyCallableResult((spawn) => !AttackerRole.getFlag().room || AttackerRole.getTargets(AttackerRole.getFlag().room).shift()),
-                RoleCountStrategy.global(0, this),
+                RoleCountStrategy.global(ATTACKER_COUNT_LIMIT, this),
             ]
         );
 

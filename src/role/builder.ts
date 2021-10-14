@@ -36,6 +36,13 @@ export default class BuilderRole extends WorkRestCycleCreepRole<ConstructionSite
     }
 
     protected rest(creep: Creep): void {
+        // const grave = Utils.getRoomGraves(creep.room).shift();
+        // if (grave) {
+        //     CreepTrait.pickupAllEnergy(creep, grave);
+        //
+        //     return;
+        // }
+
         const enemySource: Structure = creep.room.find(FIND_HOSTILE_STRUCTURES, {
             filter: (structure: StructureSpawn | StructureStorage | StructureContainer | StructureTower) =>
                 ((structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE || structure.structureType === STRUCTURE_TOWER)

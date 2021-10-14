@@ -26,6 +26,9 @@ import Utils from "./utils/utils";
 import EconomyLogger from "./activities/economy_logger";
 import ResourceSeller from "./activities/resource_seller";
 import Logger from "./utils/logger";
+import RemoteBuilderRole from "./role/remote_builder";
+import RemoteUpgraderRole from "./role/remote_upgrader";
+import AttackerRole from "./role/attacker";
 
 module.exports.loop = function () {
     const roles: Role[] = [
@@ -43,9 +46,9 @@ module.exports.loop = function () {
         new TerminalResourceCarrierRole(),
         new ResourceAggregatorRole(),
         new StorageLinkKeeperRole(),
-        // new AttackerRole(),
-        // new RemoteBuilderRole(),
-        // new RemoteUpgraderRole(),
+        new AttackerRole(),
+        new RemoteBuilderRole(),
+        new RemoteUpgraderRole(),
         // new RoomCleanerRole(),
     ];
 

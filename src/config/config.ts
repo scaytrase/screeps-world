@@ -7,7 +7,7 @@ export const WALKABLE_CACHE_TTL = 25;
 // PER-ROOM LIMITS
 export const ENERGY_AGGREGATORS_COUNT_LIMIT = 1; // @todo 0 for low economy
 export const GUARDS_COUNT_LIMIT = 1;
-export const BUILDERS_COUNT_LIMIT = 2; // @todo 1 or 0 for low economy
+export const BUILDERS_COUNT_LIMIT = 3; // @todo 1 or 0 for low economy
 export const REPAIRERS_COUNT_LIMIT = 1; // @todo 1 or 0 for low economy
 export const WALL_KEEPERS_COUNT_LIMIT = 1;
 export const SPAWN_KEEPERS_COUNT_LIMIT = 2; // @todo 1 for low economy, 2 for high economy
@@ -29,13 +29,17 @@ export const MAX_WORK_PER_CONTROLLER_EMERGENCY = 1;
 
 export const UPGRADE_REMOTE_ROOMS_UP_TO_LEVEL = 3;
 export const BUILD_REMOTE_ROOMS_UP_TO_LEVEL = 3;
+export const BUILD_REMOTE_ROOMS_UP_ENERGY_CURRENT = 2000;
+export const BUILD_REMOTE_ROOMS_UP_ENERGY_MAX = 9000;
 export const MIN_ECONOMY_FOR_REMOTE_CREEP_PRODUCERS = 30000;
-export const REMOTE_BUILDERS_COUNT_LIMIT = 2;
-export const REMOTE_UPGRADERS_COUNT_LIMIT = 4;
+export const REMOTE_BUILDERS_COUNT_LIMIT = 4;
+export const REMOTE_UPGRADERS_COUNT_LIMIT = 2;
 
 export const REPAIRER_HEALTH_UPPER_RATIO = 0.9; // @todo 0.5 for low economy
 export const REPAIRER_HEALTH_LOWER_RATIO = 0.5; // @todo 0.3 for low economy
 export const REPAIRER_HEALTH_EMERGENCY_RATIO = 0.10;
+
+export const ATTACKER_COUNT_LIMIT = 4;
 
 export const RAMPART_INITIAL_HITS = 5000;
 export const WALL_DESIRED_HITS_LOW = 50000;
